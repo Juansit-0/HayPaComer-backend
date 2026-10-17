@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public sealed interface InventoryCommand
-    permits StockFoodCommand, ConsumeFoodCommand, DiscardFoodCommand {
+    permits StockFoodCommand, ConsumeFoodCommand, DiscardFoodCommand, MoveFoodCommand {
 
   UUID id();
 

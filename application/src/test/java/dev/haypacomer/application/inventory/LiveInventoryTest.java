@@ -161,6 +161,46 @@ class LiveInventoryTest {
   }
 
   @Test
+  void movesFoodToAnotherTrayWithoutChangingItsGrams() {
+    FoodItem milk = stock(juan, "Milk", 892, 50, null);
+    Tray top = fridge.trays().filter(tray -> tray.name().equals("Top")).findFirst().orElseThrow();
+
+    CommandOutcome outcome =
+        commands.execute(
+            ana, new MoveFoodCommand(UUID.randomUUID(), household.id(), milk.id(), top.id()));
+
+    Fridge saved = fridges.findById(fridge.id()).orElseThrow();
+    assertEquals(top.id(), saved.locate(milk.id()).orElseThrow().id());
+    assertEquals(Grams.of(842), outcome.remaining());
+    InventoryMovement moved = stores.movementLog.getLast();
+    assertEquals(MovementType.ADJUST, moved.type());
+    assertEquals(0, BigDecimal.ZERO.compareTo(moved.deltaGrams()));
+  }
+
+  @Test
+  void movingRespectsPrivateFoodAndUnknownTrays() {
+    FoodItem yogurt = stock(juan, "Yogurt", 125, 0, Visibility.PRIVATE);
+    Tray top = fridge.trays().filter(tray -> tray.name().equals("Top")).findFirst().orElseThrow();
+
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            commands.execute(
+                ana,
+                new MoveFoodCommand(UUID.randomUUID(), household.id(), yogurt.id(), top.id())));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            commands.execute(
+                juan,
+                new MoveFoodCommand(
+                    UUID.randomUUID(),
+                    household.id(),
+                    yogurt.id(),
+                    dev.haypacomer.domain.fridge.TrayId.newId())));
+  }
+
+  @Test
   void stocksWeighedFoodAndLogsTheAddition() {
     FoodItem milk = stock(juan, "milk", 892, 50, null);
 

@@ -9,6 +9,7 @@ import dev.haypacomer.application.inventory.ConsumeFoodCommand;
 import dev.haypacomer.application.inventory.DiscardFoodCommand;
 import dev.haypacomer.application.inventory.ExecuteInventoryCommand;
 import dev.haypacomer.application.inventory.MarkFoodOpened;
+import dev.haypacomer.application.inventory.MoveFoodCommand;
 import dev.haypacomer.application.inventory.StockFoodCommand;
 import dev.haypacomer.domain.expiry.ExpirySource;
 import dev.haypacomer.domain.fridge.FoodItem;
@@ -129,6 +130,23 @@ public class InventoryController {
                 commandId(idempotencyKey), new HouseholdId(householdId), new FoodItemId(itemId))));
   }
 
+  @PostMapping("/{itemId}/move")
+  OutcomeResponse move(
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID householdId,
+      @PathVariable UUID itemId,
+      @RequestHeader(name = IDEMPOTENCY_KEY, required = false) UUID idempotencyKey,
+      @Valid @RequestBody MoveRequest request) {
+    return OutcomeResponse.from(
+        commands.execute(
+            CurrentUser.of(jwt),
+            new MoveFoodCommand(
+                commandId(idempotencyKey),
+                new HouseholdId(householdId),
+                new FoodItemId(itemId),
+                new TrayId(request.trayId()))));
+  }
+
   private static UUID commandId(UUID idempotencyKey) {
     return idempotencyKey == null ? UUID.randomUUID() : idempotencyKey;
   }
@@ -188,6 +206,8 @@ public class InventoryController {
 
   record OpenedResponse(
       UUID itemId, LocalDate expiresOn, ExpirySource expirySource, LocalDate openedOn) {}
+
+  record MoveRequest(@NotNull UUID trayId) {}
 
   record ConsumeRequest(@NotNull @DecimalMin(value = "0", inclusive = false) BigDecimal grams) {}
 

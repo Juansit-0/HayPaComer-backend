@@ -6,6 +6,7 @@ import dev.haypacomer.application.agent.AgentRunNotFoundException;
 import dev.haypacomer.application.agent.ConfirmationExpiredException;
 import dev.haypacomer.application.agent.ConfirmationNotFoundException;
 import dev.haypacomer.application.ai.AiRateLimitExceededException;
+import dev.haypacomer.application.ai.FoodCheckUnavailableException;
 import dev.haypacomer.application.ai.PhotoReadingUnavailableException;
 import dev.haypacomer.application.auth.EmailAlreadyRegisteredException;
 import dev.haypacomer.application.auth.InvalidCredentialsException;
@@ -20,6 +21,7 @@ import dev.haypacomer.application.household.InvitationEmailMismatchException;
 import dev.haypacomer.application.i18n.UnknownLocaleException;
 import dev.haypacomer.application.inventory.FoodItemNotFoundException;
 import dev.haypacomer.application.inventory.FoodNotInCatalogException;
+import dev.haypacomer.application.inventory.NotFoodException;
 import dev.haypacomer.application.inventory.NothingToUndoException;
 import dev.haypacomer.application.inventory.PermissionRequiredException;
 import dev.haypacomer.application.inventory.SnapshotNotFoundException;
@@ -242,6 +244,17 @@ public class ApiExceptionHandler {
   @ExceptionHandler(MarketBudgetNotSetException.class)
   ProblemDetail budgetNotSet(MarketBudgetNotSetException exception) {
     return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
+  }
+
+  @ExceptionHandler(NotFoodException.class)
+  ProblemDetail notFood(NotFoodException exception) {
+    return problem(HttpStatus.UNPROCESSABLE_CONTENT, "Not food", exception.getMessage());
+  }
+
+  @ExceptionHandler(FoodCheckUnavailableException.class)
+  ProblemDetail foodCheckUnavailable(FoodCheckUnavailableException exception) {
+    return problem(
+        HttpStatus.UNPROCESSABLE_CONTENT, "Food could not be checked", exception.getMessage());
   }
 
   @ExceptionHandler(PhotoReadingUnavailableException.class)

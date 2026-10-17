@@ -7,28 +7,33 @@ import dev.haypacomer.agent.tools.ToolRegistry;
 import dev.haypacomer.ai.llm.GeminiClient;
 import dev.haypacomer.ai.llm.LlmChatModel;
 import dev.haypacomer.ai.llm.LlmClient;
+import dev.haypacomer.ai.llm.LlmFoodClassifier;
 import dev.haypacomer.ai.llm.LlmKitchenAdvisor;
 import dev.haypacomer.ai.llm.LlmLabelPhotoReader;
 import dev.haypacomer.ai.llm.LlmRecipePhotoReader;
 import dev.haypacomer.ai.llm.LlmSettings;
 import dev.haypacomer.ai.llm.OpenAiCompatibleClient;
+import dev.haypacomer.ai.offline.OfflineFoodClassifier;
 import dev.haypacomer.ai.offline.OfflineLabelPhotoReader;
 import dev.haypacomer.ai.offline.OfflineRecipePhotoReader;
 import dev.haypacomer.ai.offline.OfflineRuleEngine;
 import dev.haypacomer.ai.resilience.NullChatModel;
 import dev.haypacomer.ai.resilience.ProviderCircuit;
 import dev.haypacomer.ai.resilience.ResilientChatModel;
+import dev.haypacomer.ai.resilience.ResilientFoodClassifier;
 import dev.haypacomer.ai.resilience.ResilientKitchenAdvisor;
 import dev.haypacomer.ai.resilience.ResilientLabelPhotoReader;
 import dev.haypacomer.ai.resilience.ResilientRecipePhotoReader;
 import dev.haypacomer.application.ai.ReadRecipePhoto;
 import dev.haypacomer.application.inventory.ExpiryDesk;
+import dev.haypacomer.application.inventory.LearnFood;
 import dev.haypacomer.application.inventory.ReadExpiryFromLabel;
 import dev.haypacomer.application.port.AiAuditLog;
 import dev.haypacomer.application.port.AiRateLimiter;
 import dev.haypacomer.application.port.AiResponseCache;
 import dev.haypacomer.application.port.CircuitBreakerStore;
 import dev.haypacomer.application.port.FoodCatalogRepository;
+import dev.haypacomer.application.port.FoodClassifier;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.KitchenAdvisor;
 import dev.haypacomer.application.port.LabelPhotoReader;
@@ -138,6 +143,30 @@ public class AiConfiguration {
     LlmClient client = client(properties);
     return new ResilientLabelPhotoReader(
         new LlmLabelPhotoReader(client), circuit(client, breaker, health, policies, clock));
+  }
+
+  @Bean
+  FoodClassifier foodClassifier(
+      AiProperties properties,
+      CircuitBreakerStore breaker,
+      ServiceHealth health,
+      PolicySource policies,
+      Clock clock) {
+    if (properties.provider() == AiProperties.Provider.OFFLINE) {
+      return new OfflineFoodClassifier();
+    }
+    LlmClient client = client(properties);
+    return new ResilientFoodClassifier(
+        new LlmFoodClassifier(client), circuit(client, breaker, health, policies, clock));
+  }
+
+  @Bean
+  LearnFood learnFood(
+      HouseholdRepository households,
+      FoodCatalogRepository catalog,
+      FoodClassifier classifier,
+      AiRateLimiter rateLimiter) {
+    return new LearnFood(households, catalog, classifier, rateLimiter);
   }
 
   @Bean

@@ -1,0 +1,20 @@
+INSERT INTO translations (locale, key, text) VALUES
+    ('es-CO', 'add.learn', 'Agregar «{food}»'),
+    ('en', 'add.learn', 'Add “{food}”'),
+    ('es-CO', 'add.learned', '{food} ya está en tu catálogo'),
+    ('en', 'add.learned', '{food} is now in your catalog'),
+    ('es-CO', 'add.learning', 'Revisando si {food} es comida…'),
+    ('en', 'add.learning', 'Checking whether {food} is food…'),
+    ('es-CO', 'stage.discard-lead', 'Se sale de la nevera {grams} de {food} y cuenta como comida botada.'),
+    ('en', 'stage.discard-lead', '{grams} of {food} leave the fridge and count as wasted food.'),
+    ('es-CO', 'stage.discard-title', '¿Botar {food}?'),
+    ('en', 'stage.discard-title', 'Throw away {food}?'),
+    ('es-CO', 'stage.moved', '{food} cambió de repisa'),
+    ('en', 'stage.moved', '{food} moved to another shelf'),
+    ('es-CO', 'stage.other', 'Otro alimento'),
+    ('en', 'stage.other', 'Another food'),
+    ('es-CO', 'stage.palette', 'Arrastra un alimento a una repisa, o escribe otro.'),
+    ('en', 'stage.palette', 'Drag a food onto a shelf, or type another.'),
+    ('es-CO', 'stage.use-title', '¿Cuánto usaste de {food}?'),
+    ('en', 'stage.use-title', 'How much {food} did you use?')
+ON CONFLICT (locale, key) DO UPDATE SET text = EXCLUDED.text, updated_at = now();

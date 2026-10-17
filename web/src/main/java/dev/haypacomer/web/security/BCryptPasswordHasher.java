@@ -2,11 +2,18 @@ package dev.haypacomer.web.security;
 
 import dev.haypacomer.application.port.PasswordHasher;
 import dev.haypacomer.domain.identity.PasswordHash;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.util.HexFormat;
+import java.util.Locale;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class BCryptPasswordHasher implements PasswordHasher {
 
   private static final int STRENGTH = 12;
+  private static final int PROOF_ITERATIONS = 100_000;
 
   private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(STRENGTH);
 
@@ -18,5 +25,23 @@ public class BCryptPasswordHasher implements PasswordHasher {
   @Override
   public boolean matches(String rawPassword, PasswordHash hash) {
     return encoder.matches(rawPassword, hash.value());
+  }
+
+  @Override
+  public String proof(String email, String rawPassword) {
+    byte[] salt =
+        ("haypacomer:" + email.trim().toLowerCase(Locale.ROOT)).getBytes(StandardCharsets.UTF_8);
+    PBEKeySpec spec = new PBEKeySpec(rawPassword.toCharArray(), salt, PROOF_ITERATIONS, 256);
+    try {
+      return HexFormat.of()
+          .formatHex(
+              SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+                  .generateSecret(spec)
+                  .getEncoded());
+    } catch (GeneralSecurityException exception) {
+      throw new IllegalStateException("PBKDF2WithHmacSHA256 is not available", exception);
+    } finally {
+      spec.clearPassword();
+    }
   }
 }

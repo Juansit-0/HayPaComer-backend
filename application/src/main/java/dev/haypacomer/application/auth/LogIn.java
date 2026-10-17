@@ -42,9 +42,8 @@ public final class LogIn {
         >= settings.maxFailedLogins()) {
       throw new TooManyLoginAttemptsException();
     }
-    String password = command.password() == null ? "" : command.password();
     Optional<User> user = users.findByEmail(email);
-    boolean valid = verify(user, password);
+    boolean valid = verify(user, email, command);
     attempts.record(email, valid, now);
     if (!valid) {
       throw new InvalidCredentialsException();
@@ -52,12 +51,35 @@ public final class LogIn {
     return sessions.issue(user.orElseThrow().id(), UUID.randomUUID(), now).tokens();
   }
 
-  private boolean verify(Optional<User> user, String password) {
-    if (user.isEmpty()) {
-      hasher.hash(password);
+  private boolean verify(Optional<User> user, EmailAddress email, LoginCommand command) {
+    String password = command.password();
+    String proof = proofOf(email, command);
+    if (user.isEmpty() || proof == null) {
+      hasher.hash(proof == null ? "" : proof);
       return false;
     }
-    return user.get().canSignIn() && hasher.matches(password, user.get().passwordHash());
+    User found = user.get();
+    if (!Credentials.legacy(found.passwordHash())) {
+      return found.canSignIn() && Credentials.matches(hasher, proof, found.passwordHash());
+    }
+    if (password == null) {
+      hasher.hash(proof);
+      return false;
+    }
+    boolean valid = found.canSignIn() && hasher.matches(password, found.passwordHash());
+    if (valid) {
+      users.save(found.changePassword(Credentials.store(hasher, proof)));
+    }
+    return valid;
+  }
+
+  private String proofOf(EmailAddress email, LoginCommand command) {
+    if (command.passwordProof() != null) {
+      return PasswordProof.valid(command.passwordProof()) ? command.passwordProof() : null;
+    }
+    return command.password() == null || command.password().isEmpty()
+        ? null
+        : hasher.proof(email.value(), command.password());
   }
 
   private static EmailAddress parse(String email) {

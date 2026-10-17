@@ -172,6 +172,20 @@ final class AuthFakes {
     public boolean matches(String rawPassword, PasswordHash hash) {
       return hash.value().equals("hashed:" + rawPassword);
     }
+
+    @Override
+    public String proof(String email, String rawPassword) {
+      try {
+        return java.util.HexFormat.of()
+            .formatHex(
+                java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(
+                        (email.trim().toLowerCase(java.util.Locale.ROOT) + ":" + rawPassword)
+                            .getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+      } catch (java.security.NoSuchAlgorithmException exception) {
+        throw new IllegalStateException(exception);
+      }
+    }
   }
 
   static final class Attempts implements LoginAttemptLog {

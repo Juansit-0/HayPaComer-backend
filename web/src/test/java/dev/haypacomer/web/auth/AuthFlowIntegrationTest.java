@@ -78,12 +78,12 @@ class AuthFlowIntegrationTest {
   }
 
   @Test
-  void locksOutAfterFiveFailures() throws Exception {
+  void locksOutAfterTenFailures() throws Exception {
     send(
         "/api/v1/auth/register",
         "{\"email\":\"ana@haypacomer.dev\",\"password\":\"fresh-milk-842\",\"displayName\":\"Ana\"}",
         201);
-    for (int attempt = 0; attempt < 5; attempt++) {
+    for (int attempt = 0; attempt < 10; attempt++) {
       send(
           "/api/v1/auth/login",
           "{\"email\":\"ana@haypacomer.dev\",\"password\":\"wrong-password\"}",

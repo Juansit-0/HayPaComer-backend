@@ -2,8 +2,10 @@ package dev.haypacomer.web.auth;
 
 import dev.haypacomer.application.auth.AuthTokens;
 import dev.haypacomer.domain.identity.User;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
@@ -14,8 +16,14 @@ final class AuthDtos {
 
   record RegisterRequest(
       @NotBlank @Email @Size(max = 254) String email,
-      @NotBlank @Size(max = 128) String password,
+      @Size(max = 128) String password,
+      @Pattern(regexp = "[0-9a-f]{64}") String passwordProof,
       @NotBlank @Size(max = 80) String displayName) {
+
+    @AssertTrue(message = "Send either password or passwordProof")
+    boolean isOneSecret() {
+      return (password == null) != (passwordProof == null);
+    }
 
     @Override
     public String toString() {
@@ -23,7 +31,12 @@ final class AuthDtos {
     }
   }
 
-  record LoginRequest(@NotBlank String email, @NotBlank String password) {
+  record LoginRequest(@NotBlank String email, String password, String passwordProof) {
+
+    @AssertTrue(message = "Send password or passwordProof")
+    boolean isSecretPresent() {
+      return (password != null && !password.isBlank()) || passwordProof != null;
+    }
 
     @Override
     public String toString() {

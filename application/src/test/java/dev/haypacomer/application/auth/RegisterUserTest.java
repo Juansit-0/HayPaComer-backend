@@ -18,7 +18,9 @@ class RegisterUserTest {
         registerUser.register(new RegisterCommand("Juan@HayPaComer.dev", "fresh-milk-842", "Juan"));
 
     assertEquals("juan@haypacomer.dev", user.email().value());
-    assertEquals("hashed:fresh-milk-842", user.passwordHash().value());
+    assertEquals(
+        "{proof}hashed:" + fakes.hasher.proof("juan@haypacomer.dev", "fresh-milk-842"),
+        user.passwordHash().value());
     assertFalse(user.emailVerified());
     assertEquals(user, fakes.users.findById(user.id()).orElseThrow());
     assertEquals(fakes.clock.instant(), user.createdAt());

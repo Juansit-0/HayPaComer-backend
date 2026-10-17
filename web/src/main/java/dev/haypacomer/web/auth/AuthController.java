@@ -64,14 +64,20 @@ public class AuthController {
   UserResponse register(@Valid @RequestBody RegisterRequest request) {
     User user =
         registerUser.register(
-            new RegisterCommand(request.email(), request.password(), request.displayName()));
+            new RegisterCommand(
+                request.email(),
+                request.password(),
+                request.passwordProof(),
+                request.displayName()));
     requestEmailVerification.request(user.id());
     return UserResponse.from(user);
   }
 
   @PostMapping("/login")
   TokenResponse login(@Valid @RequestBody LoginRequest request) {
-    return TokenResponse.from(logIn.logIn(new LoginCommand(request.email(), request.password())));
+    return TokenResponse.from(
+        logIn.logIn(
+            new LoginCommand(request.email(), request.password(), request.passwordProof())));
   }
 
   @PostMapping("/refresh")

@@ -7,4 +7,6 @@ public interface PasswordHasher {
   PasswordHash hash(String rawPassword);
 
   boolean matches(String rawPassword, PasswordHash hash);
+
+  String proof(String email, String rawPassword);
 }

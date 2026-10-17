@@ -41,7 +41,8 @@ public final class ResetPassword {
     Instant now = clock.instant();
     UserToken token = tokens.consume(rawToken, UserTokenType.RESET_PASSWORD, now);
     User user = users.findById(token.user()).orElseThrow(InvalidTokenException::new);
-    users.save(user.changePassword(hasher.hash(newPassword)));
+    String proof = hasher.proof(user.email().value(), newPassword);
+    users.save(user.changePassword(Credentials.store(hasher, proof)));
     refreshTokens.revokeAll(user.id(), now);
   }
 }

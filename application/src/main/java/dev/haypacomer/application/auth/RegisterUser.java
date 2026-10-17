@@ -24,13 +24,15 @@ public final class RegisterUser {
 
   public User register(RegisterCommand command) {
     EmailAddress email = new EmailAddress(command.email());
-    PasswordPolicy.requireAcceptable(command.password(), settings);
+    String proof =
+        Credentials.proof(
+            hasher, email.value(), command.password(), command.passwordProof(), settings);
     if (users.findByEmail(email).isPresent()) {
       throw new EmailAlreadyRegisteredException();
     }
     User user =
         User.register(
-            email, hasher.hash(command.password()), command.displayName(), clock.instant());
+            email, Credentials.store(hasher, proof), command.displayName(), clock.instant());
     users.save(user);
     return user;
   }

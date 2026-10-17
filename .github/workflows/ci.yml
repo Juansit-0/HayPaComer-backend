@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Bring in the web UI the image ships
+        run: |
+          mkdir -p /tmp/web web/src/main/resources/static brand/assets
+          curl -fsSL https://github.com/Juansit-0/HayPaComer-web/archive/refs/heads/main.tar.gz | tar -xz -C /tmp/web --strip-components=1
+          cp -R /tmp/web/assets/. brand/assets/
+          rm -rf /tmp/web/assets /tmp/web/README.md /tmp/web/.github
+          cp -R /tmp/web/. web/src/main/resources/static/
+
+      - name: Build and test
+        run: mvn -B -ntp verify
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build the production image
+        run: docker build --tag haypacomer:${{ github.sha }} .
+
+      - name: Check the image runs as a non-root user
+        run: test "$(docker image inspect --format '{{.Config.User}}' haypacomer:${{ github.sha }})" = "haypacomer"

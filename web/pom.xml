@@ -127,6 +127,8 @@
         <includes>
           <include>tokens.css</include>
           <include>logo-mark.svg</include>
+          <include>photos/*.jpg</include>
+          <include>engravings/*.jpg</include>
         </includes>
       </resource>
     </resources>

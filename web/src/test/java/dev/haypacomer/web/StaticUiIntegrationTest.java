@@ -71,6 +71,8 @@ class StaticUiIntegrationTest {
         .andExpect(content().string(containsString(".bento")))
         .andExpect(content().string(containsString("input.money")));
     mvc.perform(get("/brand/logo-mark.svg")).andExpect(status().isOk());
+    mvc.perform(get("/brand/photos/potrerillo.jpg")).andExpect(status().isOk());
+    mvc.perform(get("/brand/engravings/entrada-pasto.jpg")).andExpect(status().isOk());
     mvc.perform(get("/api/v1/households")).andExpect(status().isUnauthorized());
     mvc.perform(get("/app/../api/v1/me")).andExpect(status().is4xxClientError());
   }

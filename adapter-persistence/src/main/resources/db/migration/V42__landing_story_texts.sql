@@ -1,0 +1,20 @@
+INSERT INTO translations (locale, key, text) VALUES
+    ('es-CO', 'landing.story.arrive', 'Pasto, 1876. El botánico francés Édouard André entra a la ciudad un domingo.'),
+    ('en', 'landing.story.arrive', 'Pasto, 1876. The French botanist Édouard André rides into town on a Sunday.'),
+    ('es-CO', 'landing.story.bogota', 'Mercado de Bogotá, donde André vio los mismos productos de tierra fría.'),
+    ('en', 'landing.story.bogota', 'The Bogotá market, where André saw the same cold-country produce.'),
+    ('es-CO', 'landing.story.credit', 'Grabados de «América pintoresca» (Barcelona, 1884), del viaje de Édouard André. Dominio público, Internet Archive.'),
+    ('en', 'landing.story.credit', 'Engravings from “América pintoresca” (Barcelona, 1884), from Édouard André''s journey. Public domain, Internet Archive.'),
+    ('es-CO', 'landing.story.fridge', 'Lo difícil es acordarse de ella antes de que se pierda. Para eso está una nevera que pesa.'),
+    ('en', 'landing.story.fridge', 'The hard part is remembering it before it spoils. That is what a fridge that weighs is for.'),
+    ('es-CO', 'landing.story.heaps', '«Por do quiera se veían grandes montones de patatas y ocas.»'),
+    ('en', 'landing.story.heaps', '“Everywhere there were great heaps of potatoes and oca.”'),
+    ('es-CO', 'landing.story.market-day', 'Es día de mercado.'),
+    ('en', 'landing.story.market-day', 'It is market day.'),
+    ('es-CO', 'landing.story.oca', 'Contó diez variedades de oca: rosa, blanca, amarilla, violeta, roja.'),
+    ('en', 'landing.story.oca', 'He counted ten kinds of oca: pink, white, yellow, violet, red.'),
+    ('es-CO', 'landing.story.title', 'Un domingo de mercado en Pasto'),
+    ('en', 'landing.story.title', 'A market Sunday in Pasto'),
+    ('es-CO', 'landing.story.today', '150 años después, la comida sigue llegando del mercado a la casa.'),
+    ('en', 'landing.story.today', '150 years later, food still comes home from the market.')
+ON CONFLICT (locale, key) DO UPDATE SET text = EXCLUDED.text, updated_at = now();

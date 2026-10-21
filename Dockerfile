@@ -6,7 +6,7 @@ COPY . .
 RUN mkdir -p /tmp/web brand/assets web/src/main/resources/static \
     && tar -xzf /tmp/web.tar.gz -C /tmp/web --strip-components=1 \
     && cp -R /tmp/web/assets/. brand/assets/ \
-    && rm -rf /tmp/web/assets /tmp/web/README.md \
+    && rm -rf /tmp/web/assets /tmp/web/README.md /tmp/web/.github /tmp/web/tools /tmp/web/app/dev /tmp/web/package.json \
     && cp -R /tmp/web/. web/src/main/resources/static/ \
     && mvn -B -ntp -DskipTests -Djacoco.skip=true -Dspotless.check.skip=true -pl web -am package \
     && cp web/target/web-*.jar /src/app.jar

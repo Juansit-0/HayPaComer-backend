@@ -1,0 +1,20 @@
+INSERT INTO translations (locale, key, text) VALUES
+    ('es-CO', 'landing.story.chapters', 'Capítulos de la historia'),
+    ('en', 'landing.story.chapters', 'Story chapters'),
+    ('es-CO', 'landing.story.chapter.market', 'El mercado'),
+    ('en', 'landing.story.chapter.market', 'The market'),
+    ('es-CO', 'landing.story.chapter.kitchen', 'La cocina'),
+    ('en', 'landing.story.chapter.kitchen', 'The kitchen'),
+    ('es-CO', 'landing.story.chapter.scale', 'La báscula'),
+    ('en', 'landing.story.chapter.scale', 'The scale'),
+    ('es-CO', 'landing.story.chapter.plate', 'El plato'),
+    ('en', 'landing.story.chapter.plate', 'The plate'),
+    ('es-CO', 'landing.story.hold', 'Mantén presionado para abrir la nevera'),
+    ('en', 'landing.story.hold', 'Press and hold to open the fridge'),
+    ('es-CO', 'landing.story.hold-hint', 'Un toque no basta: mantén presionado o deja oprimida la barra espaciadora.'),
+    ('en', 'landing.story.hold-hint', 'A tap is not enough: press and hold, or keep the space bar down.'),
+    ('es-CO', 'landing.story.nudge', 'La historia sigue cuando abras la nevera.'),
+    ('en', 'landing.story.nudge', 'The story goes on once you open the fridge.'),
+    ('es-CO', 'sound.toggle', 'Sonido'),
+    ('en', 'sound.toggle', 'Sound')
+ON CONFLICT (locale, key) DO UPDATE SET text = EXCLUDED.text, updated_at = now();

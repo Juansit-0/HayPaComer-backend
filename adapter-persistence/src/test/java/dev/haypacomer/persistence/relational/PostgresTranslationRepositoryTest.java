@@ -29,7 +29,7 @@ class PostgresTranslationRepositoryTest extends PostgresTestSupport {
     assertEquals("Leche", translations.texts("es-CO").get("food.milk"));
     assertEquals("Milk", translations.texts("en").get("food.milk"));
     assertEquals(
-        25,
+        65,
         translations.texts("en").keySet().stream().filter(key -> key.startsWith("food.")).count());
     assertEquals("Use this first", translations.texts("en").get("now.title"));
     assertEquals("Úsalo primero", translations.texts("es-CO").get("now.title"));

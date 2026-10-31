@@ -20,6 +20,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -100,10 +101,16 @@ public class ChefChatController {
     }
   }
 
-  record Pending(UUID id, String tool, String summary, Instant expiresAt) {
+  record Pending(
+      UUID id, String tool, Map<String, String> arguments, String summary, Instant expiresAt) {
 
     static Pending from(PendingConfirmation pending) {
-      return new Pending(pending.id(), pending.tool(), pending.summary(), pending.expiresAt());
+      return new Pending(
+          pending.id(),
+          pending.tool(),
+          pending.arguments(),
+          pending.summary(),
+          pending.expiresAt());
     }
   }
 

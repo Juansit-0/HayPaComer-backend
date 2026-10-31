@@ -66,7 +66,9 @@ public final class LlmPlanner implements Planner {
         %s
         Rules: read before you answer; never invent grams, dates, or food safety verdicts;
         quote grams only as the tools observed them; write tools are proposals that the
-        person confirms; answer briefly in the language of the goal.
+        person confirms; answer briefly in the language of the goal. Tools name foods in
+        English: write each food in the language of the goal with its own article and gender
+        (in Spanish: el tomate, la pechuga de pollo, la leche, los fríjoles, las lentejas).
         Reply only JSON, either
         {"action":"call","tool":"name","arguments":{"name":"value"},"reason":"why"}
         or {"action":"answer","text":"answer","evidence":["tool names you relied on"]}.

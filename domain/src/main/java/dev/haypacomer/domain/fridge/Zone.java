@@ -39,6 +39,18 @@ public final class Zone implements FridgeNode {
     trays.add(tray);
   }
 
+  public Tray remove(TrayId trayId) {
+    Tray tray =
+        find(trayId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Tray not in zone " + name + ": " + trayId));
+    if (tray.itemCount() > 0) {
+      throw new TrayNotEmptyException(tray);
+    }
+    trays.remove(tray);
+    return tray;
+  }
+
   public Optional<Tray> find(TrayId trayId) {
     return trays.stream().filter(tray -> tray.id().equals(trayId)).findFirst();
   }

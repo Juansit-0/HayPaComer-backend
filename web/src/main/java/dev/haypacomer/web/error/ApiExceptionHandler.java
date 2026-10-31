@@ -35,6 +35,7 @@ import dev.haypacomer.application.session.CookingSessionNotFoundException;
 import dev.haypacomer.application.session.SessionAlreadyActiveException;
 import dev.haypacomer.domain.expiry.ImpossibleExpiryException;
 import dev.haypacomer.domain.fridge.FridgeBusyException;
+import dev.haypacomer.domain.fridge.TrayNotEmptyException;
 import dev.haypacomer.domain.household.AccessDeniedException;
 import dev.haypacomer.domain.quantity.InvalidQuantityException;
 import dev.haypacomer.domain.quantity.UnconvertibleQuantityException;
@@ -204,6 +205,13 @@ public class ApiExceptionHandler {
   @ExceptionHandler(CookingSessionNotFoundException.class)
   ProblemDetail sessionNotFound(CookingSessionNotFoundException exception) {
     return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
+  }
+
+  @ExceptionHandler(TrayNotEmptyException.class)
+  ProblemDetail trayNotEmpty(TrayNotEmptyException exception) {
+    ProblemDetail problem = problem(HttpStatus.CONFLICT, "Tray holds food", exception.getMessage());
+    problem.setProperty("trayId", exception.tray().value());
+    return problem;
   }
 
   @ExceptionHandler(SessionAlreadyActiveException.class)

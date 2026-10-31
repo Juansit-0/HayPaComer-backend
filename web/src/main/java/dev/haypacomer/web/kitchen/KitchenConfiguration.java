@@ -8,9 +8,11 @@ import dev.haypacomer.application.coldchain.ListColdChains;
 import dev.haypacomer.application.coldchain.ReviewColdChain;
 import dev.haypacomer.application.coldchain.TrackColdChain;
 import dev.haypacomer.application.cooking.EvaluateRecipe;
+import dev.haypacomer.application.fridge.ChangeFridgeShape;
 import dev.haypacomer.application.fridge.ListFridges;
 import dev.haypacomer.application.fridge.SetUpFridge;
 import dev.haypacomer.application.fridge.UseFridgeSession;
+import dev.haypacomer.application.fridge.ViewFridgeShape;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.inventory.ChangeFoodOwnership;
 import dev.haypacomer.application.inventory.EstimateExpiry;
@@ -36,6 +38,7 @@ import dev.haypacomer.application.port.FoodOwnershipRepository;
 import dev.haypacomer.application.port.FoodProfileRepository;
 import dev.haypacomer.application.port.FridgeRepository;
 import dev.haypacomer.application.port.FridgeSessionRegistry;
+import dev.haypacomer.application.port.FridgeShapeRepository;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InventoryMovementLog;
 import dev.haypacomer.application.port.KitchenAdvisor;
@@ -73,6 +76,23 @@ public class KitchenConfiguration {
   @Bean
   SetUpFridge setUpFridge(HouseholdRepository households, FridgeRepository fridges) {
     return new SetUpFridge(households, fridges);
+  }
+
+  @Bean
+  ViewFridgeShape viewFridgeShape(
+      HouseholdRepository households, FridgeRepository fridges, FridgeShapeRepository shapes) {
+    return new ViewFridgeShape(households, fridges, shapes);
+  }
+
+  @Bean
+  ChangeFridgeShape changeFridgeShape(
+      HouseholdRepository households,
+      FridgeRepository fridges,
+      FridgeShapeRepository shapes,
+      AuditLog audit,
+      UnitOfWork unitOfWork,
+      Clock clock) {
+    return new ChangeFridgeShape(households, fridges, shapes, audit, unitOfWork, clock);
   }
 
   @Bean

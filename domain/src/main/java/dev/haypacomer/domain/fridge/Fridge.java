@@ -33,6 +33,24 @@ public final class Fridge implements FridgeNode {
     zones.add(zone);
   }
 
+  public Zone removeZone(ZoneId zoneId) {
+    Zone zone =
+        zones.stream()
+            .filter(existing -> existing.id().equals(zoneId))
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException("Zone not in fridge " + name + ": " + zoneId));
+    zone.children().stream()
+        .filter(tray -> tray.itemCount() > 0)
+        .findFirst()
+        .ifPresent(
+            tray -> {
+              throw new TrayNotEmptyException(tray);
+            });
+    zones.remove(zone);
+    return zone;
+  }
+
   public Optional<Tray> findTray(TrayId trayId) {
     return trays().filter(tray -> tray.id().equals(trayId)).findFirst();
   }

@@ -37,6 +37,23 @@ class ZoneAndTrayTest {
   }
 
   @Test
+  void renamingATrayKeepsItsIdPositionAndFood() {
+    Zone shelves = Zone.named("Shelves", ZoneKind.SHELF);
+    Tray tray = Tray.named("Middle", 1);
+    FoodItem milk = FridgeFixtures.item(MILK, 842);
+    tray.add(milk);
+    shelves.add(tray);
+
+    shelves.renameTray(tray.id(), "Bottom");
+
+    Tray renamed = shelves.find(tray.id()).orElseThrow();
+    assertEquals("Bottom", renamed.name());
+    assertEquals(1, renamed.position());
+    assertEquals(milk, renamed.find(milk.id()).orElseThrow());
+    assertThrows(IllegalArgumentException.class, () -> shelves.renameTray(TrayId.newId(), "Top"));
+  }
+
+  @Test
   void rejectsInvalidNamesAndPositions() {
     assertThrows(IllegalArgumentException.class, () -> Fridge.named(" "));
     assertThrows(IllegalArgumentException.class, () -> Zone.named("", ZoneKind.SHELF));

@@ -51,6 +51,18 @@ public final class Zone implements FridgeNode {
     return tray;
   }
 
+  // A tray keeps its id, position, and food under its new name.
+  public void renameTray(TrayId trayId, String name) {
+    Tray tray =
+        find(trayId)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException("Tray not in zone " + this.name + ": " + trayId));
+    Tray renamed = new Tray(tray.id(), name, tray.position());
+    tray.children().forEach(renamed::add);
+    trays.set(trays.indexOf(tray), renamed);
+  }
+
   public Optional<Tray> find(TrayId trayId) {
     return trays.stream().filter(tray -> tray.id().equals(trayId)).findFirst();
   }

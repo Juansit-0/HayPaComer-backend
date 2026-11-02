@@ -7,6 +7,7 @@ import dev.haypacomer.domain.fridge.ZoneKind;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public record FridgeShape(
     FridgeType type,
@@ -22,6 +23,8 @@ public record FridgeShape(
   public static final int MAX_SHELVES = 6;
   public static final int MAX_DOOR_RACKS = 5;
   public static final int MAX_DRAWERS = 3;
+
+  private static final Pattern LEVEL = Pattern.compile("Top|Middle|Bottom|Shelf \\d+");
 
   public FridgeShape {
     Objects.requireNonNull(type, "type");
@@ -80,6 +83,35 @@ public record FridgeShape(
     fitZone(fridge, ZoneKind.DOOR, doorRacks);
     fitZone(fridge, ZoneKind.DRAWER, drawers);
     fitZone(fridge, ZoneKind.FREEZER, freezerShelves);
+    nameLevels(fridge, ZoneKind.SHELF);
+    nameLevels(fridge, ZoneKind.FREEZER);
+  }
+
+  // Shelves are named from the top down by how many there are: two read Top and Bottom, three add
+  // Middle, and more are numbered between Top and Bottom. A name the household chose is kept.
+  private static void nameLevels(Fridge fridge, ZoneKind kind) {
+    List<Zone> zones = fridge.children().stream().filter(zone -> zone.kind() == kind).toList();
+    int count = zones.stream().mapToInt(zone -> zone.children().size()).sum();
+    int index = 0;
+    for (Zone zone : zones) {
+      for (Tray tray :
+          zone.children().stream().sorted(Comparator.comparingInt(Tray::position)).toList()) {
+        String name = levelName(index++, count);
+        if (LEVEL.matcher(tray.name()).matches() && !tray.name().equals(name)) {
+          zone.renameTray(tray.id(), name);
+        }
+      }
+    }
+  }
+
+  private static String levelName(int index, int count) {
+    if (index == 0) {
+      return "Top";
+    }
+    if (index == count - 1) {
+      return "Bottom";
+    }
+    return count == 3 ? "Middle" : "Shelf " + (index + 1);
   }
 
   private static void fitZone(Fridge fridge, ZoneKind kind, int wanted) {
@@ -140,13 +172,11 @@ public record FridgeShape(
     };
   }
 
-  // Names the translations know: Top, Middle and Bottom, then Shelf 4; Rack, then Rack 2;
-  // Vegetables,
-  // then Drawer 2.
+  // Names the translations know: shelves get their level from nameLevels; Rack, then Rack 2;
+  // Vegetables, then Drawer 2.
   private static String trayName(ZoneKind kind, int index) {
     return switch (kind) {
-      case SHELF, FREEZER ->
-          index < 3 ? List.of("Top", "Middle", "Bottom").get(index) : "Shelf " + (index + 1);
+      case SHELF, FREEZER -> "Shelf " + (index + 1);
       case DOOR -> index == 0 ? "Rack" : "Rack " + (index + 1);
       case DRAWER -> index == 0 ? "Vegetables" : "Drawer " + (index + 1);
     };

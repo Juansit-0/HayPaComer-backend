@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import dev.haypacomer.domain.fridge.Fridge;
 import dev.haypacomer.domain.fridge.Tray;
+import dev.haypacomer.domain.fridge.Zone;
 import dev.haypacomer.domain.fridge.ZoneKind;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -48,10 +49,10 @@ class FridgeShapeTest {
     new FridgeShape(FridgeType.TOP_FREEZER, 5, 3, 2, 2, Hinge.LEFT, 60, 165, 65).fit(fridge);
 
     assertEquals(
-        List.of("Top", "Middle", "Bottom", "Shelf 4", "Shelf 5"), names(fridge, ZoneKind.SHELF));
+        List.of("Top", "Shelf 2", "Shelf 3", "Shelf 4", "Bottom"), names(fridge, ZoneKind.SHELF));
     assertEquals(List.of("Rack", "Rack 2", "Rack 3"), names(fridge, ZoneKind.DOOR));
     assertEquals(List.of("Vegetables", "Drawer 2"), names(fridge, ZoneKind.DRAWER));
-    assertEquals(List.of("Top", "Middle"), names(fridge, ZoneKind.FREEZER));
+    assertEquals(List.of("Top", "Bottom"), names(fridge, ZoneKind.FREEZER));
     assertEquals(2, FridgeShape.inferredFrom(fridge).freezerShelves());
   }
 
@@ -61,11 +62,26 @@ class FridgeShapeTest {
 
     shape(FridgeType.MINIBAR, 2, 0).fit(fridge);
 
-    assertEquals(List.of("Top", "Middle"), names(fridge, ZoneKind.SHELF));
+    assertEquals(List.of("Top", "Bottom"), names(fridge, ZoneKind.SHELF));
     assertEquals(List.of(), names(fridge, ZoneKind.DRAWER));
     assertEquals(
         List.of(ZoneKind.SHELF, ZoneKind.DOOR),
         fridge.children().stream().map(zone -> zone.kind()).toList());
+  }
+
+  @Test
+  void shelvesAreRenamedByHowManyThereAreButAChosenNameStays() {
+    Fridge fridge = FridgeLayout.EMPTY.build("Kitchen");
+    shape(FridgeType.MINIBAR, 4, 1).fit(fridge);
+    assertEquals(List.of("Top", "Shelf 2", "Shelf 3", "Bottom"), names(fridge, ZoneKind.SHELF));
+    assertEquals(List.of("Top"), names(fridge, ZoneKind.FREEZER));
+
+    Zone shelves = fridge.children().getFirst();
+    Tray second = shelves.children().get(1);
+    shelves.renameTray(second.id(), "Cheese");
+    shape(FridgeType.MINIBAR, 3, 1).fit(fridge);
+
+    assertEquals(List.of("Top", "Cheese", "Bottom"), names(fridge, ZoneKind.SHELF));
   }
 
   private static FridgeShape shape(FridgeType type, int shelves, int freezer) {

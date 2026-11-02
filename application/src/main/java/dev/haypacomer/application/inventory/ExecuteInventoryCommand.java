@@ -8,6 +8,7 @@ import dev.haypacomer.application.port.AuditLog;
 import dev.haypacomer.application.port.FoodCatalogRepository;
 import dev.haypacomer.application.port.FoodOwnershipRepository;
 import dev.haypacomer.application.port.FridgeRepository;
+import dev.haypacomer.application.port.FridgeShapeRepository;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InventoryMovementLog;
 import dev.haypacomer.application.port.SnapshotStore;
@@ -37,6 +38,7 @@ public final class ExecuteInventoryCommand {
   private final Clock clock;
   private final BroadcastLiveUpdate live;
   private final ExpiryDesk expiry;
+  private final FridgeShapeRepository shapes;
 
   public ExecuteInventoryCommand(
       HouseholdRepository households,
@@ -103,6 +105,37 @@ public final class ExecuteInventoryCommand {
       BroadcastLiveUpdate live,
       ExpiryDesk expiry,
       Clock clock) {
+    this(
+        households,
+        fridges,
+        ownerships,
+        movements,
+        catalog,
+        guard,
+        audit,
+        unitOfWork,
+        snapshots,
+        live,
+        expiry,
+        null,
+        clock);
+  }
+
+  public ExecuteInventoryCommand(
+      HouseholdRepository households,
+      FridgeRepository fridges,
+      FoodOwnershipRepository ownerships,
+      InventoryMovementLog movements,
+      FoodCatalogRepository catalog,
+      FoodAccessGuard guard,
+      AuditLog audit,
+      UnitOfWork unitOfWork,
+      SnapshotStore snapshots,
+      BroadcastLiveUpdate live,
+      ExpiryDesk expiry,
+      FridgeShapeRepository shapes,
+      Clock clock) {
+    this.shapes = shapes;
     this.live = Objects.requireNonNull(live, "live");
     this.expiry = Objects.requireNonNull(expiry, "expiry");
     this.inventory = new HouseholdInventory(households, fridges, ownerships, movements);
@@ -130,7 +163,7 @@ public final class ExecuteInventoryCommand {
               CommandOutcome outcome =
                   command.execute(
                       new InventoryWorkspace(
-                          actor, household, inventory, guard, catalog, expiry, now));
+                          actor, household, inventory, guard, catalog, expiry, shapes, now));
               Map<String, String> detail = new HashMap<>(command.detail());
               detail.put("commandId", command.id().toString());
               detail.put("remainingGrams", outcome.remaining().value().toPlainString());

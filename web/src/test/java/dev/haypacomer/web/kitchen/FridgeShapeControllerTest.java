@@ -12,6 +12,7 @@ import dev.haypacomer.application.device.AuthenticateDevice;
 import dev.haypacomer.application.fridge.ChangeFridgeShape;
 import dev.haypacomer.application.fridge.FridgeShape;
 import dev.haypacomer.application.fridge.ViewFridgeShape;
+import dev.haypacomer.application.fridge.ViewFridgeSpace;
 import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.fridge.Tray;
 import dev.haypacomer.domain.fridge.TrayNotEmptyException;
@@ -51,6 +52,7 @@ class FridgeShapeControllerTest {
   @Autowired private JwtProperties properties;
   @MockitoBean private ViewFridgeShape viewFridgeShape;
   @MockitoBean private ChangeFridgeShape changeFridgeShape;
+  @MockitoBean private ViewFridgeSpace viewFridgeSpace;
   @MockitoBean private AuthenticateDevice authenticateDevice;
 
   private final UserId juan = UserId.newId();

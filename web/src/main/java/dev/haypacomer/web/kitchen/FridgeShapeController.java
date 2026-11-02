@@ -4,7 +4,9 @@ import dev.haypacomer.application.fridge.ChangeFridgeShape;
 import dev.haypacomer.application.fridge.FridgeShape;
 import dev.haypacomer.application.fridge.FridgeType;
 import dev.haypacomer.application.fridge.Hinge;
+import dev.haypacomer.application.fridge.TraySpace;
 import dev.haypacomer.application.fridge.ViewFridgeShape;
+import dev.haypacomer.application.fridge.ViewFridgeSpace;
 import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
@@ -25,11 +27,37 @@ public class FridgeShapeController {
 
   private final ViewFridgeShape viewFridgeShape;
   private final ChangeFridgeShape changeFridgeShape;
+  private final ViewFridgeSpace viewFridgeSpace;
 
   public FridgeShapeController(
-      ViewFridgeShape viewFridgeShape, ChangeFridgeShape changeFridgeShape) {
+      ViewFridgeShape viewFridgeShape,
+      ChangeFridgeShape changeFridgeShape,
+      ViewFridgeSpace viewFridgeSpace) {
     this.viewFridgeShape = viewFridgeShape;
     this.changeFridgeShape = changeFridgeShape;
+    this.viewFridgeSpace = viewFridgeSpace;
+  }
+
+  @GetMapping("/api/v1/households/{householdId}/fridges/{fridgeId}/space")
+  List<SpaceResponse> space(
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID householdId,
+      @PathVariable UUID fridgeId) {
+    return viewFridgeSpace
+        .view(CurrentUser.of(jwt), new HouseholdId(householdId), new FridgeId(fridgeId))
+        .stream()
+        .map(SpaceResponse::from)
+        .toList();
+  }
+
+  record SpaceResponse(UUID trayId, double capacityLiters, double usedLiters) {
+
+    static SpaceResponse from(TraySpace space) {
+      return new SpaceResponse(
+          space.tray().value(),
+          Math.round(space.capacityLiters() * 10) / 10.0,
+          Math.round(space.usedLiters() * 10) / 10.0);
+    }
   }
 
   @GetMapping("/api/v1/fridge-examples")

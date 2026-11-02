@@ -43,6 +43,10 @@ public record MoveFoodCommand(UUID id, HouseholdId household, FoodItemId item, T
     if (located.fridge().findTray(tray).isEmpty()) {
       throw new IllegalArgumentException("Tray not in the fridge that holds this food");
     }
+    FoodItem moving = located.item();
+    if (!located.fridge().locate(item).map(current -> current.id().equals(tray)).orElse(false)) {
+      workspace.requireRoom(located.fridge(), tray, moving.food(), moving.quantity());
+    }
     located.fridge().move(item, tray);
     workspace.inventory().save(household, located.fridge());
     FoodItem moved = located.fridge().findItem(item).orElseThrow();

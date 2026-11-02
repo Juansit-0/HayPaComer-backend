@@ -117,6 +117,7 @@ public record StockFoodCommand(
         expiry
             .map(found -> FoodItem.weighed(food, grossWeight, tare, found, opened ? today : null))
             .orElseGet(() -> FoodItem.weighed(food, grossWeight, tare, null));
+    workspace.requireRoom(target, tray, food, item.quantity());
     target.place(item, tray);
     workspace.inventory().save(household, target);
     workspace

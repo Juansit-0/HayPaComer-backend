@@ -16,6 +16,7 @@ import dev.haypacomer.application.auth.TooManyLoginAttemptsException;
 import dev.haypacomer.application.auth.UserNotFoundException;
 import dev.haypacomer.application.coldchain.FridgeNotFoundException;
 import dev.haypacomer.application.device.DeviceNotFoundException;
+import dev.haypacomer.application.fridge.TrayFullException;
 import dev.haypacomer.application.household.HouseholdNotFoundException;
 import dev.haypacomer.application.household.InvitationEmailMismatchException;
 import dev.haypacomer.application.i18n.UnknownLocaleException;
@@ -205,6 +206,14 @@ public class ApiExceptionHandler {
   @ExceptionHandler(CookingSessionNotFoundException.class)
   ProblemDetail sessionNotFound(CookingSessionNotFoundException exception) {
     return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
+  }
+
+  @ExceptionHandler(TrayFullException.class)
+  ProblemDetail trayFull(TrayFullException exception) {
+    ProblemDetail problem = problem(HttpStatus.CONFLICT, "Tray full", exception.getMessage());
+    problem.setProperty("trayId", exception.tray().value());
+    problem.setProperty("freeLiters", Math.round(exception.freeLiters() * 10) / 10.0);
+    return problem;
   }
 
   @ExceptionHandler(TrayNotEmptyException.class)

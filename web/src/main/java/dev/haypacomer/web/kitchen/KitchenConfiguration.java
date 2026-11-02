@@ -13,6 +13,7 @@ import dev.haypacomer.application.fridge.ListFridges;
 import dev.haypacomer.application.fridge.SetUpFridge;
 import dev.haypacomer.application.fridge.UseFridgeSession;
 import dev.haypacomer.application.fridge.ViewFridgeShape;
+import dev.haypacomer.application.fridge.ViewFridgeSpace;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.inventory.ChangeFoodOwnership;
 import dev.haypacomer.application.inventory.EstimateExpiry;
@@ -82,6 +83,12 @@ public class KitchenConfiguration {
   ViewFridgeShape viewFridgeShape(
       HouseholdRepository households, FridgeRepository fridges, FridgeShapeRepository shapes) {
     return new ViewFridgeShape(households, fridges, shapes);
+  }
+
+  @Bean
+  ViewFridgeSpace viewFridgeSpace(
+      HouseholdRepository households, FridgeRepository fridges, FridgeShapeRepository shapes) {
+    return new ViewFridgeSpace(households, fridges, shapes);
   }
 
   @Bean
@@ -209,6 +216,7 @@ public class KitchenConfiguration {
       SnapshotStore snapshots,
       BroadcastLiveUpdate live,
       ExpiryDesk expiryDesk,
+      FridgeShapeRepository shapes,
       Clock clock) {
     return new ExecuteInventoryCommand(
         households,
@@ -222,6 +230,7 @@ public class KitchenConfiguration {
         snapshots,
         live,
         expiryDesk,
+        shapes,
         clock);
   }
 

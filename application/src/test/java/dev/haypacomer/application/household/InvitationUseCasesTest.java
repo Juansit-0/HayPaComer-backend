@@ -81,7 +81,7 @@ class InvitationUseCasesTest {
 
   private String lastToken() {
     String link = outbox.getLast().link();
-    return URLDecoder.decode(link.substring(link.indexOf("#token=") + 7), StandardCharsets.UTF_8);
+    return URLDecoder.decode(link.substring(link.indexOf("?token=") + 7), StandardCharsets.UTF_8);
   }
 
   @BeforeEach
@@ -96,10 +96,10 @@ class InvitationUseCasesTest {
   @Test
   void ownerInvitesAndTheInviteeJoinsWithTheRole() {
     Invitation invitation =
-        invite().invite(juan.id(), household.id(), "ANA@haypacomer.dev", Role.MEMBER);
+        invite().invite(juan.id(), household.id(), "ANA@haypacomer.dev", Role.MEMBER).invitation();
 
     assertEquals(new EmailAddress("ana@haypacomer.dev"), outbox.getLast().to());
-    assertTrue(outbox.getLast().link().startsWith("https://haypacomer.dev/join#token="));
+    assertTrue(outbox.getLast().link().startsWith("https://haypacomer.dev/#/join?token="));
     assertEquals(
         List.of(invitation),
         new ListInvitations(households, invitations, clock).list(juan.id(), household.id()));
@@ -134,7 +134,7 @@ class InvitationUseCasesTest {
   @Test
   void cancelledInvitationsCannotBeAccepted() {
     Invitation invitation =
-        invite().invite(juan.id(), household.id(), "ana@haypacomer.dev", Role.GUEST);
+        invite().invite(juan.id(), household.id(), "ana@haypacomer.dev", Role.GUEST).invitation();
 
     new CancelInvitation(households, invitations)
         .cancel(juan.id(), household.id(), invitation.id());

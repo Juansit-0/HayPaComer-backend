@@ -64,6 +64,7 @@ class HouseholdControllerTest {
   @Autowired private JwtProperties properties;
 
   @MockitoBean private CreateHousehold createHousehold;
+  @MockitoBean private dev.haypacomer.application.analytics.HouseholdMemberNames memberNames;
   @MockitoBean private ListHouseholds listHouseholds;
   @MockitoBean private GetHousehold getHousehold;
   @MockitoBean private UpdateHousehold updateHousehold;

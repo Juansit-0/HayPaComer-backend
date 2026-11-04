@@ -106,7 +106,7 @@ final class AuthFakes {
 
     String lastToken() {
       String link = sent.getLast().link();
-      return URLDecoder.decode(link.substring(link.indexOf("#token=") + 7), StandardCharsets.UTF_8);
+      return URLDecoder.decode(link.substring(link.indexOf("?token=") + 7), StandardCharsets.UTF_8);
     }
   }
 

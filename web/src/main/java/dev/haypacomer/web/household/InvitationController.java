@@ -4,6 +4,7 @@ import dev.haypacomer.application.household.AcceptInvitation;
 import dev.haypacomer.application.household.CancelInvitation;
 import dev.haypacomer.application.household.InviteMember;
 import dev.haypacomer.application.household.ListInvitations;
+import dev.haypacomer.application.household.SentInvitation;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Invitation;
 import dev.haypacomer.domain.household.Role;
@@ -53,9 +54,10 @@ public class InvitationController {
       @AuthenticationPrincipal Jwt jwt,
       @PathVariable UUID householdId,
       @Valid @RequestBody InviteRequest request) {
-    return InvitationResponse.from(
+    SentInvitation sent =
         inviteMember.invite(
-            CurrentUser.of(jwt), new HouseholdId(householdId), request.email(), request.role()));
+            CurrentUser.of(jwt), new HouseholdId(householdId), request.email(), request.role());
+    return InvitationResponse.from(sent.invitation(), sent.link());
   }
 
   @GetMapping("/api/v1/households/{householdId}/invitations")
@@ -91,11 +93,19 @@ public class InvitationController {
     }
   }
 
-  record InvitationResponse(UUID id, String email, Role role, Instant expiresAt) {
+  record InvitationResponse(UUID id, String email, Role role, Instant expiresAt, String link) {
 
     static InvitationResponse from(Invitation invitation) {
+      return from(invitation, null);
+    }
+
+    static InvitationResponse from(Invitation invitation, String link) {
       return new InvitationResponse(
-          invitation.id(), invitation.email().value(), invitation.role(), invitation.expiresAt());
+          invitation.id(),
+          invitation.email().value(),
+          invitation.role(),
+          invitation.expiresAt(),
+          link);
     }
   }
 }

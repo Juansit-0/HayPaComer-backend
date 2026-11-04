@@ -1,5 +1,6 @@
 package dev.haypacomer.web.household;
 
+import dev.haypacomer.application.analytics.HouseholdMemberNames;
 import dev.haypacomer.application.household.ChangeMemberRole;
 import dev.haypacomer.application.household.CreateHousehold;
 import dev.haypacomer.application.household.CreateHouseholdCommand;
@@ -46,6 +47,7 @@ public class HouseholdController {
   private final ChangeMemberRole changeMemberRole;
   private final RemoveMember removeMember;
   private final TransferOwnership transferOwnership;
+  private final HouseholdMemberNames memberNames;
 
   public HouseholdController(
       CreateHousehold createHousehold,
@@ -54,7 +56,8 @@ public class HouseholdController {
       UpdateHousehold updateHousehold,
       ChangeMemberRole changeMemberRole,
       RemoveMember removeMember,
-      TransferOwnership transferOwnership) {
+      TransferOwnership transferOwnership,
+      HouseholdMemberNames memberNames) {
     this.createHousehold = createHousehold;
     this.listHouseholds = listHouseholds;
     this.getHousehold = getHousehold;
@@ -62,6 +65,7 @@ public class HouseholdController {
     this.changeMemberRole = changeMemberRole;
     this.removeMember = removeMember;
     this.transferOwnership = transferOwnership;
+    this.memberNames = memberNames;
   }
 
   @PostMapping
@@ -87,7 +91,9 @@ public class HouseholdController {
   @GetMapping("/{householdId}")
   HouseholdResponse get(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     UserId actor = CurrentUser.of(jwt);
-    return HouseholdResponse.from(getHousehold.get(actor, new HouseholdId(householdId)), actor);
+    HouseholdId household = new HouseholdId(householdId);
+    return HouseholdResponse.from(
+        getHousehold.get(actor, household), actor, memberNames.names(actor, household));
   }
 
   @PatchMapping("/{householdId}")

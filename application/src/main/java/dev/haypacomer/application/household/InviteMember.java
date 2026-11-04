@@ -40,7 +40,7 @@ public final class InviteMember {
     this.clock = Objects.requireNonNull(clock, "clock");
   }
 
-  public Invitation invite(UserId actor, HouseholdId id, String emailAddress, Role role) {
+  public SentInvitation invite(UserId actor, HouseholdId id, String emailAddress, Role role) {
     Household household = households.load(actor, id);
     household.requirePermission(actor, Permission.MANAGE_MEMBERS);
     String raw = opaqueTokens.generate();
@@ -60,6 +60,6 @@ public final class InviteMember {
             "You are invited to " + household.name() + " on HayPaComer",
             "Join " + household.name() + " within 7 days: " + link,
             link));
-    return invitation;
+    return new SentInvitation(invitation, link);
   }
 }

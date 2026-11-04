@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 final class HouseholdDtos {
@@ -26,14 +27,19 @@ final class HouseholdDtos {
 
   record TransferOwnershipRequest(@NotNull UUID userId) {}
 
-  record MemberResponse(UUID userId, UUID memberId, Role role, Instant joinedAt) {
+  record MemberResponse(UUID userId, UUID memberId, Role role, Instant joinedAt, String name) {
 
     static MemberResponse from(Membership membership) {
+      return from(membership, null);
+    }
+
+    static MemberResponse from(Membership membership, String name) {
       return new MemberResponse(
           membership.user().value(),
           membership.member().value(),
           membership.role(),
-          membership.joinedAt());
+          membership.joinedAt(),
+          name);
     }
   }
 
@@ -46,13 +52,19 @@ final class HouseholdDtos {
       List<MemberResponse> members) {
 
     static HouseholdResponse from(Household household, UserId viewer) {
+      return from(household, viewer, Map.of());
+    }
+
+    static HouseholdResponse from(Household household, UserId viewer, Map<UserId, String> names) {
       return new HouseholdResponse(
           household.id().value(),
           household.name(),
           household.currency().getCurrencyCode(),
           household.timezone().getId(),
           household.membershipOf(viewer).map(Membership::role).orElseThrow(),
-          household.memberships().stream().map(MemberResponse::from).toList());
+          household.memberships().stream()
+              .map(membership -> MemberResponse.from(membership, names.get(membership.user())))
+              .toList());
     }
   }
 }

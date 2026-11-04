@@ -15,6 +15,6 @@ public record MailLinks(String baseUrl) {
   }
 
   public String to(String page, String token) {
-    return baseUrl + "/" + page + "#token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
+    return baseUrl + "/#/" + page + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
   }
 }

@@ -70,7 +70,7 @@ class InvitationFlowIntegrationTest {
             .findFirst()
             .orElseThrow();
     String link = message.link();
-    return URLDecoder.decode(link.substring(link.indexOf("#token=") + 7), StandardCharsets.UTF_8);
+    return URLDecoder.decode(link.substring(link.indexOf("?token=") + 7), StandardCharsets.UTF_8);
   }
 
   private String signUp(String email, String password) throws Exception {

@@ -198,7 +198,7 @@ class DemoFlowIntegrationTest {
         201);
     String link = OUTBOX.getLast().link();
     String token =
-        URLDecoder.decode(link.substring(link.indexOf("#token=") + 7), StandardCharsets.UTF_8);
+        URLDecoder.decode(link.substring(link.indexOf("?token=") + 7), StandardCharsets.UTF_8);
     post("/api/v1/invitations/accept", ana, "{\"token\":\"" + token + "\"}", 200);
 
     String tomorrow = LocalDate.now(ZoneOffset.UTC).plusDays(1).toString();

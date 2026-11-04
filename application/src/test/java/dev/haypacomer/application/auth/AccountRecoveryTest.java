@@ -37,7 +37,7 @@ class AccountRecoveryTest {
             .sent
             .getFirst()
             .link()
-            .startsWith("https://haypacomer.dev/verify-email#token="));
+            .startsWith("https://haypacomer.dev/#/verify-email?token="));
     String token = fakes.outbox.lastToken();
 
     assertTrue(fakes.verifyEmail().verify(token).emailVerified());

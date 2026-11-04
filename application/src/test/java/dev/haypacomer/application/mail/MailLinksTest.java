@@ -10,10 +10,10 @@ class MailLinksTest {
   @Test
   void buildsFragmentLinksSoTokensStayOutOfServerLogs() {
     assertEquals(
-        "https://haypacomer.dev/join#token=a%2Bb",
+        "https://haypacomer.dev/#/join?token=a%2Bb",
         new MailLinks("https://haypacomer.dev/").to("join", "a+b"));
     assertEquals(
-        "http://localhost:5173/join#token=x",
+        "http://localhost:5173/#/join?token=x",
         new MailLinks("http://localhost:5173").to("join", "x"));
   }
 

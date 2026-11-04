@@ -57,6 +57,14 @@ public class PostgresInventoryMovementLog implements InventoryMovementLog, Movem
   }
 
   @Override
+  public void forgetSince(HouseholdId household, Instant at) {
+    jdbc.sql("DELETE FROM inventory_movements WHERE household_id = :household AND at >= :at")
+        .param("household", household.value())
+        .param("at", Timestamps.toDatabase(at))
+        .update();
+  }
+
+  @Override
   public List<InventoryMovement> history(FoodItemId item) {
     return jdbc.sql(SELECT + " WHERE food_item_id = :item ORDER BY at, id")
         .param("item", item.value())

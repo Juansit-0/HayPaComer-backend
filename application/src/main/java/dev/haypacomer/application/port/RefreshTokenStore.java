@@ -10,6 +10,8 @@ public interface RefreshTokenStore {
 
   void save(RefreshToken token);
 
+  boolean claim(UUID id, Instant at);
+
   Optional<RefreshToken> findByHash(String tokenHash);
 
   void revokeFamily(UUID family, Instant at);

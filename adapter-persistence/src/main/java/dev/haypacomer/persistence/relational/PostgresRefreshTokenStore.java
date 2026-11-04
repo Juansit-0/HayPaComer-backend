@@ -63,6 +63,16 @@ public class PostgresRefreshTokenStore implements RefreshTokenStore {
   }
 
   @Override
+  public boolean claim(UUID id, Instant at) {
+    return jdbc.sql(
+                "UPDATE refresh_tokens SET revoked_at = :at WHERE id = :id AND revoked_at IS NULL")
+            .param("id", id)
+            .param("at", Timestamps.toDatabase(at))
+            .update()
+        == 1;
+  }
+
+  @Override
   public void revokeFamily(UUID family, Instant at) {
     jdbc.sql(
             """

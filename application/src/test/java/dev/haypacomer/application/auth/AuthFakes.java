@@ -220,6 +220,16 @@ final class AuthFakes {
     }
 
     @Override
+    public boolean claim(UUID id, Instant at) {
+      RefreshToken token = byId.get(id);
+      if (token.isRevoked()) {
+        return false;
+      }
+      byId.put(id, token.revoke(at));
+      return true;
+    }
+
+    @Override
     public Optional<RefreshToken> findByHash(String tokenHash) {
       return byId.values().stream()
           .filter(token -> token.tokenHash().equals(tokenHash))

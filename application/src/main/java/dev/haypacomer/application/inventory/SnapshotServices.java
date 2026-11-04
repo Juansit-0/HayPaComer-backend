@@ -23,6 +23,7 @@ final class SnapshotServices {
   final InventoryCaretaker caretaker;
   final SnapshotStore snapshots;
   final AuditLog audit;
+  private final InventoryMovementLog movements;
   final UnitOfWork unitOfWork;
   final Clock clock;
 
@@ -37,6 +38,7 @@ final class SnapshotServices {
       UnitOfWork unitOfWork,
       Clock clock) {
     this.inventory = new HouseholdInventory(households, fridges, ownerships, movements);
+    this.movements = Objects.requireNonNull(movements, "movements");
     this.caretaker = new InventoryCaretaker(inventory, catalog);
     this.snapshots = Objects.requireNonNull(snapshots, "snapshots");
     this.audit = Objects.requireNonNull(audit, "audit");
@@ -51,6 +53,7 @@ final class SnapshotServices {
   void restore(UserId actor, InventorySnapshot snapshot, String action) {
     Instant now = clock.instant();
     caretaker.restore(snapshot.household(), snapshot.memento());
+    movements.forgetSince(snapshot.household(), snapshot.at());
     snapshots.markUsed(snapshot.id(), now);
     audit.record(
         new AuditEntry(

@@ -52,6 +52,15 @@ final class InventoryCaretaker {
                               .findByName(key)
                               .orElseThrow(() -> new FoodNotInCatalogException(key)))));
     }
-    memento.ownerships().forEach((item, ownership) -> inventory.ownerships().save(item, ownership));
+    // Who may see a food is its owner's current decision: only food coming back recovers its old
+    // terms.
+    memento
+        .ownerships()
+        .forEach(
+            (item, ownership) -> {
+              if (inventory.ownerships().find(item).isEmpty()) {
+                inventory.ownerships().save(item, ownership);
+              }
+            });
   }
 }

@@ -255,13 +255,25 @@ public class KitchenConfiguration {
       FridgeRepository fridges,
       FoodOwnershipRepository ownerships,
       InventoryMovementLog movements,
+      FoodCatalogRepository catalog,
       FoodAccessGuard guard,
       ExpiryDesk expiryDesk,
       AuditLog audit,
       UnitOfWork unitOfWork,
+      SnapshotStore snapshots,
       Clock clock) {
     return new MarkFoodOpened(
-        households, fridges, ownerships, movements, guard, expiryDesk, audit, unitOfWork, clock);
+        households,
+        fridges,
+        ownerships,
+        movements,
+        catalog,
+        guard,
+        expiryDesk,
+        audit,
+        unitOfWork,
+        snapshots,
+        clock);
   }
 
   @Bean

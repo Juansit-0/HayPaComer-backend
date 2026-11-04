@@ -3,6 +3,8 @@ package dev.haypacomer.domain.quantity;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,6 +15,8 @@ public final class QuantityParser {
   private static final Pattern MIXED = Pattern.compile("^(\\d+)\\s+(\\d+)/(\\d+)(.*)$");
   private static final Pattern FRACTION = Pattern.compile("^(\\d+)/(\\d+)(.*)$");
   private static final Pattern DECIMAL = Pattern.compile("^(\\d+(?:[.,]\\d+)?)(.*)$");
+
+  private static final Set<String> FOOD_LINK = Set.of("de", "del", "of");
 
   private QuantityParser() {}
 
@@ -59,8 +63,15 @@ public final class QuantityParser {
 
   private static Amount amount(BigDecimal value, String rest) {
     String words = rest.strip();
-    String first = words.isEmpty() ? "" : words.split("\\s+")[0];
-    Unit unit = UnitVocabulary.lookup(first).orElse(Unit.PIECE);
-    return new Amount(new Quantity(value, unit));
+    String[] parts = words.isEmpty() ? new String[0] : words.split("\\s+");
+    Optional<Unit> unit = parts.length == 0 ? Optional.empty() : UnitVocabulary.lookup(parts[0]);
+    boolean clean =
+        unit.isPresent()
+            ? parts.length == 1 || FOOD_LINK.contains(parts[1])
+            : !words.matches(".*[\\d+*/=-].*");
+    if (!clean) {
+      throw new InvalidQuantityException("Cannot read a quantity from \"" + words + "\"");
+    }
+    return new Amount(new Quantity(value, unit.orElse(Unit.PIECE)));
   }
 }

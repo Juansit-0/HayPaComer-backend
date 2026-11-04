@@ -29,6 +29,9 @@ public final class CloneWeeklyPlan {
             .find(householdId, planId)
             .orElseThrow(WeeklyPlanNotFoundException::new)
             .cloneFor(weekStart);
+    if (plans.current(householdId, weekStart).isPresent()) {
+      throw new IllegalStateException("That week already has a plan");
+    }
     plans.save(copy);
     return copy;
   }

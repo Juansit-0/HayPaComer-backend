@@ -213,4 +213,30 @@ class UndoAndSnapshotsTest {
         SnapshotNotFoundException.class,
         () -> restoreSnapshot.restore(juan, household.id(), UUID.randomUUID()));
   }
+
+  @Test
+  void undoKeepsWhatTheOwnerHidLater() {
+    FoodItemId milk = stock(juan, 842, Visibility.SHARED);
+    consume(ana, milk, 92);
+    var shared = stores.ownershipById.get(milk);
+    stores.ownerships.save(
+        milk,
+        new dev.haypacomer.domain.inventory.Ownership(
+            shared.owner(), Visibility.PRIVATE, shared.grantees()));
+
+    undo.undo(ana, household.id());
+
+    assertEquals(Grams.of(842), quantity(milk));
+    assertEquals(Visibility.PRIVATE, stores.ownershipById.get(milk).visibility());
+  }
+
+  @Test
+  void undoneChangesLeaveTheMovementHistory() {
+    FoodItemId milk = stock(juan, 842, Visibility.SHARED);
+    consume(juan, milk, 92);
+
+    undo.undo(juan, household.id());
+
+    assertTrue(stores.movements.history(milk).isEmpty());
+  }
 }

@@ -12,6 +12,7 @@ import dev.haypacomer.domain.fridge.FoodItemId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.inventory.InventoryMovement;
 import dev.haypacomer.domain.inventory.Ownership;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,12 @@ public final class InMemoryInventoryStores {
           return movementLog.stream()
               .filter(movement -> movement.commandId().equals(commandId))
               .findFirst();
+        }
+
+        @Override
+        public void forgetSince(HouseholdId household, Instant at) {
+          movementLog.removeIf(
+              movement -> movement.household().equals(household) && !movement.at().isBefore(at));
         }
       };
 

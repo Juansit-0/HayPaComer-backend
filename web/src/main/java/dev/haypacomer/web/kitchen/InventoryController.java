@@ -28,7 +28,9 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -86,7 +88,7 @@ public class InventoryController {
         commands.execute(
             CurrentUser.of(jwt),
             new StockFoodCommand(
-                commandId(idempotencyKey),
+                commandId(idempotencyKey, jwt, householdId, "stock", request),
                 new HouseholdId(householdId),
                 new FridgeId(request.fridgeId()),
                 new TrayId(request.trayId()),
@@ -110,7 +112,7 @@ public class InventoryController {
         commands.execute(
             CurrentUser.of(jwt),
             new ConsumeFoodCommand(
-                commandId(idempotencyKey),
+                commandId(idempotencyKey, jwt, householdId, "consume", itemId, request),
                 new HouseholdId(householdId),
                 new FoodItemId(itemId),
                 Grams.of(request.grams()),
@@ -127,7 +129,9 @@ public class InventoryController {
         commands.execute(
             CurrentUser.of(jwt),
             new DiscardFoodCommand(
-                commandId(idempotencyKey), new HouseholdId(householdId), new FoodItemId(itemId))));
+                commandId(idempotencyKey, jwt, householdId, "discard", itemId),
+                new HouseholdId(householdId),
+                new FoodItemId(itemId))));
   }
 
   @PostMapping("/{itemId}/move")
@@ -141,14 +145,21 @@ public class InventoryController {
         commands.execute(
             CurrentUser.of(jwt),
             new MoveFoodCommand(
-                commandId(idempotencyKey),
+                commandId(idempotencyKey, jwt, householdId, "move", itemId, request),
                 new HouseholdId(householdId),
                 new FoodItemId(itemId),
                 new TrayId(request.trayId()))));
   }
 
-  private static UUID commandId(UUID idempotencyKey) {
-    return idempotencyKey == null ? UUID.randomUUID() : idempotencyKey;
+  // A key means "this same request again": the same person, household, action and body, never a
+  // stranger's result.
+  private static UUID commandId(UUID idempotencyKey, Jwt jwt, Object... request) {
+    if (idempotencyKey == null) {
+      return UUID.randomUUID();
+    }
+    String scope =
+        idempotencyKey + "|" + CurrentUser.of(jwt).value() + "|" + Arrays.toString(request);
+    return UUID.nameUUIDFromBytes(scope.getBytes(StandardCharsets.UTF_8));
   }
 
   @PutMapping("/{itemId}/visibility")

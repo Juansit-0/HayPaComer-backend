@@ -180,12 +180,14 @@ class ExpiryInventoryTest {
             fridges,
             stores.ownerships,
             stores.movements,
+            stores.catalog,
             new FoodAccessGuard(),
             ExpiryDesk.enforcing(
                 food -> new ShelfLife(7, 5, 90, 4),
                 FixedPolicies.DEFAULT.withExpiryRules(new ExpiryRules(3))),
             stores.audit,
             stores.unitOfWork,
+            new dev.haypacomer.application.support.InMemorySnapshotStore(),
             clock);
     CommandOutcome typed = stock(top, TODAY.plusDays(7), false, null);
     CommandOutcome soon = stock(top, TODAY.plusDays(2), false, null);

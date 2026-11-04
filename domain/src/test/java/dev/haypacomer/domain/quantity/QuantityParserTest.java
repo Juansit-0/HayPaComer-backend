@@ -1,10 +1,12 @@
 package dev.haypacomer.domain.quantity;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -89,5 +91,20 @@ class QuantityParserTest {
     assertTrue(UnitVocabulary.lookup("huevos").isEmpty());
     assertTrue(UnitVocabulary.lookup(null).isEmpty());
     assertEquals("2 cup", new Amount(Quantity.of("2", Unit.CUP)).toString());
+  }
+
+  @Test
+  void refusesWhatItCannotReadWholly() {
+    for (String text :
+        List.of("1 kg foo", "1 kg 200 g", "1 kg - 200 g", "1 kg * 3", "500 g plus 100 g")) {
+      assertThrows(InvalidQuantityException.class, () -> QuantityParser.parse(text), text);
+    }
+  }
+
+  @Test
+  void stillReadsPiecesAndFoodNames() {
+    assertDoesNotThrow(() -> QuantityParser.parse("2 tomates"));
+    assertDoesNotThrow(() -> QuantityParser.parse("200 g de arroz"));
+    assertDoesNotThrow(() -> QuantityParser.parse("1 kg y 200 g"));
   }
 }

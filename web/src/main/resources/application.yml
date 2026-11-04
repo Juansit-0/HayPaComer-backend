@@ -5,6 +5,8 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:${POSTGRES_PORT:5432}/${POSTGRES_DB:haypacomer}}
     username: ${POSTGRES_USER:haypacomer}
     password: ${POSTGRES_PASSWORD:}
+    hikari:
+      connection-timeout: 3000
   flyway:
     locations: classpath:db/migration
   data:
@@ -12,6 +14,8 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+      timeout: 2s
+      connect-timeout: 2s
   mvc:
     problemdetails:
       enabled: true

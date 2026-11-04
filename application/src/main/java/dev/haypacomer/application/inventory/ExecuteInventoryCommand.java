@@ -1,6 +1,7 @@
 package dev.haypacomer.application.inventory;
 
 import dev.haypacomer.application.audit.AuditEntry;
+import dev.haypacomer.application.audit.ListActivity;
 import dev.haypacomer.application.live.BroadcastLiveUpdate;
 import dev.haypacomer.application.live.LiveUpdate;
 import dev.haypacomer.application.live.LiveUpdateKind;
@@ -14,9 +15,12 @@ import dev.haypacomer.application.port.InventoryMovementLog;
 import dev.haypacomer.application.port.SnapshotStore;
 import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.fridge.FoodItem;
+import dev.haypacomer.domain.fridge.FoodItemId;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.inventory.InventoryMovement;
+import dev.haypacomer.domain.inventory.Ownership;
+import dev.haypacomer.domain.inventory.Visibility;
 import dev.haypacomer.domain.quantity.Grams;
 import java.time.Clock;
 import java.time.Instant;
@@ -167,6 +171,9 @@ public final class ExecuteInventoryCommand {
               Map<String, String> detail = new HashMap<>(command.detail());
               detail.put("commandId", command.id().toString());
               detail.put("remainingGrams", outcome.remaining().value().toPlainString());
+              if (isPrivate(before, outcome.item())) {
+                detail.put(ListActivity.PRIVATE, "true");
+              }
               audit.record(
                   new AuditEntry(
                       actor,
@@ -195,10 +202,25 @@ public final class ExecuteInventoryCommand {
               command.household(),
               LiveUpdateKind.INVENTORY,
               null,
-              command.action() + " " + result.remaining().value().toPlainString() + " g left",
+              isPrivate(result.item())
+                  ? command.action()
+                  : command.action() + " " + result.remaining().value().toPlainString() + " g left",
               clock.instant()));
     }
     return result;
+  }
+
+  private boolean isPrivate(InventoryMemento before, FoodItemId item) {
+    Ownership ownership = before.ownerships().get(item);
+    return ownership != null ? ownership.visibility() == Visibility.PRIVATE : isPrivate(item);
+  }
+
+  private boolean isPrivate(FoodItemId item) {
+    return inventory
+        .ownerships()
+        .find(item)
+        .filter(ownership -> ownership.visibility() == Visibility.PRIVATE)
+        .isPresent();
   }
 
   private CommandOutcome replay(InventoryMovement movement) {

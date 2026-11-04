@@ -6,9 +6,12 @@ import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class ListActivity {
+
+  public static final String PRIVATE = "private";
 
   private static final int MAX_LIMIT = 100;
 
@@ -22,6 +25,22 @@ public final class ListActivity {
 
   public List<AuditEntry> list(UserId actor, HouseholdId household, int limit) {
     households.get(actor, household);
-    return audit.recent(household, Math.clamp(limit, 1, MAX_LIMIT));
+    return audit.recent(household, Math.clamp(limit, 1, MAX_LIMIT)).stream()
+        .map(entry -> visibleTo(actor, entry))
+        .toList();
+  }
+
+  private AuditEntry visibleTo(UserId actor, AuditEntry entry) {
+    if (entry.actor().equals(actor) || !entry.detail().containsKey(PRIVATE)) {
+      return entry;
+    }
+    return new AuditEntry(
+        entry.actor(),
+        entry.household(),
+        entry.action(),
+        entry.entity(),
+        entry.entityId(),
+        Map.of(),
+        entry.at());
   }
 }

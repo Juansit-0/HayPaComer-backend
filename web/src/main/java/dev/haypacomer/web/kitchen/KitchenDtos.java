@@ -5,11 +5,13 @@ import dev.haypacomer.application.fridge.FridgeLayout;
 import dev.haypacomer.application.inventory.InventoryEntry;
 import dev.haypacomer.domain.expiry.ExpirySource;
 import dev.haypacomer.domain.fridge.FoodItem;
+import dev.haypacomer.domain.fridge.FoodItemId;
 import dev.haypacomer.domain.fridge.Fridge;
 import dev.haypacomer.domain.fridge.FridgeNode;
 import dev.haypacomer.domain.fridge.Tray;
 import dev.haypacomer.domain.fridge.Zone;
 import dev.haypacomer.domain.inventory.FoodStatus;
+import dev.haypacomer.domain.inventory.PrivateFoodProxy;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -34,14 +36,34 @@ final class KitchenDtos {
       List<NodeResponse> children) {
 
     static NodeResponse from(FridgeNode node) {
+      return from(node, Set.of());
+    }
+
+    static NodeResponse from(FridgeNode node, Set<FoodItemId> hidden) {
+      String type = node.getClass().getSimpleName().toUpperCase();
+      if (node instanceof FoodItem item) {
+        return hidden.contains(item.id())
+            ? new NodeResponse(
+                id(node),
+                type,
+                null,
+                PrivateFoodProxy.HIDDEN.name(),
+                BigDecimal.ZERO,
+                node.itemCount(),
+                List.of())
+            : new NodeResponse(
+                id(node), type, null, node.name(), node.totalGrams().value(), 1, List.of());
+      }
+      List<NodeResponse> children =
+          node.children().stream().map(child -> from(child, hidden)).toList();
       return new NodeResponse(
           id(node),
-          node.getClass().getSimpleName().toUpperCase(),
+          type,
           node instanceof Zone zone ? zone.kind().name() : null,
           node.name(),
-          node.totalGrams().value(),
+          children.stream().map(NodeResponse::grams).reduce(BigDecimal.ZERO, BigDecimal::add),
           node.itemCount(),
-          node.children().stream().map(NodeResponse::from).toList());
+          children);
     }
 
     private static UUID id(FridgeNode node) {

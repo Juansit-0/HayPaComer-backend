@@ -47,8 +47,10 @@ public class KitchenController {
 
   @GetMapping("/fridges")
   List<NodeResponse> fridges(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
-    return facade.fridges(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
-        .map(NodeResponse::from)
+    HouseholdId household = new HouseholdId(householdId);
+    var hidden = facade.hiddenFoods(CurrentUser.of(jwt), household);
+    return facade.fridges(CurrentUser.of(jwt), household).stream()
+        .map(fridge -> NodeResponse.from(fridge, hidden))
         .toList();
   }
 

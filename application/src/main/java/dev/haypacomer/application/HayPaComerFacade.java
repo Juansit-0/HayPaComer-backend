@@ -6,16 +6,20 @@ import dev.haypacomer.application.fridge.SetUpFridge;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.inventory.InventoryEntry;
 import dev.haypacomer.application.inventory.ViewInventory;
+import dev.haypacomer.domain.fridge.FoodItemId;
 import dev.haypacomer.domain.fridge.Fridge;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.inventory.FoodStatus;
+import dev.haypacomer.domain.inventory.PrivateFoodProxy;
 import dev.haypacomer.domain.quantity.Grams;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class HayPaComerFacade {
 
@@ -44,6 +48,13 @@ public final class HayPaComerFacade {
 
   public List<Fridge> fridges(UserId actor, HouseholdId household) {
     return listFridges.list(actor, household);
+  }
+
+  public Set<FoodItemId> hiddenFoods(UserId actor, HouseholdId household) {
+    return inventory(actor, household).stream()
+        .filter(entry -> entry.food() instanceof PrivateFoodProxy)
+        .map(entry -> entry.food().item().id())
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   public List<InventoryEntry> inventory(UserId actor, HouseholdId household) {

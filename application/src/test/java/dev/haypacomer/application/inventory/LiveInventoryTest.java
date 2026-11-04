@@ -378,4 +378,15 @@ class LiveInventoryTest {
     assertEquals(household.id(), live.getLast().household());
     assertTrue(live.getLast().detail().endsWith("642.00 g left"));
   }
+
+  @Test
+  void otherMembersSeeNoFoodOrGramsOfPrivateStock() {
+    FoodItem yogurt = stock(juan, "Yogurt", 125, 0, Visibility.PRIVATE);
+    ListActivity activity = new ListActivity(households, stores.audit);
+
+    assertTrue(activity.list(ana, household.id(), 10).getFirst().detail().isEmpty());
+    assertEquals(yogurt.id().value(), activity.list(ana, household.id(), 10).getFirst().entityId());
+    assertEquals("Yogurt", activity.list(juan, household.id(), 10).getFirst().detail().get("food"));
+    assertFalse(live.getLast().detail().contains("g left"));
+  }
 }

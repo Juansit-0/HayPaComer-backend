@@ -21,6 +21,7 @@ import dev.haypacomer.domain.session.StepCompletion;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -199,11 +200,11 @@ public class CookingSessionController {
 
   record StartRequest(
       @NotBlank String name,
-      @Min(1) int servings,
+      @Min(1) @Max(100) int servings,
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
       @Size(max = 50) List<@Valid StepRequest> steps,
-      @Min(1) int targetServings,
+      @Min(1) @Max(100) int targetServings,
       UUID scaleId) {}
 
   record WeighRequest(@DecimalMin(value = "0") BigDecimal grams) {}

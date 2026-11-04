@@ -127,6 +127,21 @@ class KitchenControllerTest {
   }
 
   @Test
+  void masksPrivateFoodInTheTwin() throws Exception {
+    Fridge fridge = fridgeWithSoup();
+    FoodItem soup = fridge.trays().findFirst().orElseThrow().children().getFirst();
+    when(facade.fridges(juan, household)).thenReturn(List.of(fridge));
+    when(facade.hiddenFoods(juan, household)).thenReturn(Set.of(soup.id()));
+
+    mvc.perform(get(path("/fridges")).header("Authorization", bearer()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].grams").value(0))
+        .andExpect(
+            jsonPath("$..name", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem("Soup"))))
+        .andExpect(jsonPath("$[0].children[0].children[0].children[0].name").value("Private food"));
+  }
+
+  @Test
   void showsInventoryWithStatusesAndTheKitchenSnapshot() throws Exception {
     Fridge fridge = fridgeWithSoup();
     Tray tray = fridge.trays().findFirst().orElseThrow();

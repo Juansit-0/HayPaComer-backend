@@ -11,6 +11,7 @@ import dev.haypacomer.domain.member.MemberId;
 import dev.haypacomer.domain.recipe.Recipe;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -96,20 +97,20 @@ public class RecipeController {
 
   record MissingRequest(
       @NotBlank String name,
-      @Min(1) int servings,
+      @Min(1) @Max(100) int servings,
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
-      @Min(1) int targetServings) {}
+      @Min(1) @Max(100) int targetServings) {}
 
   record MissingResponse(
       String food, BigDecimal shortfallGrams, BigDecimal addedGrams, BigDecimal pendingGrams) {}
 
   record EvaluateRequest(
       @NotBlank String name,
-      @Min(1) int servings,
+      @Min(1) @Max(100) int servings,
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
-      @Min(1) int targetServings,
+      @Min(1) @Max(100) int targetServings,
       @NotNull StrategyKind strategy,
       List<UUID> diners) {}
 

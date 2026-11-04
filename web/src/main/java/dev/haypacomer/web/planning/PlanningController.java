@@ -192,7 +192,7 @@ public class PlanningController {
 
   record RecipeRequest(
       @NotBlank String name,
-      @Min(1) int servings,
+      @Min(1) @Max(100) int servings,
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
       @Size(max = 50) List<@Valid StepRequest> steps) {}

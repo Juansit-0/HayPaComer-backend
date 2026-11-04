@@ -81,7 +81,7 @@ public class SuggestionController {
 
   record CandidateRequest(
       @NotBlank String name,
-      @Min(1) int servings,
+      @Min(1) @Max(100) int servings,
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
       @Size(max = 50) List<@Valid StepRequest> steps) {}
@@ -89,7 +89,7 @@ public class SuggestionController {
   record SuggestionsRequest(
       @NotEmpty @Size(max = SuggestionQuery.MAX_CANDIDATES)
           List<@Valid CandidateRequest> candidates,
-      @Min(1) Integer servings,
+      @Min(1) @Max(100) Integer servings,
       @Min(1) Integer maxMinutes,
       @Min(1) @Max(3) Integer limit,
       List<UUID> diners) {}

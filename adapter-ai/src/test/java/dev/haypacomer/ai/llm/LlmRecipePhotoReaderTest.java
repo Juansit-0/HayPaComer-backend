@@ -110,6 +110,6 @@ class LlmRecipePhotoReaderTest {
     assertTrue(
         assertThrows(PhotoReadingUnavailableException.class, () -> offline.read(PHOTO))
             .getMessage()
-            .contains("AI_PROVIDER"));
+            .contains("AI provider"));
   }
 }

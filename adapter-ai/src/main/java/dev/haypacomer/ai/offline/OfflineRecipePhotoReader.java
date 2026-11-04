@@ -14,8 +14,6 @@ public final class OfflineRecipePhotoReader implements RecipePhotoReader {
 
   @Override
   public PhotoRecipe read(RecipePhoto photo) {
-    throw new PhotoReadingUnavailableException(
-        "Reading recipe photos needs an AI provider; set AI_PROVIDER to gemini or"
-            + " openai-compatible");
+    throw new PhotoReadingUnavailableException("Reading recipe photos needs an AI provider");
   }
 }

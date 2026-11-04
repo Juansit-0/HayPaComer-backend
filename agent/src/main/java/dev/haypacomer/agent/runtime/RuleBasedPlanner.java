@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 public final class RuleBasedPlanner implements Planner {
 
+  public static final String RAW_ANSWER = "Offline answer based on measured data";
+
   private static final String ADD_TO_MARKET = "add_to_market";
   private static final String DEFAULT_GRAMS = "500";
   private static final Pattern ADD =
@@ -56,7 +58,7 @@ public final class RuleBasedPlanner implements Planner {
     if (evidence.isEmpty()) {
       return new Decision.FinalAnswer("No evidence available right now; nothing was changed.");
     }
-    return new Decision.FinalAnswer("Offline answer based on measured data:\n" + evidence);
+    return new Decision.FinalAnswer(RAW_ANSWER + ":\n" + evidence);
   }
 
   // The person confirms the amount before anything is added, so a missing one can start from a

@@ -19,7 +19,7 @@ public record RecipePhoto(String mimeType, byte[] bytes) {
       throw new IllegalArgumentException("The photo must be between 1 byte and 4 MB");
     }
     if (!matches(mimeType, bytes)) {
-      throw new IllegalArgumentException("The file content is not a " + mimeType + " image");
+      throw new IllegalArgumentException("The file is not a valid image");
     }
     bytes = bytes.clone();
   }

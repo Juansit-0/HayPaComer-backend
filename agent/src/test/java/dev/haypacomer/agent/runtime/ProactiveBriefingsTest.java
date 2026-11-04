@@ -1,6 +1,7 @@
 package dev.haypacomer.agent.runtime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.haypacomer.agent.kitchen.KitchenFixture;
@@ -197,7 +198,7 @@ class ProactiveBriefingsTest {
     queued.forEach(Runnable::run);
     assertEquals(1, delivered.size());
     assertEquals("What to check after: Door left open", delivered.getFirst().title());
-    assertTrue(delivered.getFirst().body().contains("view_cold_chain"));
+    assertFalse(delivered.getFirst().body().contains("view_cold_chain"));
   }
 
   @Test

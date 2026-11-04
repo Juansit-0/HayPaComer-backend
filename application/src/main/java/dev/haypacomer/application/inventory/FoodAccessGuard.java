@@ -16,7 +16,7 @@ public final class FoodAccessGuard {
     Membership membership =
         household
             .membershipOf(actor)
-            .orElseThrow(() -> new AccessDeniedException("Not a member of " + household.name()));
+            .orElseThrow(() -> new AccessDeniedException("You are not a member of this household"));
     MemberId member = membership.member();
     if (ownership.isEmpty() || ownership.get().visibility() == Visibility.SHARED) {
       household.requirePermission(actor, Permission.EDIT_INVENTORY);

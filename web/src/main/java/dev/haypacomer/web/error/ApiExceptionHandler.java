@@ -45,6 +45,8 @@ import dev.haypacomer.web.security.ProblemTypes;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -62,10 +64,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiExceptionHandler {
+
+  private static final String INVALID_VALUE = "A value is not valid";
+  // What the JDK says about a value it could not read is written for programmers.
+  private static final Pattern TECHNICAL =
+      Pattern.compile("No enum constant|Invalid UUID string|For input string");
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   ProblemDetail invalidBody(MethodArgumentNotValidException exception) {
@@ -352,7 +360,19 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(IllegalArgumentException.class)
   ProblemDetail invalidInput(IllegalArgumentException exception) {
-    return problem(HttpStatus.BAD_REQUEST, "Invalid request", exception.getMessage());
+    String detail = exception.getMessage();
+    boolean technical = detail == null || TECHNICAL.matcher(detail).lookingAt();
+    return problem(HttpStatus.BAD_REQUEST, "Invalid request", technical ? INVALID_VALUE : detail);
+  }
+
+  @ExceptionHandler(TypeMismatchException.class)
+  ProblemDetail wrongType(TypeMismatchException exception) {
+    return problem(HttpStatus.BAD_REQUEST, "Invalid request", INVALID_VALUE);
+  }
+
+  @ExceptionHandler(MissingServletRequestPartException.class)
+  ProblemDetail missingPart(MissingServletRequestPartException exception) {
+    return problem(HttpStatus.BAD_REQUEST, "Invalid request", "Choose a photo to send");
   }
 
   private static ProblemDetail problem(HttpStatus status, String title, String detail) {

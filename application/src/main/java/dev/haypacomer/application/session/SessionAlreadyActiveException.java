@@ -7,7 +7,7 @@ public final class SessionAlreadyActiveException extends RuntimeException {
   private final CookingSessionId active;
 
   public SessionAlreadyActiveException(CookingSessionId active) {
-    super("The household is already cooking in session " + active.value());
+    super("The household is already cooking");
     this.active = active;
   }
 

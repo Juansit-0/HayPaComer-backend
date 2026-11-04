@@ -86,7 +86,7 @@ public final class Household {
 
   public void requirePermission(UserId user, Permission permission) {
     if (!can(user, permission)) {
-      throw new AccessDeniedException("Missing permission " + permission + " in household " + name);
+      throw new AccessDeniedException("You do not have permission to do this");
     }
   }
 

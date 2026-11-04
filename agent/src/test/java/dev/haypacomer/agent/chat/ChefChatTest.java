@@ -121,7 +121,9 @@ class ChefChatTest {
           }
 
           @Override
-          public void remove(PendingConfirmation confirmation) {}
+          public boolean remove(PendingConfirmation confirmation) {
+            return true;
+          }
         };
     AiAuditLog audit =
         new AiAuditLog() {

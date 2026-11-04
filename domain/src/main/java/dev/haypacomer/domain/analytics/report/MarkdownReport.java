@@ -125,6 +125,14 @@ public final class MarkdownReport extends ReportTemplate {
   }
 
   static String clean(String text) {
-    return text.replace("|", "/").replace("\n", " ").replace("#", "").strip();
+    return text.replaceAll("[\\r\\n]+", " ")
+        .replace("\\", "\\\\")
+        .replace("|", "/")
+        .replace("<", "\\<")
+        .replace(">", "\\>")
+        .replace("[", "\\[")
+        .replace("]", "\\]")
+        .replace("#", "\\#")
+        .strip();
   }
 }

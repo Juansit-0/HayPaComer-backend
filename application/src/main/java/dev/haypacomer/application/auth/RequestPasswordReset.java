@@ -41,16 +41,17 @@ public final class RequestPasswordReset {
     } catch (IllegalArgumentException | NullPointerException exception) {
       return;
     }
-    user.ifPresent(
-        found -> {
-          String raw = tokens.issue(found.id(), UserTokenType.RESET_PASSWORD, clock.instant());
-          String link = links.to("reset-password", raw);
-          email.send(
-              new EmailMessage(
-                  found.email(),
-                  "Reset your HayPaComer password",
-                  "Use this link within one hour to choose a new password: " + link,
-                  link));
-        });
+    user.filter(found -> tokens.mayIssue(found.id(), UserTokenType.RESET_PASSWORD, clock.instant()))
+        .ifPresent(
+            found -> {
+              String raw = tokens.issue(found.id(), UserTokenType.RESET_PASSWORD, clock.instant());
+              String link = links.to("reset-password", raw);
+              email.send(
+                  new EmailMessage(
+                      found.email(),
+                      "Reset your HayPaComer password",
+                      "Use this link within one hour to choose a new password: " + link,
+                      link));
+            });
   }
 }

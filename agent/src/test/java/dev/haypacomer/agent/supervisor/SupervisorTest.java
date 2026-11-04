@@ -89,7 +89,9 @@ class SupervisorTest {
         }
 
         @Override
-        public void remove(PendingConfirmation confirmation) {}
+        public boolean remove(PendingConfirmation confirmation) {
+          return true;
+        }
       };
   private final AiAuditLog audit =
       new AiAuditLog() {

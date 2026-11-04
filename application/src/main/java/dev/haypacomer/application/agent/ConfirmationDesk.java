@@ -21,7 +21,9 @@ public record ConfirmationDesk(ConfirmationStore confirmations, AgentRunStore ru
             .find(id)
             .filter(found -> found.user().equals(actor))
             .orElseThrow(ConfirmationNotFoundException::new);
-    confirmations.remove(pending);
+    if (!confirmations.remove(pending)) {
+      throw new ConfirmationNotFoundException();
+    }
     if (pending.expired(clock.instant())) {
       close(pending, RunStatus.FAILED, "Confirmation expired before anyone answered");
       throw new ConfirmationExpiredException();

@@ -20,6 +20,7 @@ import dev.haypacomer.domain.session.SessionPhase;
 import dev.haypacomer.domain.session.StepCompletion;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -207,7 +208,7 @@ public class CookingSessionController {
       @Min(1) @Max(100) int targetServings,
       UUID scaleId) {}
 
-  record WeighRequest(@DecimalMin(value = "0") BigDecimal grams) {}
+  record WeighRequest(@DecimalMin("0") @DecimalMax("100000") BigDecimal grams) {}
 
   record WeighingResponse(
       String food,

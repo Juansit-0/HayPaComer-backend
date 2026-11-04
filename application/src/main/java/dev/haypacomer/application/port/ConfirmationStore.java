@@ -14,5 +14,5 @@ public interface ConfirmationStore {
 
   List<PendingConfirmation> pendingFor(UserId user);
 
-  void remove(PendingConfirmation confirmation);
+  boolean remove(PendingConfirmation confirmation);
 }

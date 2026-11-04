@@ -82,7 +82,13 @@ public final class MarketList {
 
   public Optional<MarketItem> topUp(
       FoodMetadata food, Grams needed, MarketSource source, UserId addedBy, Instant at) {
-    Grams gap = pendingGrams(food).shortfallTo(needed);
+    Grams bought =
+        items.values().stream()
+            .filter(MarketItem::isInCart)
+            .filter(item -> item.food().key().equals(food.key()))
+            .map(MarketItem::grams)
+            .reduce(Grams.ZERO, Grams::plus);
+    Grams gap = pendingGrams(food).plus(bought).shortfallTo(needed);
     if (gap.isZero()) {
       return Optional.empty();
     }

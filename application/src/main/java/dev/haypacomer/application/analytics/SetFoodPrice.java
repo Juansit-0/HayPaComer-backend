@@ -31,12 +31,13 @@ public final class SetFoodPrice {
   public FoodMetadata set(
       UserId actor, HouseholdId household, String foodName, BigDecimal pricePerKg) {
     households.get(actor, household).requirePermission(actor, Permission.MANAGE_MARKET_LIST);
-    if (pricePerKg.signum() <= 0 || pricePerKg.compareTo(MAX_PRICE) > 0) {
+    BigDecimal price = pricePerKg.setScale(2, RoundingMode.HALF_UP);
+    if (price.signum() <= 0 || price.compareTo(MAX_PRICE) > 0) {
       throw new IllegalArgumentException("A price per kilogram must be positive and realistic");
     }
     FoodMetadata food =
         catalog.findByName(foodName).orElseThrow(() -> new FoodNotInCatalogException(foodName));
-    prices.save(household, food.key(), pricePerKg.setScale(2, RoundingMode.HALF_UP));
+    prices.save(household, food.key(), price);
     return food;
   }
 }

@@ -35,7 +35,8 @@ public final class RequestEmailVerification {
 
   public void request(UserId id) {
     User user = users.findById(id).orElseThrow(UserNotFoundException::new);
-    if (user.emailVerified()) {
+    if (user.emailVerified()
+        || !tokens.mayIssue(user.id(), UserTokenType.VERIFY_EMAIL, clock.instant())) {
       return;
     }
     String raw = tokens.issue(user.id(), UserTokenType.VERIFY_EMAIL, clock.instant());

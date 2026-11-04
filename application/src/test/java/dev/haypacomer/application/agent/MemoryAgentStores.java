@@ -52,7 +52,7 @@ final class MemoryAgentStores implements AgentRunStore, ConfirmationStore {
   }
 
   @Override
-  public void remove(PendingConfirmation confirmation) {
-    pending.remove(confirmation.id());
+  public boolean remove(PendingConfirmation confirmation) {
+    return pending.remove(confirmation.id()) != null;
   }
 }

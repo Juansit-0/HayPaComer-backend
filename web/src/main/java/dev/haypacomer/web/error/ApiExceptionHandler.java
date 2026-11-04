@@ -42,12 +42,14 @@ import dev.haypacomer.domain.quantity.InvalidQuantityException;
 import dev.haypacomer.domain.quantity.UnconvertibleQuantityException;
 import dev.haypacomer.domain.session.IllegalSessionTransitionException;
 import dev.haypacomer.web.security.ProblemTypes;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -245,6 +247,15 @@ public class ApiExceptionHandler {
   @ExceptionHandler(SnapshotNotFoundException.class)
   ProblemDetail snapshotNotFound(SnapshotNotFoundException exception) {
     return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  ProblemDetail dataRefused(DataIntegrityViolationException exception) {
+    return exception.getMostSpecificCause() instanceof SQLException sql
+            && sql.getSQLState() != null
+            && sql.getSQLState().startsWith("22")
+        ? problem(HttpStatus.BAD_REQUEST, "Invalid request", "A value is outside what can be saved")
+        : problem(HttpStatus.CONFLICT, "Conflict", "Someone else changed this at the same time");
   }
 
   @ExceptionHandler({RedisConnectionFailureException.class, QueryTimeoutException.class})

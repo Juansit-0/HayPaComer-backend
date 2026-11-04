@@ -5,6 +5,7 @@ import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.identity.UserToken;
 import dev.haypacomer.domain.identity.UserTokenType;
 import java.sql.Types;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.HexFormat;
 import java.util.Optional;
@@ -39,6 +40,29 @@ public class PostgresUserTokenStore implements UserTokenStore {
             "usedAt",
             token.usedAt() == null ? null : Timestamps.toDatabase(token.usedAt()),
             Types.TIMESTAMP_WITH_TIMEZONE)
+        .update();
+  }
+
+  @Override
+  public int countUsable(UserId user, UserTokenType type, Instant now) {
+    return jdbc.sql(
+            "SELECT count(*) FROM user_tokens WHERE user_id = :user AND type = :type"
+                + " AND used_at IS NULL AND expires_at > :now")
+        .param("user", user.value())
+        .param("type", type.name())
+        .param("now", Timestamps.toDatabase(now))
+        .query(Integer.class)
+        .single();
+  }
+
+  @Override
+  public void useAll(UserId user, UserTokenType type, Instant at) {
+    jdbc.sql(
+            "UPDATE user_tokens SET used_at = :at WHERE user_id = :user AND type = :type"
+                + " AND used_at IS NULL")
+        .param("user", user.value())
+        .param("type", type.name())
+        .param("at", Timestamps.toDatabase(at))
         .update();
   }
 

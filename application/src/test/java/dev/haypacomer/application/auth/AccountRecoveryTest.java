@@ -122,4 +122,25 @@ class AccountRecoveryTest {
         () -> fakes.resetPassword().reset(fakes.outbox.lastToken(), "new-password-123"));
     assertFalse(fakes.outbox.sent.getFirst().toString().contains("token"));
   }
+
+  @Test
+  void resetLinksStopAtThreeInFlight() {
+    for (int request = 0; request < 5; request++) {
+      fakes.requestPasswordReset().request("juan@haypacomer.dev");
+    }
+
+    assertEquals(
+        3, fakes.outbox.sent.stream().filter(mail -> mail.link().contains("reset")).count());
+  }
+
+  @Test
+  void aNewPasswordClosesOlderResetLinks() {
+    fakes.requestPasswordReset().request("juan@haypacomer.dev");
+    String older = fakes.outbox.lastToken();
+    fakes.requestPasswordReset().request("juan@haypacomer.dev");
+    fakes.resetPassword().reset(fakes.outbox.lastToken(), "a-new-password-1");
+
+    assertThrows(
+        InvalidTokenException.class, () -> fakes.resetPassword().reset(older, "another-pass-22"));
+  }
 }

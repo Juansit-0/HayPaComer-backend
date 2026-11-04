@@ -100,8 +100,9 @@ public final class RedisConfirmationStore implements ConfirmationStore {
   }
 
   @Override
-  public void remove(PendingConfirmation confirmation) {
-    redis.delete(key(confirmation.id()));
+  public boolean remove(PendingConfirmation confirmation) {
+    boolean removed = Boolean.TRUE.equals(redis.delete(key(confirmation.id())));
     redis.opsForSet().remove(index(confirmation.user()), confirmation.id().toString());
+    return removed;
   }
 }

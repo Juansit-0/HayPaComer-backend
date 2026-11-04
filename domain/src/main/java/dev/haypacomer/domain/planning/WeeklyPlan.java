@@ -3,6 +3,7 @@ package dev.haypacomer.domain.planning;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.recipe.Recipe;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -12,6 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public final class WeeklyPlan {
+
+  private static final int MAX_CLONE_DAYS = 366;
 
   private final WeeklyPlanId id;
   private final HouseholdId household;
@@ -58,6 +61,9 @@ public final class WeeklyPlan {
     Objects.requireNonNull(newWeekStart, "newWeekStart");
     if (newWeekStart.equals(weekStart)) {
       throw new IllegalArgumentException("A copy must start on a different week");
+    }
+    if (Math.abs(ChronoUnit.DAYS.between(weekStart, newWeekStart)) > MAX_CLONE_DAYS) {
+      throw new IllegalArgumentException("A copy must start within a year of the plan");
     }
     return new WeeklyPlan(
         WeeklyPlanId.newId(),

@@ -139,4 +139,14 @@ class MarketListTest {
     assertEquals(MarketSource.RECIPE, raised.source());
     assertEquals(Grams.ZERO, list.pendingGrams(PASTA));
   }
+
+  @Test
+  void foodAlreadyInTheCartIsNotAskedForAgain() {
+    MarketItem bought = list.add(RICE, Grams.of(300), MarketSource.MANUAL, juan, NOW);
+    list.check(bought.id(), NOW);
+
+    list.topUp(RICE, Grams.of(500), MarketSource.PLAN, juan, NOW);
+
+    assertEquals(Grams.of(200), list.pendingGrams(RICE));
+  }
 }

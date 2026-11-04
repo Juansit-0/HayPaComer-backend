@@ -15,6 +15,7 @@ import dev.haypacomer.domain.identity.RefreshToken;
 import dev.haypacomer.domain.identity.User;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.identity.UserToken;
+import dev.haypacomer.domain.identity.UserTokenType;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -85,6 +86,21 @@ final class AuthFakes {
     @Override
     public void save(UserToken token) {
       byId.put(token.id(), token);
+    }
+
+    @Override
+    public int countUsable(UserId user, UserTokenType type, Instant now) {
+      return (int)
+          byId.values().stream()
+              .filter(token -> token.user().equals(user) && token.isUsable(type, now))
+              .count();
+    }
+
+    @Override
+    public void useAll(UserId user, UserTokenType type, Instant at) {
+      byId.replaceAll(
+          (id, token) ->
+              token.user().equals(user) && token.isUsable(type, at) ? token.use(at) : token);
     }
 
     @Override

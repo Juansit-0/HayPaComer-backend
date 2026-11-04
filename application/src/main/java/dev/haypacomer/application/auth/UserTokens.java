@@ -9,12 +9,23 @@ import java.util.Objects;
 
 final class UserTokens {
 
+  private static final int MAX_OPEN_LINKS = 3;
+
   private final UserTokenStore store;
   private final OpaqueTokens opaqueTokens;
 
   UserTokens(UserTokenStore store, OpaqueTokens opaqueTokens) {
     this.store = Objects.requireNonNull(store, "store");
     this.opaqueTokens = Objects.requireNonNull(opaqueTokens, "opaqueTokens");
+  }
+
+  // Links in flight are the limit: enough for a lost email, too few to flood someone's inbox.
+  boolean mayIssue(UserId user, UserTokenType type, Instant now) {
+    return store.countUsable(user, type, now) < MAX_OPEN_LINKS;
+  }
+
+  void closeAll(UserId user, UserTokenType type, Instant now) {
+    store.useAll(user, type, now);
   }
 
   String issue(UserId user, UserTokenType type, Instant now) {

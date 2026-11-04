@@ -18,6 +18,7 @@ import dev.haypacomer.domain.market.MarketSource;
 import dev.haypacomer.domain.quantity.Grams;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -116,10 +117,9 @@ public class MarketController {
   }
 
   record AddRequest(
-      @NotBlank String food,
-      @NotNull @DecimalMin(value = "0", inclusive = false) BigDecimal grams) {}
+      @NotBlank String food, @NotNull @DecimalMin("0.01") @DecimalMax("100000") BigDecimal grams) {}
 
-  record GramsRequest(@NotNull @DecimalMin(value = "0", inclusive = false) BigDecimal grams) {}
+  record GramsRequest(@NotNull @DecimalMin("0.01") @DecimalMax("100000") BigDecimal grams) {}
 
   record ItemResponse(
       UUID id,

@@ -43,6 +43,7 @@ public final class ResetPassword {
     User user = users.findById(token.user()).orElseThrow(InvalidTokenException::new);
     String proof = hasher.proof(user.email().value(), newPassword);
     users.save(user.changePassword(Credentials.store(hasher, proof)));
+    tokens.closeAll(user.id(), UserTokenType.RESET_PASSWORD, now);
     refreshTokens.revokeAll(user.id(), now);
   }
 }

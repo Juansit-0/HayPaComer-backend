@@ -3,6 +3,7 @@ package dev.haypacomer.application.market;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.MarketListRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
@@ -17,15 +18,29 @@ public final class UpdateMarketList {
 
   private final GetHousehold households;
   private final MarketListRepository lists;
+  private final UnitOfWork unitOfWork;
   private final Clock clock;
 
   public UpdateMarketList(HouseholdRepository households, MarketListRepository lists, Clock clock) {
+    this(households, lists, new DirectWork(), clock);
+  }
+
+  public UpdateMarketList(
+      HouseholdRepository households,
+      MarketListRepository lists,
+      UnitOfWork unitOfWork,
+      Clock clock) {
     this.households = new GetHousehold(households);
     this.lists = Objects.requireNonNull(lists, "lists");
     this.clock = Objects.requireNonNull(clock, "clock");
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
   }
 
   public MarketList update(UserId actor, HouseholdId household, Change change) {
+    return unitOfWork.runFor(household, () -> updateLocked(actor, household, change));
+  }
+
+  private MarketList updateLocked(UserId actor, HouseholdId household, Change change) {
     households.get(actor, household).requirePermission(actor, Permission.MANAGE_MARKET_LIST);
     MarketList list = lists.findByHousehold(household).orElseGet(() -> MarketList.empty(household));
     change.apply(list, clock.instant());

@@ -121,7 +121,8 @@ public class RecipeController {
       BigDecimal shortfallGrams,
       RequirementVerdict verdict,
       String substitute,
-      BigDecimal substituteGrams) {
+      BigDecimal substituteGrams,
+      boolean optional) {
 
     static RequirementResponse from(RequirementEvaluation evaluation) {
       return new RequirementResponse(
@@ -131,7 +132,8 @@ public class RecipeController {
           evaluation.shortfall().value(),
           evaluation.verdict(),
           evaluation.proposal().map(proposal -> proposal.substitute().name()).orElse(null),
-          evaluation.proposal().map(proposal -> proposal.substituteGrams().value()).orElse(null));
+          evaluation.proposal().map(proposal -> proposal.substituteGrams().value()).orElse(null),
+          evaluation.requirement().optional());
     }
   }
 

@@ -5,6 +5,7 @@ import dev.haypacomer.application.cooking.StrategyKind;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.MarketListRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.cooking.RecipeEvaluation;
 import dev.haypacomer.domain.cooking.RequirementEvaluation;
 import dev.haypacomer.domain.household.HouseholdId;
@@ -26,6 +27,7 @@ public final class AddMissingToMarketList {
   private final GetHousehold households;
   private final EvaluateRecipe evaluateRecipe;
   private final MarketListRepository lists;
+  private final UnitOfWork unitOfWork;
   private final Clock clock;
 
   public AddMissingToMarketList(
@@ -33,6 +35,16 @@ public final class AddMissingToMarketList {
       EvaluateRecipe evaluateRecipe,
       MarketListRepository lists,
       Clock clock) {
+    this(households, evaluateRecipe, lists, new DirectWork(), clock);
+  }
+
+  public AddMissingToMarketList(
+      HouseholdRepository households,
+      EvaluateRecipe evaluateRecipe,
+      MarketListRepository lists,
+      UnitOfWork unitOfWork,
+      Clock clock) {
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
     this.households = new GetHousehold(households);
     this.evaluateRecipe = Objects.requireNonNull(evaluateRecipe, "evaluateRecipe");
     this.lists = Objects.requireNonNull(lists, "lists");
@@ -40,6 +52,11 @@ public final class AddMissingToMarketList {
   }
 
   public List<MissingItem> add(UserId actor, HouseholdId householdId, Recipe recipe, int servings) {
+    return unitOfWork.runFor(householdId, () -> addLocked(actor, householdId, recipe, servings));
+  }
+
+  private List<MissingItem> addLocked(
+      UserId actor, HouseholdId householdId, Recipe recipe, int servings) {
     households.get(actor, householdId).requirePermission(actor, Permission.MANAGE_MARKET_LIST);
     RecipeEvaluation evaluation =
         evaluateRecipe.evaluate(

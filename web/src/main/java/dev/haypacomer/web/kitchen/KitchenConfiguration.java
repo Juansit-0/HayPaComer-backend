@@ -155,8 +155,9 @@ public class KitchenConfiguration {
       HouseholdRepository households,
       EvaluateRecipe evaluateRecipe,
       MarketListRepository lists,
+      UnitOfWork unitOfWork,
       Clock clock) {
-    return new AddMissingToMarketList(households, evaluateRecipe, lists, clock);
+    return new AddMissingToMarketList(households, evaluateRecipe, lists, unitOfWork, clock);
   }
 
   @Bean

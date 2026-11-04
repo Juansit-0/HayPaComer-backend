@@ -16,6 +16,7 @@ import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.MarketListRepository;
 import dev.haypacomer.application.port.RecipeRepository;
 import dev.haypacomer.application.port.RecipeTemplateRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.application.port.WeeklyPlanRepository;
 import dev.haypacomer.domain.planning.RescueFirstStrategy;
 import java.time.Clock;
@@ -71,8 +72,9 @@ public class PlanningConfiguration {
       WeeklyPlanRepository plans,
       ViewInventory inventory,
       MarketListRepository lists,
+      UnitOfWork unitOfWork,
       Clock clock) {
-    return new AddPlanDeltaToMarketList(households, plans, inventory, lists, clock);
+    return new AddPlanDeltaToMarketList(households, plans, inventory, lists, unitOfWork, clock);
   }
 
   @Bean

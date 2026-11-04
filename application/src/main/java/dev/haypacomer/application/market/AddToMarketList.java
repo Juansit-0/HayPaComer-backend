@@ -5,6 +5,7 @@ import dev.haypacomer.application.inventory.FoodNotInCatalogException;
 import dev.haypacomer.application.port.FoodCatalogRepository;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.MarketListRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Permission;
@@ -21,6 +22,7 @@ public final class AddToMarketList {
   private final GetHousehold households;
   private final MarketListRepository lists;
   private final FoodCatalogRepository catalog;
+  private final UnitOfWork unitOfWork;
   private final Clock clock;
 
   public AddToMarketList(
@@ -28,13 +30,28 @@ public final class AddToMarketList {
       MarketListRepository lists,
       FoodCatalogRepository catalog,
       Clock clock) {
+    this(households, lists, catalog, new DirectWork(), clock);
+  }
+
+  public AddToMarketList(
+      HouseholdRepository households,
+      MarketListRepository lists,
+      FoodCatalogRepository catalog,
+      UnitOfWork unitOfWork,
+      Clock clock) {
     this.households = new GetHousehold(households);
     this.lists = Objects.requireNonNull(lists, "lists");
     this.catalog = Objects.requireNonNull(catalog, "catalog");
     this.clock = Objects.requireNonNull(clock, "clock");
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
   }
 
   public MarketItem add(
+      UserId actor, HouseholdId household, String foodName, Grams grams, MarketSource source) {
+    return unitOfWork.runFor(household, () -> addLocked(actor, household, foodName, grams, source));
+  }
+
+  private MarketItem addLocked(
       UserId actor, HouseholdId household, String foodName, Grams grams, MarketSource source) {
     households.get(actor, household).requirePermission(actor, Permission.MANAGE_MARKET_LIST);
     FoodMetadata food =

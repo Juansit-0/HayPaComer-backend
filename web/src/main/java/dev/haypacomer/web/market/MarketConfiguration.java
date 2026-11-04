@@ -11,6 +11,7 @@ import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.MarketBudgetRepository;
 import dev.haypacomer.application.port.MarketListRepository;
 import dev.haypacomer.application.port.SubstitutionRuleRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,13 +45,17 @@ public class MarketConfiguration {
       HouseholdRepository households,
       MarketListRepository lists,
       FoodCatalogRepository catalog,
+      UnitOfWork unitOfWork,
       Clock clock) {
-    return new AddToMarketList(households, lists, catalog, clock);
+    return new AddToMarketList(households, lists, catalog, unitOfWork, clock);
   }
 
   @Bean
   UpdateMarketList updateMarketList(
-      HouseholdRepository households, MarketListRepository lists, Clock clock) {
-    return new UpdateMarketList(households, lists, clock);
+      HouseholdRepository households,
+      MarketListRepository lists,
+      UnitOfWork unitOfWork,
+      Clock clock) {
+    return new UpdateMarketList(households, lists, unitOfWork, clock);
   }
 }

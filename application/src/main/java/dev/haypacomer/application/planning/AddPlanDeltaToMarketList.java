@@ -3,8 +3,10 @@ package dev.haypacomer.application.planning;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.inventory.InventoryEntry;
 import dev.haypacomer.application.inventory.ViewInventory;
+import dev.haypacomer.application.market.DirectWork;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.MarketListRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.application.port.WeeklyPlanRepository;
 import dev.haypacomer.domain.cooking.Availability;
 import dev.haypacomer.domain.food.FoodMetadata;
@@ -31,6 +33,7 @@ public final class AddPlanDeltaToMarketList {
   private final WeeklyPlanRepository plans;
   private final ViewInventory inventory;
   private final MarketListRepository lists;
+  private final UnitOfWork unitOfWork;
   private final Clock clock;
 
   public AddPlanDeltaToMarketList(
@@ -39,6 +42,17 @@ public final class AddPlanDeltaToMarketList {
       ViewInventory inventory,
       MarketListRepository lists,
       Clock clock) {
+    this(households, plans, inventory, lists, new DirectWork(), clock);
+  }
+
+  public AddPlanDeltaToMarketList(
+      HouseholdRepository households,
+      WeeklyPlanRepository plans,
+      ViewInventory inventory,
+      MarketListRepository lists,
+      UnitOfWork unitOfWork,
+      Clock clock) {
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
     this.households = new GetHousehold(households);
     this.plans = Objects.requireNonNull(plans, "plans");
     this.inventory = Objects.requireNonNull(inventory, "inventory");
@@ -47,6 +61,10 @@ public final class AddPlanDeltaToMarketList {
   }
 
   public List<PlanDeltaItem> add(UserId actor, HouseholdId householdId) {
+    return unitOfWork.runFor(householdId, () -> addLocked(actor, householdId));
+  }
+
+  private List<PlanDeltaItem> addLocked(UserId actor, HouseholdId householdId) {
     Household household = households.get(actor, householdId);
     household.requirePermission(actor, Permission.MANAGE_MARKET_LIST);
     Instant now = clock.instant();

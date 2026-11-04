@@ -48,7 +48,9 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -243,6 +245,18 @@ public class ApiExceptionHandler {
   @ExceptionHandler(SnapshotNotFoundException.class)
   ProblemDetail snapshotNotFound(SnapshotNotFoundException exception) {
     return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
+  }
+
+  @ExceptionHandler({RedisConnectionFailureException.class, QueryTimeoutException.class})
+  ResponseEntity<ProblemDetail> chefMemoryUnavailable(DataAccessException exception) {
+    ProblemDetail problem =
+        problem(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "Service unavailable",
+            "The Chef cannot reach its memory right now. The fridge and the market keep working.");
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+        .header(HttpHeaders.RETRY_AFTER, "5")
+        .body(problem);
   }
 
   @ExceptionHandler({DataAccessResourceFailureException.class, TransientDataAccessException.class})

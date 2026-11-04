@@ -78,7 +78,7 @@ class KitchenToolsTest {
 
     ToolInvocation milk = call(Map.of("food", "milk", "grams", "1000"));
     assertEquals(Optional.empty(), add.problem(milk));
-    assertEquals("Add 1000 g of milk to the market list", add.describe(milk));
+    assertEquals("Add 1000 g of Milk to the market list", add.describe(milk));
     assertEquals("Added 1000 g of Milk to the market list", add.invoke(milk).content());
     assertEquals("OTHER: Milk 1000 g", view.invoke(call(Map.of())).content());
     assertEquals(

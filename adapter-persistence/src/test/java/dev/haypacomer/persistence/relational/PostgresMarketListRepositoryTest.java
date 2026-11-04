@@ -45,9 +45,12 @@ class PostgresMarketListRepositoryTest extends PostgresTestSupport {
     MarketList loaded = lists.findByHousehold(household.id()).orElseThrow();
     assertEquals(list.items(), loaded.items());
 
-    loaded.clearChecked();
+    loaded.clearChecked(NOW.plusSeconds(120));
     lists.save(loaded);
-    assertEquals(2, lists.findByHousehold(household.id()).orElseThrow().items().size());
+    MarketList cleared = lists.findByHousehold(household.id()).orElseThrow();
+    assertEquals(2, cleared.pending().size());
+    assertEquals(3, cleared.items().size());
+    assertTrue(cleared.items().stream().noneMatch(MarketItem::isInCart));
     assertTrue(lists.findByHousehold(HouseholdId.newId()).isEmpty());
   }
 }

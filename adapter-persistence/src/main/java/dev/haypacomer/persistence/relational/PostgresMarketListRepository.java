@@ -47,13 +47,14 @@ public class PostgresMarketListRepository implements MarketListRepository {
     List<MarketItem> items =
         jdbc.sql(
                 """
-                SELECT id, food_id, grams_needed, source, added_by, added_at, checked_at
+                SELECT id, food_id, grams_needed, source, added_by, added_at, checked_at, cleared_at
                 FROM market_items WHERE household_id = :household ORDER BY position, id
                 """)
             .param("household", household.value())
             .query(
                 (row, rowNumber) -> {
                   OffsetDateTime checkedAt = row.getObject("checked_at", OffsetDateTime.class);
+                  OffsetDateTime clearedAt = row.getObject("cleared_at", OffsetDateTime.class);
                   UUID addedBy = row.getObject("added_by", UUID.class);
                   return new MarketItem(
                       new MarketItemId(row.getObject("id", UUID.class)),
@@ -62,7 +63,8 @@ public class PostgresMarketListRepository implements MarketListRepository {
                       MarketSource.valueOf(row.getString("source")),
                       new UserId(addedBy == null ? new UUID(0, 0) : addedBy),
                       Timestamps.read(row, "added_at"),
-                      checkedAt == null ? null : checkedAt.toInstant());
+                      checkedAt == null ? null : checkedAt.toInstant(),
+                      clearedAt == null ? null : clearedAt.toInstant());
                 })
             .list();
     return items.isEmpty() ? Optional.empty() : Optional.of(MarketList.restore(household, items));
@@ -86,9 +88,9 @@ public class PostgresMarketListRepository implements MarketListRepository {
       jdbc.sql(
               """
               INSERT INTO market_items (id, household_id, food_id, grams_needed, source, added_by,
-                                        added_at, checked_at, position)
+                                        added_at, checked_at, cleared_at, position)
               VALUES (:id, :household, :food, :grams, :source,
-                      (SELECT id FROM users WHERE id = :addedBy), :addedAt, :checkedAt, :position)
+                      (SELECT id FROM users WHERE id = :addedBy), :addedAt, :checkedAt, :clearedAt, :position)
               """)
           .param("id", item.id().value())
           .param("household", household)
@@ -100,6 +102,10 @@ public class PostgresMarketListRepository implements MarketListRepository {
           .param(
               "checkedAt",
               item.checkedAt() == null ? null : Timestamps.toDatabase(item.checkedAt()),
+              Types.TIMESTAMP_WITH_TIMEZONE)
+          .param(
+              "clearedAt",
+              item.clearedAt() == null ? null : Timestamps.toDatabase(item.clearedAt()),
               Types.TIMESTAMP_WITH_TIMEZONE)
           .param("position", position)
           .update();

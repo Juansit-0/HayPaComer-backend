@@ -61,4 +61,26 @@ class FoodMetadataCatalogTest {
     interned.forEach(food -> assertSame(canonical, food));
     assertEquals(1, catalog.size());
   }
+
+  @Test
+  void latestSharesOneInstanceAndFollowsAChangedDefinition() {
+    FoodMetadataCatalog catalog = new FoodMetadataCatalog();
+    FoodMetadata first = food("Rice", 7);
+
+    assertSame(first, catalog.latest(first));
+    assertSame(first, catalog.latest(food("Rice", 7)));
+    FoodMetadata changed = food("Rice", 9);
+    assertSame(changed, catalog.latest(changed));
+  }
+
+  private static FoodMetadata food(String name, int days) {
+    return new FoodMetadata(
+        name,
+        dev.haypacomer.domain.food.FoodCategory.OTHER,
+        dev.haypacomer.domain.quantity.Unit.GRAM,
+        dev.haypacomer.domain.quantity.ConversionFactors.MASS_ONLY,
+        true,
+        days,
+        java.util.Set.of());
+  }
 }

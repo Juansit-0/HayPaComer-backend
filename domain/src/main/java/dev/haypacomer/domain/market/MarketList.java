@@ -5,6 +5,7 @@ import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.quantity.Grams;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,6 +17,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class MarketList {
+
+  private static final Duration SPENDING_MEMORY = Duration.ofDays(40);
 
   private final HouseholdId household;
   private final Map<MarketItemId, MarketItem> items = new LinkedHashMap<>();
@@ -66,7 +69,9 @@ public final class MarketList {
         existing
             .map(found -> found.withGrams(found.grams().plus(grams)))
             .orElseGet(
-                () -> new MarketItem(MarketItemId.newId(), food, grams, source, addedBy, at, null));
+                () ->
+                    new MarketItem(
+                        MarketItemId.newId(), food, grams, source, addedBy, at, null, null));
     items.put(item.id(), item);
     return item;
   }
@@ -108,10 +113,13 @@ public final class MarketList {
     items.remove(require(id).id());
   }
 
-  public int clearChecked() {
-    int before = items.size();
-    items.values().removeIf(item -> !item.isPending());
-    return before - items.size();
+  // Bought food leaves the cart but stays on record: the month's spending is counted from it.
+  public int clearChecked(Instant at) {
+    int cleared = (int) items.values().stream().filter(MarketItem::isInCart).count();
+    items.replaceAll((id, item) -> item.isInCart() ? item.cleared(at) : item);
+    Instant kept = at.minus(SPENDING_MEMORY);
+    items.values().removeIf(item -> item.clearedAt() != null && item.checkedAt().isBefore(kept));
+    return cleared;
   }
 
   private Optional<MarketItem> pendingFor(FoodMetadata food) {

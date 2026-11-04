@@ -3,6 +3,7 @@ package dev.haypacomer.persistence.relational;
 import dev.haypacomer.domain.food.Allergen;
 import dev.haypacomer.domain.food.FoodCategory;
 import dev.haypacomer.domain.food.FoodMetadata;
+import dev.haypacomer.domain.food.FoodMetadataCatalog;
 import dev.haypacomer.domain.quantity.ConversionFactors;
 import dev.haypacomer.domain.quantity.Unit;
 import java.math.BigDecimal;
@@ -19,6 +20,8 @@ final class FoodRows {
 
   static final String COLUMNS =
       "id, name, category, default_unit, grams_per_ml, grams_per_piece, perishable, shelf_days";
+
+  private static final FoodMetadataCatalog SHARED = new FoodMetadataCatalog();
 
   private FoodRows() {}
 
@@ -43,7 +46,10 @@ final class FoodRows {
     Map<UUID, FoodMetadata> foods = new LinkedHashMap<>();
     rows.values()
         .forEach(
-            row -> foods.put(row.id(), row.toMetadata(allergens.getOrDefault(row.id(), Set.of()))));
+            row ->
+                foods.put(
+                    row.id(),
+                    SHARED.latest(row.toMetadata(allergens.getOrDefault(row.id(), Set.of())))));
     return foods;
   }
 

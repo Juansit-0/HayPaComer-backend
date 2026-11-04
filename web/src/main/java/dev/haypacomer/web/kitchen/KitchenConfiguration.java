@@ -52,6 +52,7 @@ import dev.haypacomer.application.port.SnapshotStore;
 import dev.haypacomer.application.port.StepTimerStore;
 import dev.haypacomer.application.port.SubstitutionRuleRepository;
 import dev.haypacomer.application.port.UnitOfWork;
+import dev.haypacomer.application.profile.FindDinerConflicts;
 import dev.haypacomer.application.profile.ListFoodProfiles;
 import dev.haypacomer.application.profile.UpdateFoodProfile;
 import dev.haypacomer.application.quantity.InterpretQuantity;
@@ -148,6 +149,12 @@ public class KitchenConfiguration {
       Clock clock) {
     return new SuggestDishes(
         households, viewInventory, profiles, rules, advisor, rateLimiter, policies, clock);
+  }
+
+  @Bean
+  FindDinerConflicts findDinerConflicts(
+      HouseholdRepository households, FoodProfileRepository profiles) {
+    return new FindDinerConflicts(households, profiles);
   }
 
   @Bean

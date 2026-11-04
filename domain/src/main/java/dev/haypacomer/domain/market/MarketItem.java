@@ -13,7 +13,8 @@ public record MarketItem(
     MarketSource source,
     UserId addedBy,
     Instant addedAt,
-    Instant checkedAt) {
+    Instant checkedAt,
+    Instant clearedAt) {
 
   public MarketItem {
     Objects.requireNonNull(id, "id");
@@ -31,15 +32,23 @@ public record MarketItem(
     return checkedAt == null;
   }
 
+  public boolean isInCart() {
+    return checkedAt != null && clearedAt == null;
+  }
+
   MarketItem withGrams(Grams newGrams) {
-    return new MarketItem(id, food, newGrams, source, addedBy, addedAt, checkedAt);
+    return new MarketItem(id, food, newGrams, source, addedBy, addedAt, checkedAt, clearedAt);
   }
 
   MarketItem checked(Instant at) {
-    return new MarketItem(id, food, grams, source, addedBy, addedAt, at);
+    return new MarketItem(id, food, grams, source, addedBy, addedAt, at, null);
   }
 
   MarketItem unchecked() {
-    return new MarketItem(id, food, grams, source, addedBy, addedAt, null);
+    return new MarketItem(id, food, grams, source, addedBy, addedAt, null, null);
+  }
+
+  MarketItem cleared(Instant at) {
+    return new MarketItem(id, food, grams, source, addedBy, addedAt, checkedAt, at);
   }
 }

@@ -8,6 +8,7 @@ import dev.haypacomer.agent.tools.ParameterType;
 import dev.haypacomer.agent.tools.ToolSpec;
 import dev.haypacomer.application.market.AddToMarketList;
 import dev.haypacomer.application.port.FoodCatalogRepository;
+import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.market.MarketItem;
 import dev.haypacomer.domain.market.MarketSource;
@@ -42,7 +43,7 @@ public final class AddToMarketTool implements AgentTool {
   @Override
   public Optional<String> problem(ToolInvocation invocation) {
     String food = invocation.arguments().get("food").strip();
-    return catalog.findByName(food).isPresent()
+    return catalogName(food).isPresent()
         ? Optional.empty()
         : Optional.of("Unknown food " + food + "; use a catalog name");
   }
@@ -52,8 +53,21 @@ public final class AddToMarketTool implements AgentTool {
     return "Add "
         + Grams.of(invocation.arguments().get("grams").strip())
         + " of "
-        + invocation.arguments().get("food").strip()
+        + food(invocation)
         + " to the market list";
+  }
+
+  // People name food in their own language; the catalog search knows those names too.
+  private Optional<String> catalogName(String food) {
+    return catalog
+        .findByName(food)
+        .or(() -> catalog.search(food, 1).stream().findFirst())
+        .map(FoodMetadata::name);
+  }
+
+  private String food(ToolInvocation invocation) {
+    String food = invocation.arguments().get("food").strip();
+    return catalogName(food).orElse(food);
   }
 
   @Override
@@ -62,7 +76,7 @@ public final class AddToMarketTool implements AgentTool {
         add.add(
             invocation.user(),
             invocation.household(),
-            invocation.arguments().get("food").strip(),
+            food(invocation),
             Grams.of(invocation.arguments().get("grams").strip()),
             MarketSource.AGENT_CONFIRMED);
     return Observation.of(

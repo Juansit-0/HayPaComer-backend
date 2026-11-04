@@ -3,11 +3,14 @@ package dev.haypacomer.web.cooking;
 import dev.haypacomer.application.cooking.EvaluateRecipe;
 import dev.haypacomer.application.cooking.StrategyKind;
 import dev.haypacomer.application.market.AddMissingToMarketList;
+import dev.haypacomer.application.profile.FindDinerConflicts;
 import dev.haypacomer.domain.cooking.RecipeEvaluation;
 import dev.haypacomer.domain.cooking.RequirementEvaluation;
 import dev.haypacomer.domain.cooking.RequirementVerdict;
 import dev.haypacomer.domain.household.HouseholdId;
+import dev.haypacomer.domain.member.ConflictReason;
 import dev.haypacomer.domain.member.MemberId;
+import dev.haypacomer.domain.member.ProfileConflict;
 import dev.haypacomer.domain.recipe.Recipe;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
@@ -32,14 +35,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecipeController {
 
   private final EvaluateRecipe evaluateRecipe;
+  private final FindDinerConflicts findDinerConflicts;
   private final AddMissingToMarketList addMissingToMarketList;
   private final RecipeAssembler assembler;
 
   public RecipeController(
       EvaluateRecipe evaluateRecipe,
+      FindDinerConflicts findDinerConflicts,
       AddMissingToMarketList addMissingToMarketList,
       RecipeAssembler assembler) {
     this.evaluateRecipe = evaluateRecipe;
+    this.findDinerConflicts = findDinerConflicts;
     this.addMissingToMarketList = addMissingToMarketList;
     this.assembler = assembler;
   }
@@ -83,16 +89,20 @@ public class RecipeController {
             request.minutes(),
             request.requirements(),
             List.of());
+    Set<MemberId> diners =
+        request.diners() == null
+            ? Set.of()
+            : request.diners().stream().map(MemberId::new).collect(Collectors.toSet());
+    HouseholdId household = new HouseholdId(householdId);
     return EvaluationResponse.from(
         evaluateRecipe.evaluate(
             CurrentUser.of(jwt),
-            new HouseholdId(householdId),
+            household,
             recipe,
             request.targetServings(),
             request.strategy(),
-            request.diners() == null
-                ? Set.of()
-                : request.diners().stream().map(MemberId::new).collect(Collectors.toSet())));
+            diners),
+        findDinerConflicts.find(CurrentUser.of(jwt), household, recipe, diners));
   }
 
   record MissingRequest(
@@ -141,14 +151,28 @@ public class RecipeController {
       RequirementVerdict verdict,
       int requestedServings,
       int achievableServings,
-      List<RequirementResponse> requirements) {
+      List<RequirementResponse> requirements,
+      List<ConflictResponse> conflicts) {
 
     static EvaluationResponse from(RecipeEvaluation evaluation) {
+      return from(evaluation, List.of());
+    }
+
+    static EvaluationResponse from(RecipeEvaluation evaluation, List<ProfileConflict> conflicts) {
       return new EvaluationResponse(
           evaluation.verdict(),
           evaluation.requestedServings(),
           evaluation.achievableServings(),
-          evaluation.requirements().stream().map(RequirementResponse::from).toList());
+          evaluation.requirements().stream().map(RequirementResponse::from).toList(),
+          conflicts.stream().map(ConflictResponse::from).toList());
+    }
+  }
+
+  record ConflictResponse(UUID memberId, String food, ConflictReason reason, String detail) {
+
+    static ConflictResponse from(ProfileConflict conflict) {
+      return new ConflictResponse(
+          conflict.member().value(), conflict.food().name(), conflict.reason(), conflict.detail());
     }
   }
 }

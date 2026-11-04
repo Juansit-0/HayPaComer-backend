@@ -157,7 +157,7 @@ public class MarketController {
                           entry.getKey(),
                           entry.getValue().stream().map(ItemResponse::from).toList()))
               .toList(),
-          list.items().stream().filter(item -> !item.isPending()).map(ItemResponse::from).toList());
+          list.items().stream().filter(MarketItem::isInCart).map(ItemResponse::from).toList());
     }
   }
 }

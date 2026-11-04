@@ -20,6 +20,13 @@ public final class FoodMetadataCatalog {
     return existing;
   }
 
+  public FoodMetadata latest(FoodMetadata candidate) {
+    return shared.merge(
+        candidate.key(),
+        candidate,
+        (existing, fresh) -> existing.sameDefinitionAs(fresh) ? existing : fresh);
+  }
+
   public Optional<FoodMetadata> find(String name) {
     return Optional.ofNullable(shared.get(FoodMetadata.keyOf(name)));
   }

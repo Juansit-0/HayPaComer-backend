@@ -89,7 +89,7 @@ public final class UpdateMarketList {
 
     @Override
     public void apply(MarketList list, Instant now) {
-      list.clearChecked();
+      list.clearChecked(now);
     }
   }
 }

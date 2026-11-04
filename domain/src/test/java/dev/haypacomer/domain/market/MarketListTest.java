@@ -57,8 +57,22 @@ class MarketListTest {
     assertTrue(again.isPending());
     assertEquals(2, list.items().size());
     assertThrows(IllegalStateException.class, () -> list.uncheck(bought.id()));
-    assertEquals(1, list.clearChecked());
-    assertEquals(List.of(again), list.items());
+    assertEquals(1, list.clearChecked(Instant.parse("2026-10-03T12:00:00Z")));
+    assertEquals(List.of(again), list.pending());
+    assertFalse(list.items().stream().anyMatch(MarketItem::isInCart));
+    assertEquals(2, list.items().size());
+  }
+
+  @Test
+  void clearedItemsLeaveTheRecordAfterTheMonth() {
+    MarketItem bought =
+        list.check(list.add(RICE, Grams.of(500), MarketSource.MANUAL, juan, NOW).id(), NOW);
+
+    list.clearChecked(NOW);
+    assertEquals(1, list.items().size());
+    list.clearChecked(NOW.plus(java.time.Duration.ofDays(41)));
+    assertFalse(list.items().contains(bought));
+    assertTrue(list.items().isEmpty());
   }
 
   @Test

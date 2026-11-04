@@ -130,11 +130,12 @@ class MarketListUseCasesTest {
     assertEquals(Grams.of(700), view(juan).pending().getFirst().grams());
     update().update(juan, household.id(), new Check(rice.id()));
     update().update(juan, household.id(), new ClearChecked());
-    assertTrue(view(juan).items().isEmpty());
+    assertTrue(view(juan).pending().isEmpty());
+    assertTrue(view(juan).items().stream().noneMatch(MarketItem::isInCart));
 
     MarketItem again = add().add(juan, household.id(), "Rice", Grams.of(100), MarketSource.MANUAL);
     update().update(juan, household.id(), new Remove(again.id()));
-    assertTrue(view(juan).items().isEmpty());
+    assertTrue(view(juan).pending().isEmpty());
     assertThrows(
         AccessDeniedException.class,
         () -> update().update(guest, household.id(), new ClearChecked()));

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import dev.haypacomer.application.port.AlertSignal;
 import dev.haypacomer.application.port.HardwareFactory;
 import dev.haypacomer.application.sensor.AlertPattern;
 import dev.haypacomer.application.sensor.HardwareFactories;
@@ -118,5 +119,17 @@ class HardwareFamiliesTest {
     RecordingAlertSignal recording = new RecordingAlertSignal();
     recording.signal(door, AlertPattern.WEIGHT_CONFIRMED_BLINK);
     assertEquals(List.of(AlertPattern.WEIGHT_CONFIRMED_BLINK), recording.drain(door));
+  }
+
+  @Test
+  void realDevicesPickUpTheirAlertsFromAQueue() {
+    Device scale = device(DeviceKind.ESP32_SCALE);
+    AlertSignal alerts = factories.forDevice(scale).alerts();
+
+    alerts.signal(scale.id(), AlertPattern.DOOR_OPEN_BEEP);
+
+    QueuedAlertSignal queue = assertInstanceOf(QueuedAlertSignal.class, alerts);
+    assertEquals(List.of(AlertPattern.DOOR_OPEN_BEEP), queue.drain(scale.id()));
+    assertTrue(queue.drain(scale.id()).isEmpty());
   }
 }

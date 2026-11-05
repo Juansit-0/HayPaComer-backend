@@ -43,7 +43,8 @@ final class InventoryCaretaker {
     for (FridgeMemento fridge : memento.fridges()) {
       inventory.save(
           household,
-          fridge.restore(
+          Fridge.restoredFrom(
+              fridge,
               name ->
                   foods.computeIfAbsent(
                       name,

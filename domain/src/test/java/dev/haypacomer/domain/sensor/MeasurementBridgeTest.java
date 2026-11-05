@@ -134,4 +134,27 @@ class MeasurementBridgeTest {
         IllegalArgumentException.class,
         () -> monitor.record(new DoorEvent(id(), device, FridgeId.newId(), T0, DoorState.OPEN)));
   }
+
+  @Test
+  void exactlyAtTheLimitIsNeverABreach() {
+    FridgeMonitor monitor = new FridgeMonitor(fridge, FridgeThresholds.DEFAULT);
+
+    monitor.record(temperature("5.0", 0));
+    monitor.record(temperature("5.0", 30));
+
+    assertTrue(monitor.evaluate(T0.plus(Duration.ofMinutes(30))).isEmpty());
+  }
+
+  @Test
+  void fridgeMonitorListensToTheRightChannelForEachRule() {
+    FridgeMonitor warm = new FridgeMonitor(fridge, FridgeThresholds.DEFAULT);
+    warm.record(temperature("7", 0));
+    warm.record(temperature("7", 25));
+
+    assertEquals(
+        List.of(FindingKind.COLD_CHAIN_BREACH),
+        warm.evaluate(T0.plus(Duration.ofMinutes(25))).stream().map(Finding::kind).toList());
+    assertEquals(
+        "7", warm.latest("temperature").orElseThrow().value().stripTrailingZeros().toPlainString());
+  }
 }

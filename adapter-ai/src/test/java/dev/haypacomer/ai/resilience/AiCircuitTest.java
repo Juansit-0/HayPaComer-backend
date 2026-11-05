@@ -185,4 +185,9 @@ class AiCircuitTest {
     assertEquals("gemini", reader.provider());
     assertTrue(!resting.isProviderDown());
   }
+
+  @Test
+  void theNullObjectSpeaksThePlannerActionForHandingOver() {
+    assertTrue(NullChatModel.DEFER.contains("\"action\":\"defer\""));
+  }
 }

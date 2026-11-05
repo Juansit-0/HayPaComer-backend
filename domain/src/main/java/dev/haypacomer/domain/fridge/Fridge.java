@@ -1,10 +1,12 @@
 package dev.haypacomer.domain.fridge;
 
+import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.quantity.Grams;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 public final class Fridge implements FridgeNode {
 
@@ -155,5 +157,30 @@ public final class Fridge implements FridgeNode {
     return findTray(trayId)
         .orElseThrow(
             () -> new IllegalArgumentException("Tray not in fridge " + name + ": " + trayId));
+  }
+
+  public static Fridge restoredFrom(FridgeMemento memento, Function<String, FoodMetadata> foods) {
+    Fridge fridge = new Fridge(memento.id(), memento.name());
+    for (FridgeMemento.ZoneState zoneState : memento.zones()) {
+      Zone zone = new Zone(zoneState.id(), zoneState.name(), zoneState.kind());
+      for (FridgeMemento.TrayState trayState : zoneState.trays()) {
+        Tray tray = new Tray(trayState.id(), trayState.name(), trayState.position());
+        for (FridgeMemento.ItemState itemState : trayState.items()) {
+          tray.add(
+              new FoodItem(
+                  itemState.id(),
+                  Objects.requireNonNull(
+                      foods.apply(itemState.foodName()), "Unknown food " + itemState.foodName()),
+                  itemState.quantity(),
+                  itemState.tare(),
+                  itemState.expiresOn(),
+                  itemState.expirySource(),
+                  itemState.openedOn()));
+        }
+        zone.add(tray);
+      }
+      fridge.add(zone);
+    }
+    return fridge;
   }
 }

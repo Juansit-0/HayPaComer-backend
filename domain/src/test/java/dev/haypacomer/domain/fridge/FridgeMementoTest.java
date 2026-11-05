@@ -36,7 +36,7 @@ class FridgeMementoTest {
     milk.consume(Grams.of(192));
     fridge.take(chicken.id());
 
-    Fridge restored = memento.restore(FOODS);
+    Fridge restored = Fridge.restoredFrom(memento, FOODS);
 
     assertNotSame(fridge, restored);
     assertEquals(fridge.id(), restored.id());
@@ -57,7 +57,7 @@ class FridgeMementoTest {
     FridgeMemento memento = fridge.snapshot();
 
     assertThrows(UnsupportedOperationException.class, () -> memento.zones().clear());
-    assertThrows(NullPointerException.class, () -> memento.restore(name -> null));
+    assertThrows(NullPointerException.class, () -> Fridge.restoredFrom(memento, name -> null));
     assertTrue(Fridge.named("Empty").snapshot().zones().isEmpty());
   }
 }

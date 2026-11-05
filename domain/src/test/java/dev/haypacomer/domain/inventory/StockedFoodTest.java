@@ -158,4 +158,21 @@ class StockedFoodTest {
     assertThrows(
         NullPointerException.class, () -> FreshnessPolicy.DEFAULT.apply(yogurt(null), null));
   }
+
+  @Test
+  void aDecoratorNeverMakesInedibleFoodEdible() {
+    StockedFood expired = new ExpiredFood(yogurt(TODAY.minusDays(1)));
+    StockedFood owned = new OwnedFood(expired, Ownership.of(juan, Visibility.SHARED));
+
+    assertFalse(owned.isEdible());
+    assertTrue(new OwnedFood(yogurt(TODAY), Ownership.of(juan, Visibility.SHARED)).isEdible());
+  }
+
+  @Test
+  void foodUnderReviewIsNotEdibleAndSaysWhy() {
+    StockedFood reviewed = new UnderReviewFood(yogurt(TODAY.plusDays(3)));
+
+    assertFalse(reviewed.isEdible());
+    assertTrue(reviewed.has(FoodStatus.UNDER_REVIEW));
+  }
 }

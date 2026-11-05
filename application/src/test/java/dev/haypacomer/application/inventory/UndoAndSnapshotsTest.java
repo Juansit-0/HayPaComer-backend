@@ -239,4 +239,15 @@ class UndoAndSnapshotsTest {
 
     assertTrue(stores.movements.history(milk).isEmpty());
   }
+
+  @Test
+  void foodComingBackRecoversItsOwner() {
+    FoodItemId milk = stock(juan, 842, Visibility.PRIVATE);
+    consume(juan, milk, 842);
+    stores.ownershipById.remove(milk);
+
+    undo.undo(juan, household.id());
+
+    assertEquals(Visibility.PRIVATE, stores.ownershipById.get(milk).visibility());
+  }
 }

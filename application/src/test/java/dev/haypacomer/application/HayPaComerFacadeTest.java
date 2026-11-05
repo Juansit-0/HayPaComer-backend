@@ -29,6 +29,9 @@ import dev.haypacomer.domain.household.Role;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.inventory.FoodStatus;
 import dev.haypacomer.domain.inventory.FreshnessPolicy;
+import dev.haypacomer.domain.inventory.Ownership;
+import dev.haypacomer.domain.inventory.Visibility;
+import dev.haypacomer.domain.member.MemberId;
 import dev.haypacomer.domain.quantity.ConversionFactors;
 import dev.haypacomer.domain.quantity.Grams;
 import dev.haypacomer.domain.quantity.Unit;
@@ -148,5 +151,17 @@ class HayPaComerFacadeTest {
     HayPaComerFacade.KitchenSnapshot snapshot = facade.snapshot(juan, household.id());
 
     assertEquals(new HayPaComerFacade.KitchenSnapshot(3, Grams.of(1950), 1, 1), snapshot);
+  }
+
+  @Test
+  void rescueFirstLeavesOutFoodTheViewerMayNotUse() {
+    Fridge kitchen = facade.setUpFridge(juan, household.id(), "Kitchen", FridgeLayout.STANDARD);
+    stock(kitchen, "Top", "Soup", 300, TODAY_IN_BOGOTA);
+    FoodItemId soup = kitchen.foodItems().findFirst().orElseThrow().id();
+    MemberId owner = household.membershipOf(juan).orElseThrow().member();
+    stores.ownerships.save(soup, Ownership.of(owner, Visibility.ASK_FIRST));
+
+    assertEquals(1, facade.rescueFirst(juan, household.id()).size());
+    assertTrue(facade.rescueFirst(ana, household.id()).isEmpty());
   }
 }

@@ -111,15 +111,15 @@ class ChefChatIntegrationTest {
         .andExpect(jsonPath("$.conversationId").value(conversation))
         .andExpect(jsonPath("$.runs[0].specialist").value("market"));
 
-    mvc.perform(get("/api/v1/agent/conversations").header("Authorization", juan))
+    mvc.perform(get(base + "/agent/conversations").header("Authorization", juan))
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].id").value(conversation));
-    mvc.perform(get("/api/v1/agent/conversations/" + conversation).header("Authorization", juan))
+    mvc.perform(get(base + "/agent/conversations/" + conversation).header("Authorization", juan))
         .andExpect(jsonPath("$.length()").value(4))
         .andExpect(jsonPath("$[0].role").value("USER"))
         .andExpect(jsonPath("$[1].role").value("ASSISTANT"));
     mvc.perform(
-            get("/api/v1/agent/conversations/" + conversation).header("Authorization", stranger))
+            get(base + "/agent/conversations/" + conversation).header("Authorization", stranger))
         .andExpect(status().isNotFound());
     send(base + "/agent/chat", stranger, "{\"message\":\"Peek\"}").andExpect(status().isNotFound());
     send(base + "/agent/chat", juan, "{\"message\":\"\"}").andExpect(status().isBadRequest());

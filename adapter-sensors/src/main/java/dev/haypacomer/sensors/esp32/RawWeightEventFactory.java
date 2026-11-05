@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public final class RawWeightEventFactory extends Esp32EventFactory {
 
+  private static final long HX711_LIMIT = 1L << 23;
+
   private final Hx711ReadingAdapter hx711;
 
   public RawWeightEventFactory(Hx711ReadingAdapter hx711) {
@@ -29,11 +31,15 @@ public final class RawWeightEventFactory extends Esp32EventFactory {
               case "COOK", "COOKING" -> ScaleMode.COOKING;
               default -> throw new MalformedSensorPayloadException("mode must be FRIDGE or COOK");
             };
+    long raw = required(envelope.raw(), "raw");
+    if (raw < -HX711_LIMIT || raw >= HX711_LIMIT) {
+      throw new MalformedSensorPayloadException("raw is outside the HX711 range");
+    }
     return hx711
         .adapt(
             device,
             new SensorEventId(envelope.eventId()),
-            required(envelope.raw(), "raw"),
+            raw,
             envelope.at(),
             scaleMode,
             envelope.stable(),

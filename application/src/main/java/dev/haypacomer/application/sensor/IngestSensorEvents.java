@@ -74,14 +74,18 @@ public final class IngestSensorEvents {
     List<EventResult> results = new ArrayList<>();
     List<Finding> findings = new ArrayList<>();
     for (SensorEvent event : events) {
-      ValidationResult verdict = validation.validate(event);
+      ValidationResult checked = validation.validate(event);
+      // Parallel posts can all pass the check; the insert decides which one counts.
+      ValidationResult verdict =
+          checked.accepted() && !log.accept(event, clock.instant())
+              ? ValidationResult.duplicate()
+              : checked;
       results.add(
           new EventResult(
               event.id().value(), SensorEventTypes.of(event), verdict.verdict(), verdict.reason()));
       if (!verdict.accepted()) {
         continue;
       }
-      log.accept(event, clock.instant());
       if (event instanceof TemperatureReading reading) {
         coldChain.record(device, reading);
       }

@@ -34,7 +34,8 @@ public final class RuleBasedPlanner implements Planner {
 
   @Override
   public Decision next(AgentContext context) {
-    Matcher asked = ADD.matcher(context.task().goal().strip());
+    // The first line is what was just asked; the rest is the conversation so far.
+    Matcher asked = ADD.matcher(context.task().goal().strip().lines().findFirst().orElse(""));
     if (context.tools().contains(ADD_TO_MARKET)
         && !context.called(ADD_TO_MARKET)
         && context.stepsLeft() > 0

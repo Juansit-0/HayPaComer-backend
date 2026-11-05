@@ -126,6 +126,12 @@ class RuntimeSettingsTest {
                 () -> change.change(owner, home.id(), "food.at-risk-days", Optional.of("40")))
             .getMessage());
     assertEquals(
+        "fridge.max-celsius allows one decimal",
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> change.change(owner, home.id(), "fridge.max-celsius", Optional.of("4.123")))
+            .getMessage());
+    assertEquals(
         "food.at-risk-days must be a whole number",
         assertThrows(
                 IllegalArgumentException.class,

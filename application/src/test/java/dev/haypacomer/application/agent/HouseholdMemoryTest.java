@@ -147,4 +147,23 @@ class HouseholdMemoryTest {
     remember.remember(owner, home.id(), new MemoryNote(MemoryTopic.DECISION, "n1", "updated"));
     assertEquals("updated", stored.get(home.id()).get("decision:n1"));
   }
+
+  @Test
+  void aBatchThatDoesNotFitLeavesNothing() {
+    for (int i = 0; i < RememberForHousehold.MAX_NOTES - 1; i++) {
+      memory.remember(home.id(), "decision:n" + i, "v");
+    }
+
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            remember.remember(
+                owner,
+                home.id(),
+                new MemoryNote(MemoryTopic.DECISION, "n1", "changed"),
+                new MemoryNote(MemoryTopic.DECISION, "first", "v"),
+                new MemoryNote(MemoryTopic.DECISION, "second", "v")));
+    assertEquals("v", stored.get(home.id()).get("decision:n1"));
+    assertEquals(RememberForHousehold.MAX_NOTES - 1, stored.get(home.id()).size());
+  }
 }

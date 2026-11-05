@@ -101,6 +101,30 @@ class QuantityParserTest {
     }
   }
 
+  @ParameterizedTest
+  @CsvSource(
+      delimiter = '|',
+      value = {"1.000 g|1000", "1,000 g|1000", "12.500 g|12500", "1.5 kg|1500", "0.250 kg|250"})
+  void readsThousandsAsColombiaWritesThem(String text, String expected) {
+    assertEquals(Grams.of(expected), grams(text, ConversionFactors.MASS_ONLY));
+  }
+
+  @Test
+  void aMisreadAmountIsRefusedInsteadOfStored() {
+    assertThrows(
+        InvalidQuantityException.class, () -> grams("1.500 kg", ConversionFactors.MASS_ONLY));
+    assertThrows(
+        InvalidQuantityException.class, () -> grams("9999999999 kg", ConversionFactors.MASS_ONLY));
+    assertThrows(InvalidQuantityException.class, () -> QuantityParser.parse("0 g"));
+    assertThrows(InvalidQuantityException.class, () -> QuantityParser.parse("1e3 g"));
+  }
+
+  @Test
+  void readsTheFractionCharacters() {
+    assertEquals(Grams.of("500"), grams("\u00bd kg", ConversionFactors.MASS_ONLY));
+    assertEquals(Grams.of("1250"), grams("1\u00bc kg", ConversionFactors.MASS_ONLY));
+  }
+
   @Test
   void stillReadsPiecesAndFoodNames() {
     assertDoesNotThrow(() -> QuantityParser.parse("2 tomates"));

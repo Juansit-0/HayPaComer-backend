@@ -20,6 +20,8 @@ public final class CancelInvitation {
 
   public void cancel(UserId actor, HouseholdId id, UUID invitationId) {
     households.load(actor, id).requirePermission(actor, Permission.MANAGE_MEMBERS);
-    invitations.delete(id, invitationId);
+    if (!invitations.delete(id, invitationId)) {
+      throw new InvitationNotFoundException();
+    }
   }
 }

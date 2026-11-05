@@ -32,6 +32,9 @@ public record SettingDefinition(
     if (kind == SettingKind.INTEGER && number.stripTrailingZeros().scale() > 0) {
       throw new IllegalArgumentException(key + " must be a whole number");
     }
+    if (number.stripTrailingZeros().scale() > 1) {
+      throw new IllegalArgumentException(key + " allows one decimal");
+    }
     if (number.compareTo(min) < 0 || number.compareTo(max) > 0) {
       throw new IllegalArgumentException(
           key

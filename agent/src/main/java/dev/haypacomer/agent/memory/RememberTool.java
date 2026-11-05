@@ -59,8 +59,8 @@ public final class RememberTool implements AgentTool {
 
   @Override
   public Observation invoke(ToolInvocation invocation) {
-    MemoryNote note =
-        remember.remember(invocation.user(), invocation.household(), note(invocation));
+    MemoryNote note = note(invocation);
+    remember.remember(invocation.user(), invocation.household(), note);
     return Observation.of(SPEC.name(), "Remembered " + note.key());
   }
 

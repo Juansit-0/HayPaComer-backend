@@ -11,7 +11,6 @@ import dev.haypacomer.application.agent.ConversationId;
 import dev.haypacomer.application.agent.ConversationSummary;
 import dev.haypacomer.application.agent.PendingConfirmation;
 import dev.haypacomer.application.agent.RunStatus;
-import dev.haypacomer.application.port.ConversationStore;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
@@ -38,13 +37,10 @@ public class ChefChatController {
 
   private final ChefChat chat;
   private final ReadConversation readConversation;
-  private final ConversationStore conversations;
 
-  public ChefChatController(
-      ChefChat chat, ReadConversation readConversation, ConversationStore conversations) {
+  public ChefChatController(ChefChat chat, ReadConversation readConversation) {
     this.chat = chat;
     this.readConversation = readConversation;
-    this.conversations = conversations;
   }
 
   @PostMapping("/households/{householdId}/agent/chat")
@@ -67,17 +63,23 @@ public class ChefChatController {
         reply.answer().pending().map(Pending::from).orElse(null));
   }
 
-  @GetMapping("/agent/conversations")
-  List<ConversationResponse> conversations(@AuthenticationPrincipal Jwt jwt) {
-    return conversations.recent(CurrentUser.of(jwt), 20).stream()
+  @GetMapping("/households/{householdId}/agent/conversations")
+  List<ConversationResponse> conversations(
+      @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
+    return readConversation.recent(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
+        .limit(20)
         .map(ConversationResponse::from)
         .toList();
   }
 
-  @GetMapping("/agent/conversations/{conversationId}")
+  @GetMapping("/households/{householdId}/agent/conversations/{conversationId}")
   List<MessageResponse> messages(
-      @AuthenticationPrincipal Jwt jwt, @PathVariable UUID conversationId) {
-    return readConversation.read(CurrentUser.of(jwt), new ConversationId(conversationId)).stream()
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID householdId,
+      @PathVariable UUID conversationId) {
+    return readConversation
+        .read(CurrentUser.of(jwt), new HouseholdId(householdId), new ConversationId(conversationId))
+        .stream()
         .map(MessageResponse::from)
         .toList();
   }

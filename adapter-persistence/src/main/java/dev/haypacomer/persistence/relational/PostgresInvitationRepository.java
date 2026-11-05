@@ -76,11 +76,13 @@ public class PostgresInvitationRepository implements InvitationRepository {
   }
 
   @Override
-  public void delete(HouseholdId household, UUID invitationId) {
-    jdbc.sql("DELETE FROM household_invitations WHERE id = :id AND household_id = :household")
-        .param("id", invitationId)
-        .param("household", household.value())
-        .update();
+  public boolean delete(HouseholdId household, UUID invitationId) {
+    return jdbc.sql(
+                "DELETE FROM household_invitations WHERE id = :id AND household_id = :household")
+            .param("id", invitationId)
+            .param("household", household.value())
+            .update()
+        > 0;
   }
 
   private Invitation map(ResultSet row, int rowNumber) throws SQLException {

@@ -20,6 +20,7 @@ import dev.haypacomer.application.device.DeviceNotFoundException;
 import dev.haypacomer.application.fridge.TrayFullException;
 import dev.haypacomer.application.household.HouseholdNotFoundException;
 import dev.haypacomer.application.household.InvitationEmailMismatchException;
+import dev.haypacomer.application.household.InvitationNotFoundException;
 import dev.haypacomer.application.i18n.UnknownLocaleException;
 import dev.haypacomer.application.inventory.FoodItemNotFoundException;
 import dev.haypacomer.application.inventory.FoodNotInCatalogException;
@@ -104,6 +105,11 @@ public class ApiExceptionHandler {
         exception.getMostSpecificCause() instanceof MismatchedInputException
             ? "Some fields are missing or out of range"
             : "The request body is not valid JSON");
+  }
+
+  @ExceptionHandler(InvitationNotFoundException.class)
+  ProblemDetail invitationNotFound(InvitationNotFoundException exception) {
+    return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
   }
 
   @ExceptionHandler(MarketItemNotFoundException.class)

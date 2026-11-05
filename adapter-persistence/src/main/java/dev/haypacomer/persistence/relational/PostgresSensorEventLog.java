@@ -31,9 +31,11 @@ public class PostgresSensorEventLog implements SensorEventLog, SensorHistory {
   }
 
   @Override
-  public boolean contains(SensorEventId id) {
-    return jdbc.sql("SELECT EXISTS (SELECT 1 FROM sensor_events WHERE id = :id)")
+  public boolean contains(DeviceId device, SensorEventId id) {
+    return jdbc.sql(
+            "SELECT EXISTS (SELECT 1 FROM sensor_events WHERE id = :id AND device_id = :device)")
         .param("id", id.value())
+        .param("device", device.value())
         .query(Boolean.class)
         .single();
   }
@@ -78,31 +80,32 @@ public class PostgresSensorEventLog implements SensorEventLog, SensorHistory {
   }
 
   @Override
-  public void accept(SensorEvent event, Instant receivedAt) {
+  public boolean accept(SensorEvent event, Instant receivedAt) {
     String door = event instanceof DoorEvent value ? value.state().name() : null;
     var celsius = event instanceof TemperatureReading value ? value.celsius() : null;
     var grams = event instanceof WeightReading value ? value.grams().value() : null;
     Boolean stable = event instanceof WeightReading value ? value.stable() : null;
     String mode = event instanceof WeightReading value ? value.mode().name() : null;
-    jdbc.sql(
-            """
+    return jdbc.sql(
+                """
             INSERT INTO sensor_events (id, device_id, fridge_id, type, door_state, celsius, grams,
                                        stable, scale_mode, occurred_at, received_at)
             VALUES (:id, :device, :fridge, :type, :door, :celsius, :grams, :stable, :mode,
                     :occurredAt, :receivedAt)
             ON CONFLICT (id, occurred_at) DO NOTHING
             """)
-        .param("id", event.id().value())
-        .param("device", event.device().value())
-        .param("fridge", event.fridge().value())
-        .param("type", SensorEventTypes.of(event))
-        .param("door", door, Types.VARCHAR)
-        .param("celsius", celsius, Types.NUMERIC)
-        .param("grams", grams, Types.NUMERIC)
-        .param("stable", stable, Types.BOOLEAN)
-        .param("mode", mode, Types.VARCHAR)
-        .param("occurredAt", Timestamps.toDatabase(event.occurredAt()))
-        .param("receivedAt", Timestamps.toDatabase(receivedAt))
-        .update();
+            .param("id", event.id().value())
+            .param("device", event.device().value())
+            .param("fridge", event.fridge().value())
+            .param("type", SensorEventTypes.of(event))
+            .param("door", door, Types.VARCHAR)
+            .param("celsius", celsius, Types.NUMERIC)
+            .param("grams", grams, Types.NUMERIC)
+            .param("stable", stable, Types.BOOLEAN)
+            .param("mode", mode, Types.VARCHAR)
+            .param("occurredAt", Timestamps.toDatabase(event.occurredAt()))
+            .param("receivedAt", Timestamps.toDatabase(receivedAt))
+            .update()
+        > 0;
   }
 }

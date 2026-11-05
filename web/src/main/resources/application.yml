@@ -16,6 +16,9 @@ spring:
       password: ${REDIS_PASSWORD:}
       timeout: 2s
       connect-timeout: 2s
+  jackson:
+    deserialization:
+      accept-float-as-int: false
   mvc:
     problemdetails:
       enabled: true
@@ -25,6 +28,7 @@ spring:
       max-request-size: 5MB
 
 springdoc:
+  use-fqn: true
   api-docs:
     path: /v3/api-docs
   swagger-ui:

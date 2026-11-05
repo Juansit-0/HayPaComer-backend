@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface SensorEventLog {
 
-  boolean contains(SensorEventId id);
+  boolean contains(DeviceId device, SensorEventId id);
 
   Optional<Instant> lastAccepted(DeviceId device, String type);
 
-  void accept(SensorEvent event, Instant receivedAt);
+  boolean accept(SensorEvent event, Instant receivedAt);
 }

@@ -16,6 +16,8 @@ public final class DuplicateValidator extends EventValidator {
 
   @Override
   protected Optional<ValidationResult> check(SensorEvent event, Instant now) {
-    return log.contains(event.id()) ? Optional.of(ValidationResult.duplicate()) : Optional.empty();
+    return log.contains(event.device(), event.id())
+        ? Optional.of(ValidationResult.duplicate())
+        : Optional.empty();
   }
 }

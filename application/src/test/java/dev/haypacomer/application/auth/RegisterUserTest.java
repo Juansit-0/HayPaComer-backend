@@ -51,6 +51,9 @@ class RegisterUserTest {
     assertThrows(
         InvalidPasswordException.class,
         () -> registerUser.register(new RegisterCommand("a@b.co", "x".repeat(129), "A")));
+    assertThrows(
+        InvalidPasswordException.class,
+        () -> registerUser.register(new RegisterCommand("a@b.co", "1".repeat(12), "A")));
   }
 
   @Test

@@ -161,12 +161,18 @@ class WeeklyPlanUseCasesTest {
             planning.plans,
             new EvaluateRecipe(households, inventory, cooking.profiles, cooking.rules, clock));
 
-    PlanEntry changed = change.change(juan, household.id(), dinner.id(), chickenRice.id(), 2);
+    ChangedEntry changed = change.change(juan, household.id(), dinner.id(), chickenRice.id(), 2);
 
-    assertEquals(chickenRice, changed.recipe());
-    assertFalse(changed.needsShopping());
+    assertEquals(chickenRice, changed.entry().recipe());
+    assertFalse(changed.entry().needsShopping());
+    assertEquals(
+        planning.plans.findByEntry(household.id(), dinner.id()).orElseThrow().dateOf(dinner),
+        changed.date());
     assertTrue(
-        change.change(juan, household.id(), dinner.id(), lentilStew.id(), 2).needsShopping());
+        change
+            .change(juan, household.id(), dinner.id(), lentilStew.id(), 2)
+            .entry()
+            .needsShopping());
     assertThrows(
         WeeklyPlanNotFoundException.class,
         () -> change.change(juan, household.id(), PlanEntryId.newId(), lentilStew.id(), 2));

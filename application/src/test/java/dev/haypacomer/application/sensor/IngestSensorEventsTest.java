@@ -65,11 +65,12 @@ class IngestSensorEventsTest {
   private final InMemoryColdChainRepository chains = new InMemoryColdChainRepository();
   private final Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
 
+  private boolean racing;
   private final SensorEventLog log =
       new SensorEventLog() {
         @Override
-        public boolean contains(SensorEventId id) {
-          return stored.containsKey(id);
+        public boolean contains(DeviceId device, SensorEventId id) {
+          return !racing && stored.containsKey(id);
         }
 
         @Override
@@ -81,8 +82,8 @@ class IngestSensorEventsTest {
         }
 
         @Override
-        public void accept(SensorEvent event, Instant receivedAt) {
-          stored.put(event.id(), event);
+        public boolean accept(SensorEvent event, Instant receivedAt) {
+          return stored.put(event.id(), event) == null;
         }
       };
 
@@ -185,6 +186,18 @@ class IngestSensorEventsTest {
 
   private SensorEventId id() {
     return new SensorEventId(UUID.randomUUID());
+  }
+
+  @Test
+  void parallelPostsCountOnce() {
+    decoded.add(
+        new TemperatureReading(id(), device.id(), device.fridge(), NOW, new BigDecimal("4")));
+    ingest().ingest(device, "[]");
+    racing = true;
+
+    IngestionReport again = ingest().ingest(device, "[]");
+
+    assertTrue(again.allDuplicates());
   }
 
   @Test

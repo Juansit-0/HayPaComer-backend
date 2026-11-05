@@ -36,7 +36,7 @@ public final class ChangePlanEntry {
     this.evaluate = Objects.requireNonNull(evaluate, "evaluate");
   }
 
-  public PlanEntry change(
+  public ChangedEntry change(
       UserId actor, HouseholdId householdId, PlanEntryId entryId, RecipeId recipeId, int servings) {
     households.get(actor, householdId).requirePermission(actor, Permission.COOK);
     WeeklyPlan plan =
@@ -49,6 +49,6 @@ public final class ChangePlanEntry {
             != RequirementVerdict.ENOUGH;
     PlanEntry changed = plan.change(entryId, recipe, servings, shopping);
     plans.save(plan);
-    return changed;
+    return new ChangedEntry(changed, plan.dateOf(changed));
   }
 }

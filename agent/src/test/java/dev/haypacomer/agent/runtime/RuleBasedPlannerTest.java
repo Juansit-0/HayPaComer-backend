@@ -53,6 +53,16 @@ class RuleBasedPlannerTest {
   }
 
   @Test
+  void onlyTheLastAskCountsInAConversation() {
+    assertEquals(
+        Map.of("food", "tomate", "grams", "300"),
+        proposal("agrega 300 g de tomate al mercado\n\nEarlier in this conversation:\nuser: Hola"));
+    assertEquals(
+        Map.of("food", "tomate", "grams", "500"),
+        proposal("compra tomate\n\nEarlier in this conversation:\nuser: agrega 2 kg de arroz"));
+  }
+
+  @Test
   void aQuestionIsNotAnOrder() {
     AgentContext context =
         new AgentContext(

@@ -19,7 +19,10 @@ public final class Esp32EventAdapter implements SensorEventDecoder {
   private static final int MAX_BATCH = 500;
 
   private final JsonMapper json =
-      JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
+      JsonMapper.builder()
+          .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+          .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
+          .build();
 
   private final Map<String, Esp32EventFactory> factories;
 

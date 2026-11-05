@@ -15,5 +15,5 @@ public interface InvitationRepository {
 
   List<Invitation> findPending(HouseholdId household, Instant now);
 
-  void delete(HouseholdId household, UUID invitationId);
+  boolean delete(HouseholdId household, UUID invitationId);
 }

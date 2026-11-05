@@ -5,6 +5,7 @@ import dev.haypacomer.application.agent.ChatRole;
 import dev.haypacomer.application.agent.ConversationId;
 import dev.haypacomer.application.agent.ConversationSummary;
 import dev.haypacomer.application.port.ConversationStore;
+import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import java.time.Duration;
 import java.time.Instant;
@@ -34,12 +35,13 @@ public final class RedisConversationStore implements ConversationStore {
     return "agent:conv:" + conversation.value();
   }
 
-  private static String index(UserId user) {
-    return "agent:convs:" + user.value();
+  private static String index(UserId user, HouseholdId household) {
+    return "agent:convs:" + user.value() + ":" + household.value();
   }
 
   @Override
-  public void append(UserId user, ConversationId conversation, ChatMessage message) {
+  public void append(
+      UserId user, HouseholdId household, ConversationId conversation, ChatMessage message) {
     redis
         .opsForStream()
         .add(
@@ -53,8 +55,8 @@ public final class RedisConversationStore implements ConversationStore {
     redis.expire(stream(conversation), TIME_TO_LIVE);
     redis
         .opsForZSet()
-        .add(index(user), conversation.value().toString(), message.at().toEpochMilli());
-    redis.expire(index(user), TIME_TO_LIVE);
+        .add(index(user, household), conversation.value().toString(), message.at().toEpochMilli());
+    redis.expire(index(user, household), TIME_TO_LIVE);
   }
 
   @Override
@@ -78,8 +80,8 @@ public final class RedisConversationStore implements ConversationStore {
   }
 
   @Override
-  public List<ConversationSummary> recent(UserId user, int limit) {
-    var entries = redis.opsForZSet().reverseRangeWithScores(index(user), 0, limit - 1L);
+  public List<ConversationSummary> recent(UserId user, HouseholdId household, int limit) {
+    var entries = redis.opsForZSet().reverseRangeWithScores(index(user, household), 0, limit - 1L);
     if (entries == null) {
       return List.of();
     }

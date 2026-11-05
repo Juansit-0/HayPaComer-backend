@@ -19,8 +19,10 @@ import dev.haypacomer.domain.scale.WeighingTarget;
 import dev.haypacomer.domain.sensor.ScaleMode;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
@@ -154,8 +156,8 @@ public class ScaleController {
 
   record ModeRequest(
       @NotNull ScaleMode mode,
-      String food,
-      @DecimalMin(value = "0", inclusive = false) BigDecimal targetGrams) {}
+      @Size(max = 120) String food,
+      @DecimalMin(value = "0", inclusive = false) @DecimalMax("20000") BigDecimal targetGrams) {}
 
   record ModeResponse(ScaleMode mode) {}
 

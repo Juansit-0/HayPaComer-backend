@@ -38,7 +38,7 @@ class ValidationChainTest {
   private final SensorEventLog log =
       new SensorEventLog() {
         @Override
-        public boolean contains(SensorEventId id) {
+        public boolean contains(DeviceId device, SensorEventId id) {
           return seen.contains(id);
         }
 
@@ -48,12 +48,13 @@ class ValidationChainTest {
         }
 
         @Override
-        public void accept(SensorEvent event, Instant receivedAt) {
-          seen.add(event.id());
+        public boolean accept(SensorEvent event, Instant receivedAt) {
+          boolean added = seen.add(event.id());
           last.merge(
               event.device() + SensorEventTypes.of(event),
               event.occurredAt(),
               (a, b) -> a.isAfter(b) ? a : b);
+          return added;
         }
       };
   private final ValidateSensorEvent validate =

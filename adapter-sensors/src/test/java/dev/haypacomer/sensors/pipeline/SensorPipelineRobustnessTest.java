@@ -110,7 +110,7 @@ class SensorPipelineRobustnessTest {
     SensorEventLog log =
         new SensorEventLog() {
           @Override
-          public boolean contains(SensorEventId id) {
+          public boolean contains(DeviceId device, SensorEventId id) {
             return stored.containsKey(id);
           }
 
@@ -125,8 +125,8 @@ class SensorPipelineRobustnessTest {
           }
 
           @Override
-          public void accept(SensorEvent event, Instant receivedAt) {
-            stored.put(event.id(), event);
+          public boolean accept(SensorEvent event, Instant receivedAt) {
+            return stored.put(event.id(), event) == null;
           }
         };
     ColdChainRepository coldChains =

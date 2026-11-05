@@ -14,7 +14,9 @@ public final class QuantityParser {
   private static final Pattern TERM_SEPARATOR = Pattern.compile("\\s*\\+\\s*|\\s+(?:and|y)\\s+");
   private static final Pattern MIXED = Pattern.compile("^(\\d+)\\s+(\\d+)/(\\d+)(.*)$");
   private static final Pattern FRACTION = Pattern.compile("^(\\d+)/(\\d+)(.*)$");
-  private static final Pattern DECIMAL = Pattern.compile("^(\\d+(?:[.,]\\d+)?)(.*)$");
+  private static final Pattern DECIMAL =
+      Pattern.compile("^([1-9]\\d{0,2}(?:[.,]\\d{3})+(?!\\d)|\\d+(?:[.,]\\d+)?)(.*)$");
+  private static final Pattern THOUSANDS = Pattern.compile("[1-9]\\d{0,2}(?:[.,]\\d{3})+");
 
   private static final Set<String> FOOD_LINK = Set.of("de", "del", "of");
 
@@ -28,7 +30,9 @@ public final class QuantityParser {
       throw new InvalidQuantityException("Quantity is too long");
     }
     QuantityExpression expression = null;
-    for (String term : TERM_SEPARATOR.split(text.strip().toLowerCase(Locale.ROOT), -1)) {
+    String typed =
+        text.replace("\u00bd", " 1/2").replace("\u00bc", " 1/4").replace("\u00be", " 3/4");
+    for (String term : TERM_SEPARATOR.split(typed.strip().toLowerCase(Locale.ROOT), -1)) {
       Amount amount = term(term);
       expression = expression == null ? amount : new Sum(expression, amount);
     }
@@ -48,9 +52,17 @@ public final class QuantityParser {
     }
     Matcher decimal = DECIMAL.matcher(text);
     if (decimal.matches()) {
-      return amount(new BigDecimal(decimal.group(1).replace(',', '.')), decimal.group(2));
+      return amount(number(decimal.group(1)), decimal.group(2));
     }
     throw new InvalidQuantityException("Cannot read a quantity from \"" + term.strip() + "\"");
+  }
+
+  // Three digits after a separator are thousands, as Colombia writes 1.000 g; a mistaken 1.500 kg
+  // then lands over the limit in Amount and is refused instead of stored a thousand times off.
+  private static BigDecimal number(String text) {
+    return THOUSANDS.matcher(text).matches()
+        ? new BigDecimal(text.replaceAll("[.,]", ""))
+        : new BigDecimal(text.replace(',', '.'));
   }
 
   private static BigDecimal fraction(String numerator, String denominator, String term) {
@@ -62,6 +74,9 @@ public final class QuantityParser {
   }
 
   private static Amount amount(BigDecimal value, String rest) {
+    if (value.signum() == 0) {
+      throw new InvalidQuantityException("A quantity is more than zero");
+    }
     String words = rest.strip();
     String[] parts = words.isEmpty() ? new String[0] : words.split("\\s+");
     Optional<Unit> unit = parts.length == 0 ? Optional.empty() : UnitVocabulary.lookup(parts[0]);

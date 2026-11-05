@@ -137,8 +137,12 @@ class InvitationUseCasesTest {
     Invitation invitation =
         invite().invite(juan.id(), household.id(), "ana@haypacomer.dev", Role.GUEST).invitation();
 
-    new CancelInvitation(households, invitations)
-        .cancel(juan.id(), household.id(), invitation.id());
+    CancelInvitation cancel = new CancelInvitation(households, invitations);
+    cancel.cancel(juan.id(), household.id(), invitation.id());
+
+    assertThrows(
+        InvitationNotFoundException.class,
+        () -> cancel.cancel(juan.id(), household.id(), invitation.id()));
 
     assertThrows(InvalidTokenException.class, () -> accept(clock).accept(ana.id(), lastToken()));
   }

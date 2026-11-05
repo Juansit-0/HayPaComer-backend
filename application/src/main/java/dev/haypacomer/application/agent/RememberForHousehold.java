@@ -8,6 +8,7 @@ import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
+import java.util.Arrays;
 import java.util.Objects;
 
 public final class RememberForHousehold {
@@ -29,17 +30,30 @@ public final class RememberForHousehold {
     this.memory = Objects.requireNonNull(memory, "memory");
   }
 
-  public MemoryNote remember(UserId actor, HouseholdId household, MemoryNote note) {
-    return unitOfWork.runFor(household, () -> rememberInTurn(actor, household, note));
+  public void remember(UserId actor, HouseholdId household, MemoryNote... notes) {
+    unitOfWork.runFor(
+        household,
+        () -> {
+          rememberInTurn(actor, household, notes);
+          return null;
+        });
   }
 
-  private MemoryNote rememberInTurn(UserId actor, HouseholdId household, MemoryNote note) {
+  // The notes are counted before any is written, so a batch that does not fit leaves nothing.
+  private void rememberInTurn(UserId actor, HouseholdId household, MemoryNote[] notes) {
     households.get(actor, household).requirePermission(actor, Permission.COOK);
     var current = memory.read(household);
-    if (!current.containsKey(note.key()) && current.size() >= MAX_NOTES) {
+    long added =
+        Arrays.stream(notes)
+            .map(MemoryNote::key)
+            .distinct()
+            .filter(key -> !current.containsKey(key))
+            .count();
+    if (current.size() + added > MAX_NOTES) {
       throw new IllegalStateException("Household memory is full; forget something first");
     }
-    memory.remember(household, note.key(), note.value());
-    return note;
+    for (MemoryNote note : notes) {
+      memory.remember(household, note.key(), note.value());
+    }
   }
 }

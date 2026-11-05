@@ -91,10 +91,14 @@ class RedisAgentStoresTest {
     ConversationId dinner = ConversationId.newId();
     ConversationId market = ConversationId.newId();
 
-    store.append(juan, dinner, new ChatMessage(ChatRole.USER, "What can I cook?", NOW));
+    store.append(juan, household, dinner, new ChatMessage(ChatRole.USER, "What can I cook?", NOW));
     store.append(
-        juan, dinner, new ChatMessage(ChatRole.ASSISTANT, "Rice with chicken", NOW.plusSeconds(2)));
-    store.append(juan, market, new ChatMessage(ChatRole.USER, "Add milk", NOW.plusSeconds(60)));
+        juan,
+        household,
+        dinner,
+        new ChatMessage(ChatRole.ASSISTANT, "Rice with chicken", NOW.plusSeconds(2)));
+    store.append(
+        juan, household, market, new ChatMessage(ChatRole.USER, "Add milk", NOW.plusSeconds(60)));
 
     assertEquals(
         List.of("What can I cook?", "Rice with chicken"),
@@ -102,9 +106,10 @@ class RedisAgentStoresTest {
     assertEquals(
         List.of("Rice with chicken"),
         store.messages(dinner, 1).stream().map(ChatMessage::text).toList());
-    assertEquals(market, store.recent(juan, 10).getFirst().id());
-    assertEquals(NOW.plusSeconds(60), store.recent(juan, 10).getFirst().lastActivity());
-    assertEquals(2, store.recent(juan, 10).size());
+    assertEquals(market, store.recent(juan, household, 10).getFirst().id());
+    assertEquals(NOW.plusSeconds(60), store.recent(juan, household, 10).getFirst().lastActivity());
+    assertEquals(2, store.recent(juan, household, 10).size());
+    assertTrue(store.recent(juan, HouseholdId.newId(), 10).isEmpty());
     long ttl = redis.getExpire("agent:conv:" + dinner.value());
     assertTrue(ttl > Duration.ofDays(6).toSeconds());
     assertTrue(store.messages(ConversationId.newId(), 5).isEmpty());

@@ -29,6 +29,7 @@ import dev.haypacomer.application.port.AgentRunStore;
 import dev.haypacomer.application.port.AiAuditLog;
 import dev.haypacomer.application.port.ConfirmationStore;
 import dev.haypacomer.application.port.ConversationStore;
+import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,13 +44,15 @@ class ChefChatTest {
 
   private final KitchenFixture kitchen = new KitchenFixture();
   private final Map<ConversationId, List<ChatMessage>> stored = new LinkedHashMap<>();
-  private final Map<UserId, List<ConversationId>> owners = new HashMap<>();
+  private final Map<String, List<ConversationId>> owners = new HashMap<>();
   private final ConversationStore conversations =
       new ConversationStore() {
         @Override
-        public void append(UserId user, ConversationId conversation, ChatMessage message) {
+        public void append(
+            UserId user, HouseholdId household, ConversationId conversation, ChatMessage message) {
           stored.computeIfAbsent(conversation, id -> new ArrayList<>()).add(message);
-          List<ConversationId> mine = owners.computeIfAbsent(user, id -> new ArrayList<>());
+          List<ConversationId> mine =
+              owners.computeIfAbsent(user + ":" + household, id -> new ArrayList<>());
           if (!mine.contains(conversation)) {
             mine.add(conversation);
           }
@@ -62,8 +65,8 @@ class ChefChatTest {
         }
 
         @Override
-        public List<ConversationSummary> recent(UserId user, int limit) {
-          return owners.getOrDefault(user, List.of()).stream()
+        public List<ConversationSummary> recent(UserId user, HouseholdId household, int limit) {
+          return owners.getOrDefault(user + ":" + household, List.of()).stream()
               .map(id -> new ConversationSummary(id, KitchenFixture.NOW))
               .toList();
         }
@@ -187,7 +190,10 @@ class ChefChatTest {
     assertTrue(goals.getLast().contains("user: What can I cook?"));
     assertTrue(goals.getLast().contains("assistant: Cook rice"));
     assertEquals(
-        4, new ReadConversation(conversations).read(kitchen.owner, first.conversation()).size());
+        4,
+        new ReadConversation(conversations, kitchen.households)
+            .read(kitchen.owner, kitchen.home.id(), first.conversation())
+            .size());
   }
 
   @Test
@@ -206,7 +212,18 @@ class ChefChatTest {
                 Optional.empty()));
     assertThrows(
         ConversationNotFoundException.class,
-        () -> new ReadConversation(conversations).read(kitchen.guest, mine.conversation()));
+        () ->
+            new ReadConversation(conversations, kitchen.households)
+                .read(kitchen.guest, kitchen.home.id(), mine.conversation()));
+    assertThrows(
+        ConversationNotFoundException.class,
+        () ->
+            chat.chat(
+                HouseholdId.newId(),
+                kitchen.owner,
+                Optional.of(mine.conversation()),
+                "In another household",
+                Optional.empty()));
     assertThrows(
         IllegalArgumentException.class,
         () -> chat.chat(kitchen.home.id(), kitchen.owner, Optional.empty(), " ", Optional.empty()));

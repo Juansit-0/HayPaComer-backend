@@ -53,11 +53,11 @@ class PostgresSensorEventLogTest extends PostgresTestSupport {
         new DoorEvent(
             new SensorEventId(UUID.randomUUID()), device.id(), fridge.id(), NOW, DoorState.OPEN);
 
-    assertFalse(log.contains(open.id()));
+    assertFalse(log.contains(open.device(), open.id()));
     assertTrue(log.lastAccepted(device.id(), "DOOR").isEmpty());
 
-    log.accept(open, NOW);
-    log.accept(open, NOW);
+    assertTrue(log.accept(open, NOW));
+    assertFalse(log.accept(open, NOW));
     log.accept(
         new TemperatureReading(
             new SensorEventId(UUID.randomUUID()),
@@ -78,7 +78,8 @@ class PostgresSensorEventLogTest extends PostgresTestSupport {
             null),
         NOW);
 
-    assertTrue(log.contains(open.id()));
+    assertTrue(log.contains(open.device(), open.id()));
+    assertFalse(log.contains(dev.haypacomer.domain.device.DeviceId.newId(), open.id()));
     assertEquals(NOW, log.lastAccepted(device.id(), "DOOR").orElseThrow());
     assertEquals(NOW.plusSeconds(30), log.lastAccepted(device.id(), "TEMPERATURE").orElseThrow());
     assertEquals(NOW.plusSeconds(60), log.lastAccepted(device.id(), "WEIGHT").orElseThrow());

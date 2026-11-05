@@ -118,8 +118,9 @@ public class AgentConfiguration {
   }
 
   @Bean
-  ReadConversation readConversation(ConversationStore conversations) {
-    return new ReadConversation(conversations);
+  ReadConversation readConversation(
+      ConversationStore conversations, HouseholdRepository households) {
+    return new ReadConversation(conversations, households);
   }
 
   @Bean

@@ -32,8 +32,8 @@ final class InMemoryInvitations implements InvitationRepository {
   }
 
   @Override
-  public void delete(HouseholdId household, UUID invitationId) {
-    byId.entrySet()
+  public boolean delete(HouseholdId household, UUID invitationId) {
+    return byId.entrySet()
         .removeIf(
             entry ->
                 entry.getKey().equals(invitationId)

@@ -1,6 +1,7 @@
 package dev.haypacomer.sensors.pipeline;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.haypacomer.application.coldchain.TrackColdChain;
@@ -10,6 +11,7 @@ import dev.haypacomer.application.port.SensorEventLog;
 import dev.haypacomer.application.sensor.HardwareFactories;
 import dev.haypacomer.application.sensor.IngestSensorEvents;
 import dev.haypacomer.application.sensor.IngestionReport;
+import dev.haypacomer.application.sensor.MalformedSensorPayloadException;
 import dev.haypacomer.application.sensor.ObserveSensorEvent;
 import dev.haypacomer.application.sensor.validation.SensorEventTypes;
 import dev.haypacomer.application.sensor.validation.ValidateSensorEvent;
@@ -77,7 +79,7 @@ class ScalePipelineRobustnessTest {
     SensorEventLog log =
         new SensorEventLog() {
           @Override
-          public boolean contains(SensorEventId id) {
+          public boolean contains(DeviceId device, SensorEventId id) {
             return stored.containsKey(id);
           }
 
@@ -90,8 +92,8 @@ class ScalePipelineRobustnessTest {
           }
 
           @Override
-          public void accept(SensorEvent event, Instant receivedAt) {
-            stored.put(event.id(), event);
+          public boolean accept(SensorEvent event, Instant receivedAt) {
+            return stored.put(event.id(), event) == null;
           }
         };
     ColdChainRepository chains =
@@ -152,6 +154,13 @@ class ScalePipelineRobustnessTest {
 
   private Esp32Envelope grams(long grams, long millis) {
     return simulator.rawWeight(OFFSET + PER_GRAM * grams, null, T0.plusMillis(millis));
+  }
+
+  @Test
+  void aCountOutsideTheHx711RangeIsMalformed() {
+    assertThrows(
+        MalformedSensorPayloadException.class,
+        () -> raw(List.of(simulator.rawWeight(1L << 23, null, T0))));
   }
 
   @Test

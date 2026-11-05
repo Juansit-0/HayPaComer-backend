@@ -5,6 +5,7 @@ import dev.haypacomer.domain.recipe.Recipe;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +29,11 @@ public record SuggestionQuery(
     if (candidates.size() > MAX_CANDIDATES) {
       throw new IllegalArgumentException("At most " + MAX_CANDIDATES + " recipes per request");
     }
+    Set<String> names = new HashSet<>();
+    candidates =
+        candidates.stream()
+            .filter(recipe -> names.add(recipe.name().toLowerCase(Locale.ROOT)))
+            .toList();
     if (servings < 1) {
       throw new IllegalArgumentException("Servings must be at least 1: " + servings);
     }

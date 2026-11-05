@@ -2,6 +2,7 @@ package dev.haypacomer.web.planning;
 
 import dev.haypacomer.application.planning.AddPlanDeltaToMarketList;
 import dev.haypacomer.application.planning.ChangePlanEntry;
+import dev.haypacomer.application.planning.ChangedEntry;
 import dev.haypacomer.application.planning.CloneRecipe;
 import dev.haypacomer.application.planning.CloneWeeklyPlan;
 import dev.haypacomer.application.planning.GenerateWeeklyPlan;
@@ -180,14 +181,14 @@ public class PlanningController {
       @PathVariable UUID householdId,
       @PathVariable UUID entryId,
       @Valid @RequestBody ChangeRequest request) {
-    PlanEntry entry =
+    ChangedEntry changed =
         changePlanEntry.change(
             CurrentUser.of(jwt),
             new HouseholdId(householdId),
             new PlanEntryId(entryId),
             new RecipeId(request.recipeId()),
             request.servings());
-    return EntryResponse.from(entry, null);
+    return EntryResponse.from(changed.entry(), changed.date());
   }
 
   record RecipeRequest(

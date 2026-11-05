@@ -39,20 +39,22 @@ public final class ChefChat {
       throw new IllegalArgumentException("A message has 1 to " + MAX_MESSAGE + " characters");
     }
     ConversationId conversation =
-        existing.map(id -> owned(user, id)).orElseGet(ConversationId::newId);
+        existing.map(id -> owned(user, household, id)).orElseGet(ConversationId::newId);
     List<ChatMessage> earlier =
         existing.isPresent() ? conversations.messages(conversation, CONTEXT_MESSAGES) : List.of();
     SupervisorAnswer answer = supervisor.handle(household, user, goal(earlier, text), specialist);
-    conversations.append(user, conversation, new ChatMessage(ChatRole.USER, text, clock.instant()));
+    conversations.append(
+        user, household, conversation, new ChatMessage(ChatRole.USER, text, clock.instant()));
     conversations.append(
         user,
+        household,
         conversation,
         new ChatMessage(ChatRole.ASSISTANT, clip(answer.answer()), clock.instant()));
     return new ChatReply(conversation, answer);
   }
 
-  private ConversationId owned(UserId user, ConversationId id) {
-    return conversations.recent(user, 100).stream()
+  private ConversationId owned(UserId user, HouseholdId household, ConversationId id) {
+    return conversations.recent(user, household, 100).stream()
         .filter(summary -> summary.id().equals(id))
         .findFirst()
         .orElseThrow(ConversationNotFoundException::new)

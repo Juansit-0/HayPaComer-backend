@@ -64,10 +64,12 @@ public class HouseholdMemoryController {
     List<NoteRequest> forgotten = request.forget() == null ? List.of() : request.forget();
     List<NoteRequest> remembered = request.remember() == null ? List.of() : request.remember();
     forgotten.forEach(note -> forget.forget(actor, household, note.topic(), note.subject()));
-    remembered.stream()
-        .map(note -> new MemoryNote(note.topic(), note.subject(), note.valueOrEmpty()))
-        .toList()
-        .forEach(note -> remember.remember(actor, household, note));
+    remember.remember(
+        actor,
+        household,
+        remembered.stream()
+            .map(note -> new MemoryNote(note.topic(), note.subject(), note.valueOrEmpty()))
+            .toArray(MemoryNote[]::new));
     return list(jwt, householdId);
   }
 

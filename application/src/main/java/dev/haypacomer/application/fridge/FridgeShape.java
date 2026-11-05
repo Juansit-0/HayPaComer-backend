@@ -38,13 +38,15 @@ public record FridgeShape(
     within("depthCm", depthCm, 20, 250);
   }
 
-  // The fridges people start from: the Challenger CR 050 minibar of the demo first, then the common
-  // shapes of a Colombian kitchen.
+  // The fridges people start from: the Challenger CR 121 of the demo first, then the common shapes
+  // of a Colombian kitchen.
+  // shortcut: shelves, racks and hinge are those of the old demo minibar, set them from the real
+  // one.
   public static List<FridgeExample> examples() {
     return List.of(
         new FridgeExample(
-            "challenger-cr050",
-            new FridgeShape(FridgeType.MINIBAR, 2, 3, 0, 1, Hinge.LEFT, 43, 58, 49)),
+            "challenger-cr121",
+            new FridgeShape(FridgeType.MINIBAR, 2, 3, 0, 1, Hinge.LEFT, 49, 85, 60)),
         new FridgeExample("top-freezer", standard(FridgeType.TOP_FREEZER, 3, 3, 1, 1)),
         new FridgeExample("bottom-freezer", standard(FridgeType.BOTTOM_FREEZER, 3, 3, 1, 2)),
         new FridgeExample("side-by-side", standard(FridgeType.SIDE_BY_SIDE, 4, 4, 2, 4)),

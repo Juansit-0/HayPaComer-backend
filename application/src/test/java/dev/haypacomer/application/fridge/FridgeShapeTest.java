@@ -15,7 +15,7 @@ class FridgeShapeTest {
   @Test
   void theChallengerMinibarComesFirstAndEveryExampleBuildsItsOwnCounts() {
     List<FridgeExample> examples = FridgeShape.examples();
-    assertEquals("challenger-cr050", examples.getFirst().key());
+    assertEquals("challenger-cr121", examples.getFirst().key());
     for (FridgeExample example : examples) {
       Fridge fridge = FridgeLayout.EMPTY.build("Kitchen");
       example.shape().fit(fridge);

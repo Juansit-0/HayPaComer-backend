@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 class ChangeFridgeShapeTest {
 
   private static final Instant NOW = Instant.parse("2026-10-31T15:00:00Z");
-  private static final FridgeShape CR050 = FridgeShape.examples().getFirst().shape();
+  private static final FridgeShape CR121 = FridgeShape.examples().getFirst().shape();
 
   private final InMemoryHouseholdRepository households = new InMemoryHouseholdRepository();
   private final InMemoryFridgeRepository fridges = new InMemoryFridgeRepository();
@@ -87,10 +87,10 @@ class ChangeFridgeShapeTest {
   void aStandardFridgeBecomesTheChallengerMinibarAndIsReadBackSo() {
     assertEquals(FridgeType.TOP_FREEZER, view.view(ana, household.id(), fridge.id()).type());
 
-    FridgeShape changed = change.change(juan, household.id(), fridge.id(), CR050);
+    FridgeShape changed = change.change(juan, household.id(), fridge.id(), CR121);
 
-    assertEquals(CR050, changed);
-    assertEquals(CR050, view.view(ana, household.id(), fridge.id()));
+    assertEquals(CR121, changed);
+    assertEquals(CR121, view.view(ana, household.id(), fridge.id()));
     assertEquals("CHANGE_FRIDGE_SHAPE", stores.auditEntries.getLast().action());
     assertEquals("MINIBAR", stores.auditEntries.getLast().detail().get("type"));
   }
@@ -115,7 +115,7 @@ class ChangeFridgeShapeTest {
     TrayNotEmptyException full =
         assertThrows(
             TrayNotEmptyException.class,
-            () -> change.change(juan, household.id(), fridge.id(), CR050));
+            () -> change.change(juan, household.id(), fridge.id(), CR121));
 
     assertEquals(bottom.id(), full.tray());
     assertTrue(stored.isEmpty());
@@ -124,10 +124,10 @@ class ChangeFridgeShapeTest {
   @Test
   void onlyWhoManagesFridgesAndOnlyFridgesOfTheHousehold() {
     assertThrows(
-        AccessDeniedException.class, () -> change.change(ana, household.id(), fridge.id(), CR050));
+        AccessDeniedException.class, () -> change.change(ana, household.id(), fridge.id(), CR121));
     assertThrows(
         FridgeNotFoundException.class,
-        () -> change.change(juan, household.id(), FridgeId.newId(), CR050));
+        () -> change.change(juan, household.id(), FridgeId.newId(), CR121));
     assertThrows(
         FridgeNotFoundException.class, () -> view.view(juan, household.id(), FridgeId.newId()));
     assertThrows(

@@ -53,7 +53,7 @@ class FridgeRoomTest {
     FridgeRoom room = new FridgeRoom(shape);
     Tray shelf = tray(fridge, ZoneKind.SHELF);
     double capacity = room.capacity(ZoneKind.SHELF);
-    assertTrue(capacity > 5 && capacity < 30, "litres per shelf: " + capacity);
+    assertTrue(capacity > 5 && capacity < 50, "litres per shelf: " + capacity);
     assertTrue(room.capacity(ZoneKind.FREEZER) > 0);
 
     assertDoesNotThrow(() -> room.requireRoom(fridge, shelf.id(), CARROT, Grams.of(1000)));

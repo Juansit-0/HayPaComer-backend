@@ -45,7 +45,7 @@ import org.springframework.test.web.servlet.MockMvc;
     })
 class FridgeShapeControllerTest {
 
-  private static final FridgeShape CR050 = FridgeShape.examples().getFirst().shape();
+  private static final FridgeShape CR121 = FridgeShape.examples().getFirst().shape();
 
   @Autowired private MockMvc mvc;
   @Autowired private JwtEncoder encoder;
@@ -72,20 +72,20 @@ class FridgeShapeControllerTest {
   void listsTheExamplesWithTheChallengerFirst() throws Exception {
     mvc.perform(get("/api/v1/fridge-examples").header("Authorization", bearer()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].key").value("challenger-cr050"))
+        .andExpect(jsonPath("$[0].key").value("challenger-cr121"))
         .andExpect(jsonPath("$[0].shape.type").value("MINIBAR"))
         .andExpect(jsonPath("$[0].shape.doorRacks").value(3));
   }
 
   @Test
   void readsAndChangesTheShape() throws Exception {
-    when(viewFridgeShape.view(juan, household, fridge)).thenReturn(CR050);
-    when(changeFridgeShape.change(eq(juan), eq(household), eq(fridge), eq(CR050)))
-        .thenReturn(CR050);
+    when(viewFridgeShape.view(juan, household, fridge)).thenReturn(CR121);
+    when(changeFridgeShape.change(eq(juan), eq(household), eq(fridge), eq(CR121)))
+        .thenReturn(CR121);
 
     mvc.perform(get(path()).header("Authorization", bearer()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.widthCm").value(43));
+        .andExpect(jsonPath("$.widthCm").value(49));
     mvc.perform(
             put(path())
                 .header("Authorization", bearer())
@@ -93,7 +93,7 @@ class FridgeShapeControllerTest {
                 .content(
                     """
                     {"type":"MINIBAR","shelves":2,"doorRacks":3,"drawers":0,"freezerShelves":1,
-                     "hinge":"LEFT","widthCm":43,"heightCm":58,"depthCm":49}
+                     "hinge":"LEFT","widthCm":49,"heightCm":85,"depthCm":60}
                     """))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.shelves").value(2));
@@ -112,7 +112,7 @@ class FridgeShapeControllerTest {
                 .content(
                     """
                     {"type":"MINIBAR","shelves":9,"doorRacks":3,"drawers":0,"freezerShelves":1,
-                     "hinge":"LEFT","widthCm":43,"heightCm":58,"depthCm":49}
+                     "hinge":"LEFT","widthCm":49,"heightCm":85,"depthCm":60}
                     """))
         .andExpect(status().isBadRequest());
     mvc.perform(
@@ -122,7 +122,7 @@ class FridgeShapeControllerTest {
                 .content(
                     """
                     {"type":"MINIBAR","shelves":2,"doorRacks":3,"drawers":0,"freezerShelves":1,
-                     "hinge":"LEFT","widthCm":43,"heightCm":58,"depthCm":49}
+                     "hinge":"LEFT","widthCm":49,"heightCm":85,"depthCm":60}
                     """))
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.trayId").value(bottom.id().value().toString()));

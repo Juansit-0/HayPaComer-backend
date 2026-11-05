@@ -12,6 +12,7 @@ import dev.haypacomer.application.auth.EmailAlreadyRegisteredException;
 import dev.haypacomer.application.auth.InvalidCredentialsException;
 import dev.haypacomer.application.auth.InvalidPasswordException;
 import dev.haypacomer.application.auth.InvalidTokenException;
+import dev.haypacomer.application.auth.PasswordNeededException;
 import dev.haypacomer.application.auth.TooManyLoginAttemptsException;
 import dev.haypacomer.application.auth.UserNotFoundException;
 import dev.haypacomer.application.coldchain.FridgeNotFoundException;
@@ -108,6 +109,14 @@ public class ApiExceptionHandler {
   @ExceptionHandler(MarketItemNotFoundException.class)
   ProblemDetail marketItemNotFound(MarketItemNotFoundException exception) {
     return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
+  }
+
+  @ExceptionHandler(PasswordNeededException.class)
+  ProblemDetail passwordNeeded(PasswordNeededException exception) {
+    ProblemDetail problem =
+        problem(HttpStatus.UNAUTHORIZED, "Invalid credentials", exception.getMessage());
+    problem.setProperty("sendPassword", true);
+    return problem;
   }
 
   @ExceptionHandler(InvalidCredentialsException.class)

@@ -150,4 +150,16 @@ class SessionUseCasesTest {
     assertThrows(
         InvalidCredentialsException.class, () -> refreshSession.refresh(tokens.refreshToken()));
   }
+
+  @Test
+  void onlyAnAccountFromBeforeProofsIsAskedForItsPassword() {
+    assertThrows(
+        InvalidCredentialsException.class,
+        () -> logIn.logIn(new LoginCommand("juan@haypacomer.dev", "wrong-password")));
+    assertFalse(
+        assertThrows(
+                InvalidCredentialsException.class,
+                () -> logIn.logIn(new LoginCommand("juan@haypacomer.dev", "wrong-password")))
+            instanceof PasswordNeededException);
+  }
 }

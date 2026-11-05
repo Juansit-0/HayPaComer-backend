@@ -24,6 +24,7 @@ import dev.haypacomer.domain.inventory.Visibility;
 import dev.haypacomer.domain.quantity.Grams;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -208,7 +209,7 @@ public class InventoryController {
       @NotNull UUID fridgeId,
       @NotNull UUID trayId,
       @NotBlank String food,
-      @NotNull @DecimalMin(value = "0", inclusive = false) BigDecimal grams,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @DecimalMax("100000") BigDecimal grams,
       @DecimalMin("0") BigDecimal tareGrams,
       LocalDate expiresOn,
       Visibility visibility,

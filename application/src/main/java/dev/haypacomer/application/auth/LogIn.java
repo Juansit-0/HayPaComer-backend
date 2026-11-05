@@ -62,9 +62,11 @@ public final class LogIn {
     if (!Credentials.legacy(found.passwordHash())) {
       return found.canSignIn() && Credentials.matches(hasher, proof, found.passwordHash());
     }
+    // An account from before password proofs needs the password once; this is the only time it is
+    // asked for.
     if (password == null) {
       hasher.hash(proof);
-      return false;
+      throw new PasswordNeededException();
     }
     boolean valid = found.canSignIn() && hasher.matches(password, found.passwordHash());
     if (valid) {

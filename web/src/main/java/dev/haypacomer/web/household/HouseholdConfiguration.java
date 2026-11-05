@@ -17,6 +17,7 @@ import dev.haypacomer.application.mail.MailLinks;
 import dev.haypacomer.application.port.EmailSender;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InvitationRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.application.port.UserRepository;
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;
@@ -46,29 +47,30 @@ public class HouseholdConfiguration {
   }
 
   @Bean
-  ChangeMemberRole changeMemberRole(HouseholdRepository households) {
-    return new ChangeMemberRole(households);
+  ChangeMemberRole changeMemberRole(HouseholdRepository households, UnitOfWork unitOfWork) {
+    return new ChangeMemberRole(households, unitOfWork);
   }
 
   @Bean
-  RemoveMember removeMember(HouseholdRepository households) {
-    return new RemoveMember(households);
+  RemoveMember removeMember(HouseholdRepository households, UnitOfWork unitOfWork) {
+    return new RemoveMember(households, unitOfWork);
   }
 
   @Bean
-  TransferOwnership transferOwnership(HouseholdRepository households) {
-    return new TransferOwnership(households);
+  TransferOwnership transferOwnership(HouseholdRepository households, UnitOfWork unitOfWork) {
+    return new TransferOwnership(households, unitOfWork);
   }
 
   @Bean
   InviteMember inviteMember(
       HouseholdRepository households,
       InvitationRepository invitations,
+      UserRepository users,
       OpaqueTokens opaqueTokens,
       EmailSender email,
       MailLinks links,
       Clock clock) {
-    return new InviteMember(households, invitations, opaqueTokens, email, links, clock);
+    return new InviteMember(households, invitations, users, opaqueTokens, email, links, clock);
   }
 
   @Bean
@@ -89,8 +91,9 @@ public class HouseholdConfiguration {
       HouseholdRepository households,
       UserRepository users,
       OpaqueTokens opaqueTokens,
+      UnitOfWork unitOfWork,
       Clock clock) {
-    return new AcceptInvitation(invitations, households, users, opaqueTokens, clock);
+    return new AcceptInvitation(invitations, households, users, opaqueTokens, unitOfWork, clock);
   }
 
   @Bean

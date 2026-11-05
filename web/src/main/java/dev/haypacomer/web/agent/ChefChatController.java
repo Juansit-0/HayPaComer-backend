@@ -83,7 +83,7 @@ public class ChefChatController {
   }
 
   record ChatRequest(
-      @NotBlank @Size(max = 1000) String message,
+      @NotBlank @Size(max = 4000) String message,
       UUID conversationId,
       @Pattern(regexp = "chef|market|cold|coach") String specialist) {}
 

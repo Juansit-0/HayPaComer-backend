@@ -1,8 +1,10 @@
 package dev.haypacomer.application.agent;
 
 import dev.haypacomer.application.household.GetHousehold;
+import dev.haypacomer.application.market.DirectWork;
 import dev.haypacomer.application.port.HouseholdMemory;
 import dev.haypacomer.application.port.HouseholdRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
@@ -14,13 +16,24 @@ public final class RememberForHousehold {
 
   private final GetHousehold households;
   private final HouseholdMemory memory;
+  private final UnitOfWork unitOfWork;
 
   public RememberForHousehold(HouseholdRepository households, HouseholdMemory memory) {
+    this(households, memory, new DirectWork());
+  }
+
+  public RememberForHousehold(
+      HouseholdRepository households, HouseholdMemory memory, UnitOfWork unitOfWork) {
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
     this.households = new GetHousehold(households);
     this.memory = Objects.requireNonNull(memory, "memory");
   }
 
   public MemoryNote remember(UserId actor, HouseholdId household, MemoryNote note) {
+    return unitOfWork.runFor(household, () -> rememberInTurn(actor, household, note));
+  }
+
+  private MemoryNote rememberInTurn(UserId actor, HouseholdId household, MemoryNote note) {
     households.get(actor, household).requirePermission(actor, Permission.COOK);
     var current = memory.read(household);
     if (!current.containsKey(note.key()) && current.size() >= MAX_NOTES) {

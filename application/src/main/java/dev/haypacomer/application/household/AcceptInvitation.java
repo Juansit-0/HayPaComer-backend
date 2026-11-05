@@ -3,8 +3,10 @@ package dev.haypacomer.application.household;
 import dev.haypacomer.application.auth.InvalidTokenException;
 import dev.haypacomer.application.auth.OpaqueTokens;
 import dev.haypacomer.application.auth.UserNotFoundException;
+import dev.haypacomer.application.market.DirectWork;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InvitationRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.application.port.UserRepository;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.household.Invitation;
@@ -20,6 +22,7 @@ public final class AcceptInvitation {
   private final HouseholdRepository households;
   private final UserRepository users;
   private final OpaqueTokens opaqueTokens;
+  private final UnitOfWork unitOfWork;
   private final Clock clock;
 
   public AcceptInvitation(
@@ -28,6 +31,17 @@ public final class AcceptInvitation {
       UserRepository users,
       OpaqueTokens opaqueTokens,
       Clock clock) {
+    this(invitations, households, users, opaqueTokens, new DirectWork(), clock);
+  }
+
+  public AcceptInvitation(
+      InvitationRepository invitations,
+      HouseholdRepository households,
+      UserRepository users,
+      OpaqueTokens opaqueTokens,
+      UnitOfWork unitOfWork,
+      Clock clock) {
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
     this.invitations = Objects.requireNonNull(invitations, "invitations");
     this.households = Objects.requireNonNull(households, "households");
     this.users = Objects.requireNonNull(users, "users");
@@ -40,11 +54,19 @@ public final class AcceptInvitation {
     if (rawToken == null || rawToken.isBlank()) {
       throw new InvalidTokenException();
     }
-    Invitation invitation =
-        invitations
-            .findByHash(opaqueTokens.hash(rawToken))
-            .filter(found -> found.isPending(now))
-            .orElseThrow(InvalidTokenException::new);
+    return unitOfWork.runFor(
+        pending(rawToken, now).household(), () -> acceptInTurn(actor, rawToken, now));
+  }
+
+  private Invitation pending(String rawToken, Instant now) {
+    return invitations
+        .findByHash(opaqueTokens.hash(rawToken))
+        .filter(found -> found.isPending(now))
+        .orElseThrow(InvalidTokenException::new);
+  }
+
+  private Household acceptInTurn(UserId actor, String rawToken, Instant now) {
+    Invitation invitation = pending(rawToken, now);
     User user = users.findById(actor).orElseThrow(UserNotFoundException::new);
     if (!user.email().equals(invitation.email())) {
       throw new InvitationEmailMismatchException();

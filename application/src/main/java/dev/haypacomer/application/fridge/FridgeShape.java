@@ -132,7 +132,12 @@ public record FridgeShape(
     for (Zone zone : lastFirst) {
       List<Tray> trays =
           zone.children().stream().sorted(Comparator.comparingInt(Tray::position)).toList();
-      for (Tray tray : trays.reversed()) {
+      // A shelf with food is the last one to go, so nobody has to empty a shelf they meant to keep.
+      List<Tray> emptiestFirst =
+          trays.reversed().stream()
+              .sorted(Comparator.comparing(tray -> !tray.children().isEmpty()))
+              .toList();
+      for (Tray tray : emptiestFirst) {
         if (total > wanted) {
           zone.remove(tray.id());
           total--;

@@ -128,7 +128,14 @@ class ColdChainUseCasesTest {
     assertFalse(byName.get("Chicken breast").food().isEdible());
     assertFalse(byName.get("Rice").food().has(FoodStatus.UNDER_REVIEW));
 
-    ReviewColdChain review = new ReviewColdChain(households, fridges, chains, clock);
+    ReviewColdChain review =
+        new ReviewColdChain(
+            households,
+            fridges,
+            chains,
+            new dev.haypacomer.application.market.DirectWork(),
+            new dev.haypacomer.application.support.InMemoryInventoryStores().audit,
+            clock);
     assertThrows(
         IllegalStateException.class, () -> review.review(juan, household.id(), fridge.id()));
     reading("4", 50);
@@ -147,7 +154,14 @@ class ColdChainUseCasesTest {
 
   @Test
   void reviewRequiresAFridgeOfTheHouseholdAndReadingsTheirDevice() {
-    ReviewColdChain review = new ReviewColdChain(households, fridges, chains, clock);
+    ReviewColdChain review =
+        new ReviewColdChain(
+            households,
+            fridges,
+            chains,
+            new dev.haypacomer.application.market.DirectWork(),
+            new dev.haypacomer.application.support.InMemoryInventoryStores().audit,
+            clock);
 
     assertThrows(
         FridgeNotFoundException.class, () -> review.review(juan, household.id(), FridgeId.newId()));

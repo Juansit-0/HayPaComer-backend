@@ -1,8 +1,10 @@
 package dev.haypacomer.application.session;
 
 import dev.haypacomer.application.household.GetHousehold;
+import dev.haypacomer.application.market.DirectWork;
 import dev.haypacomer.application.port.CookingSessionRepository;
 import dev.haypacomer.application.port.HouseholdRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
@@ -17,6 +19,7 @@ public final class AdvanceCookingSession {
   private final GetHousehold households;
   private final CookingSessionRepository sessions;
   private final KitchenMediator mediator;
+  private final UnitOfWork unitOfWork;
   private final Clock clock;
 
   public AdvanceCookingSession(
@@ -24,6 +27,16 @@ public final class AdvanceCookingSession {
       CookingSessionRepository sessions,
       KitchenMediator mediator,
       Clock clock) {
+    this(households, sessions, mediator, new DirectWork(), clock);
+  }
+
+  public AdvanceCookingSession(
+      HouseholdRepository households,
+      CookingSessionRepository sessions,
+      KitchenMediator mediator,
+      UnitOfWork unitOfWork,
+      Clock clock) {
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
     this.households = new GetHousehold(households);
     this.sessions = Objects.requireNonNull(sessions, "sessions");
     this.mediator = Objects.requireNonNull(mediator, "mediator");
@@ -31,6 +44,11 @@ public final class AdvanceCookingSession {
   }
 
   public CookingSession apply(
+      UserId actor, HouseholdId householdId, CookingSessionId sessionId, SessionAction action) {
+    return unitOfWork.runFor(householdId, () -> applyInTurn(actor, householdId, sessionId, action));
+  }
+
+  private CookingSession applyInTurn(
       UserId actor, HouseholdId householdId, CookingSessionId sessionId, SessionAction action) {
     households.get(actor, householdId).requirePermission(actor, Permission.COOK);
     CookingSession session =

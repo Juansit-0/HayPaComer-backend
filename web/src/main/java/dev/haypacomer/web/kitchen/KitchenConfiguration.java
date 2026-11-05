@@ -189,8 +189,10 @@ public class KitchenConfiguration {
       HouseholdRepository households,
       FridgeRepository fridges,
       ColdChainRepository chains,
+      UnitOfWork unitOfWork,
+      AuditLog audit,
       Clock clock) {
-    return new ReviewColdChain(households, fridges, chains, clock);
+    return new ReviewColdChain(households, fridges, chains, unitOfWork, audit, clock);
   }
 
   @Bean
@@ -420,8 +422,9 @@ public class KitchenConfiguration {
       HouseholdRepository households,
       CookingSessionRepository sessions,
       KitchenMediator mediator,
+      UnitOfWork unitOfWork,
       Clock clock) {
-    return new AdvanceCookingSession(households, sessions, mediator, clock);
+    return new AdvanceCookingSession(households, sessions, mediator, unitOfWork, clock);
   }
 
   @Bean

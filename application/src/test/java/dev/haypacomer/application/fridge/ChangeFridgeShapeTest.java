@@ -112,13 +112,16 @@ class ChangeFridgeShapeTest {
             Grams.ZERO,
             LocalDate.of(2026, 11, 5)));
 
+    change.change(juan, household.id(), fridge.id(), CR121);
+    assertTrue(fridge.trays().anyMatch(tray -> tray.id().equals(bottom.id())));
+
+    FridgeShape noShelves = new FridgeShape(FridgeType.MINIBAR, 0, 3, 0, 1, Hinge.LEFT, 49, 85, 60);
     TrayNotEmptyException full =
         assertThrows(
             TrayNotEmptyException.class,
-            () -> change.change(juan, household.id(), fridge.id(), CR121));
+            () -> change.change(juan, household.id(), fridge.id(), noShelves));
 
     assertEquals(bottom.id(), full.tray());
-    assertTrue(stored.isEmpty());
   }
 
   @Test

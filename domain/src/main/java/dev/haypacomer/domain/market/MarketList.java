@@ -138,7 +138,7 @@ public final class MarketList {
   private MarketItem require(MarketItemId id) {
     MarketItem item = items.get(id);
     if (item == null) {
-      throw new IllegalArgumentException("Item is not on the market list");
+      throw new MarketItemNotFoundException();
     }
     return item;
   }

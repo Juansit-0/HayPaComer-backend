@@ -72,7 +72,8 @@ class InvitationUseCasesTest {
   }
 
   private InviteMember invite() {
-    return new InviteMember(households, invitations, opaqueTokens, outbox::add, links, clock);
+    return new InviteMember(
+        households, invitations, userRepository(), opaqueTokens, outbox::add, links, clock);
   }
 
   private AcceptInvitation accept(Clock at) {

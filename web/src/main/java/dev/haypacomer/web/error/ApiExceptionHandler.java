@@ -38,6 +38,7 @@ import dev.haypacomer.domain.expiry.ImpossibleExpiryException;
 import dev.haypacomer.domain.fridge.FridgeBusyException;
 import dev.haypacomer.domain.fridge.TrayNotEmptyException;
 import dev.haypacomer.domain.household.AccessDeniedException;
+import dev.haypacomer.domain.market.MarketItemNotFoundException;
 import dev.haypacomer.domain.quantity.InvalidQuantityException;
 import dev.haypacomer.domain.quantity.UnconvertibleQuantityException;
 import dev.haypacomer.domain.session.IllegalSessionTransitionException;
@@ -65,6 +66,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -95,7 +97,17 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   ProblemDetail unreadableBody(HttpMessageNotReadableException exception) {
-    return problem(HttpStatus.BAD_REQUEST, "Invalid request", "The request body is not valid JSON");
+    return problem(
+        HttpStatus.BAD_REQUEST,
+        "Invalid request",
+        exception.getMostSpecificCause() instanceof MismatchedInputException
+            ? "Some fields are missing or out of range"
+            : "The request body is not valid JSON");
+  }
+
+  @ExceptionHandler(MarketItemNotFoundException.class)
+  ProblemDetail marketItemNotFound(MarketItemNotFoundException exception) {
+    return problem(HttpStatus.NOT_FOUND, "Not found", exception.getMessage());
   }
 
   @ExceptionHandler(InvalidCredentialsException.class)

@@ -1,9 +1,12 @@
 package dev.haypacomer.application.coldchain;
 
+import dev.haypacomer.application.audit.AuditEntry;
 import dev.haypacomer.application.household.GetHousehold;
+import dev.haypacomer.application.port.AuditLog;
 import dev.haypacomer.application.port.ColdChainRepository;
 import dev.haypacomer.application.port.FridgeRepository;
 import dev.haypacomer.application.port.HouseholdRepository;
+import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.domain.coldchain.ColdChain;
 import dev.haypacomer.domain.coldchain.ColdIncident;
 import dev.haypacomer.domain.fridge.Fridge;
@@ -12,6 +15,7 @@ import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
 import java.time.Clock;
+import java.util.Map;
 import java.util.Objects;
 
 public final class ReviewColdChain {
@@ -19,13 +23,19 @@ public final class ReviewColdChain {
   private final GetHousehold households;
   private final FridgeRepository fridges;
   private final ColdChainRepository chains;
+  private final UnitOfWork unitOfWork;
+  private final AuditLog audit;
   private final Clock clock;
 
   public ReviewColdChain(
       HouseholdRepository households,
       FridgeRepository fridges,
       ColdChainRepository chains,
+      UnitOfWork unitOfWork,
+      AuditLog audit,
       Clock clock) {
+    this.unitOfWork = Objects.requireNonNull(unitOfWork, "unitOfWork");
+    this.audit = Objects.requireNonNull(audit, "audit");
     this.households = new GetHousehold(households);
     this.fridges = Objects.requireNonNull(fridges, "fridges");
     this.chains = Objects.requireNonNull(chains, "chains");
@@ -33,6 +43,10 @@ public final class ReviewColdChain {
   }
 
   public ColdIncident review(UserId actor, HouseholdId household, FridgeId fridge) {
+    return unitOfWork.runFor(household, () -> reviewInTurn(actor, household, fridge));
+  }
+
+  private ColdIncident reviewInTurn(UserId actor, HouseholdId household, FridgeId fridge) {
     households.get(actor, household).requirePermission(actor, Permission.EDIT_INVENTORY);
     boolean ownFridge =
         fridges.findByHousehold(household).stream().map(Fridge::id).anyMatch(fridge::equals);
@@ -42,6 +56,15 @@ public final class ReviewColdChain {
     ColdChain chain = chains.find(fridge).orElseGet(() -> ColdChain.start(fridge));
     ColdIncident incident = chain.review(actor, clock.instant());
     chains.save(chain);
+    audit.record(
+        new AuditEntry(
+            actor,
+            household,
+            "REVIEW_COLD_CHAIN",
+            "FRIDGE",
+            fridge.value(),
+            Map.of(),
+            clock.instant()));
     return incident;
   }
 }

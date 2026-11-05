@@ -108,9 +108,10 @@ class MarketListTest {
     list.remove(item.id());
 
     assertTrue(list.items().isEmpty());
-    assertThrows(IllegalArgumentException.class, () -> list.remove(item.id()));
+    assertThrows(MarketItemNotFoundException.class, () -> list.remove(item.id()));
     assertThrows(
-        IllegalArgumentException.class, () -> list.changeGrams(MarketItemId.newId(), Grams.of(1)));
+        MarketItemNotFoundException.class,
+        () -> list.changeGrams(MarketItemId.newId(), Grams.of(1)));
     assertThrows(
         IllegalArgumentException.class,
         () -> list.add(RICE, Grams.ZERO, MarketSource.MANUAL, juan, NOW));

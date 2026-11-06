@@ -106,7 +106,7 @@ class ExpiryIntegrationTest {
         .andExpect(
             jsonPath("$.detail")
                 .value(
-                    "Milk dura unos 7 días en la nevera, así que una fecha a 40 días no es"
+                    "Leche dura unos 7 días en la nevera, así que una fecha a 40 días no es"
                         + " posible; revisa la etiqueta o deja que HayPaComer la estime"));
     String milk =
         body(

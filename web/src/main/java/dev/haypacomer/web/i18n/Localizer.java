@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -67,6 +68,10 @@ public class Localizer {
     } catch (RuntimeException unavailable) {
       return text;
     }
+  }
+
+  public String lines(String text) {
+    return text.lines().map(this::message).collect(Collectors.joining("\n"));
   }
 
   public String text(String key, String fallback) {

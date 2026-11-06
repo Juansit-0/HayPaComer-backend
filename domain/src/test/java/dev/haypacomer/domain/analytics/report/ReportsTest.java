@@ -69,7 +69,8 @@ class ReportsTest {
 
     String report = markdown.render(context("Apart|ment #1"));
 
-    assertTrue(report.startsWith("# Apart/ment \\#1 kitchen report\n\n2026-10-05 to 2026-10-06"));
+    assertTrue(
+        report.startsWith("# Apart/ment \\#1 kitchen report\n\nFrom 2026-10-05 to 2026-10-06"));
     assertTrue(report.contains("- Rescued before expiring: 0.60 kg"));
     assertTrue(report.contains("(52.6% of what left the fridge)"));
     assertTrue(report.contains("- Money saved: 13200.00 COP"));

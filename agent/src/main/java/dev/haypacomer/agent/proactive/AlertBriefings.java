@@ -43,7 +43,7 @@ public final class AlertBriefings implements NotificationListener {
                 LocalDate day = LocalDate.ofInstant(alert.at(), household.timezone());
                 String kind = "alert-" + alert.type().name().toLowerCase(Locale.ROOT);
                 if (log.claim(alert.household(), kind, day)) {
-                  briefer.briefAlert(
+                  briefer.brief(
                       alert.household(),
                       "cold",
                       "The fridge raised an alert: "

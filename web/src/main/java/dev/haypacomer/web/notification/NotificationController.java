@@ -61,7 +61,7 @@ public class NotificationController {
                     response.householdId(),
                     response.type(),
                     localizer.message(response.title()),
-                    localizer.message(response.body()),
+                    localizer.lines(response.body()),
                     response.at(),
                     response.readAt()))
         .toList();

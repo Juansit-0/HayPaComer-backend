@@ -20,6 +20,7 @@ import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
+import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -32,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -61,6 +63,7 @@ public class AnalyticsController {
   private final BuildWeeklyDigest buildWeeklyDigest;
   private final GetHousehold getHousehold;
   private final Clock clock;
+  private final Localizer localizer;
 
   public AnalyticsController(
       ViewHouseholdMetrics viewMetrics,
@@ -70,7 +73,9 @@ public class AnalyticsController {
       HouseholdMemberNames memberNames,
       BuildWeeklyDigest buildWeeklyDigest,
       GetHousehold getHousehold,
-      Clock clock) {
+      Clock clock,
+      Localizer localizer) {
+    this.localizer = localizer;
     this.viewMetrics = viewMetrics;
     this.setFoodPrice = setFoodPrice;
     this.listFoodPrices = listFoodPrices;
@@ -92,7 +97,8 @@ public class AnalyticsController {
     LocalDate[] period = period(actor, household, from, to);
     return MetricsResponse.from(
         viewMetrics.view(actor, household, period[0], period[1]),
-        memberNames.names(actor, household));
+        memberNames.names(actor, household),
+        localizer.message("Former member"));
   }
 
   @GetMapping("/analytics/report")
@@ -117,7 +123,25 @@ public class AnalyticsController {
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
             ContentDisposition.attachment().filename(report.fileName()).build().toString())
-        .body(report.content());
+        .body(chosen == ReportFormat.MARKDOWN ? forPeople(report.content()) : report.content());
+  }
+
+  private String forPeople(String markdown) {
+    return markdown.lines().map(this::reportLine).collect(Collectors.joining("\n", "", "\n"));
+  }
+
+  // A table row starts with a food or a member; a translated line is a heading, not a row.
+  private String reportLine(String line) {
+    String translated = localizer.message(line);
+    String[] cells = line.split(" \\| ", 2);
+    if (!translated.equals(line) || !line.startsWith("| ") || cells.length < 2) {
+      return translated;
+    }
+    String name = cells[0].substring(2);
+    return "| "
+        + localizer.text("food." + name.toLowerCase(Locale.ROOT), localizer.message(name))
+        + " | "
+        + cells[1];
   }
 
   private LocalDate[] period(UserId actor, HouseholdId household, LocalDate from, LocalDate to) {
@@ -134,7 +158,7 @@ public class AnalyticsController {
     return new DigestResponse(
         digest.thisWeek().from(),
         digest.thisWeek().to(),
-        digest.text(),
+        localizer.lines(digest.text()),
         digest.tips().stream()
             .map(
                 tip ->
@@ -194,10 +218,10 @@ public class AnalyticsController {
 
   record MemberResponse(UUID userId, String name, TallyResponse tally) {
 
-    static MemberResponse from(MemberTally member, Map<UserId, String> names) {
+    static MemberResponse from(MemberTally member, Map<UserId, String> names, String former) {
       return new MemberResponse(
           member.user().value(),
-          names.getOrDefault(member.user(), "Former member"),
+          names.getOrDefault(member.user(), former),
           TallyResponse.from(member.tally()));
     }
   }
@@ -221,7 +245,7 @@ public class AnalyticsController {
       List<DayResponse> days,
       Set<String> unpriced) {
 
-    static MetricsResponse from(MetricsReport report, Map<UserId, String> names) {
+    static MetricsResponse from(MetricsReport report, Map<UserId, String> names, String former) {
       HouseholdMetrics metrics = report.metrics();
       return new MetricsResponse(
           metrics.from(),
@@ -231,7 +255,9 @@ public class AnalyticsController {
           metrics.moneySaved(),
           metrics.moneyWasted(),
           metrics.foods().stream().map(FoodResponse::from).toList(),
-          metrics.members().stream().map(member -> MemberResponse.from(member, names)).toList(),
+          metrics.members().stream()
+              .map(member -> MemberResponse.from(member, names, former))
+              .toList(),
           metrics.days().stream().map(DayResponse::from).toList(),
           metrics.unpriced());
     }

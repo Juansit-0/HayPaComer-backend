@@ -155,7 +155,7 @@ class ProactiveBriefingsTest {
     Notification briefing = delivered.getFirst();
     assertEquals(NotificationType.BRIEFING, briefing.type());
     assertEquals("Today in your kitchen", briefing.title());
-    assertTrue(briefing.body().contains("Chicken breast 650 g"));
+    assertEquals(Briefer.OPEN_THE_APP, briefing.body());
     assertEquals("chef", stores.runs.values().iterator().next().specialist());
   }
 
@@ -169,7 +169,7 @@ class ProactiveBriefingsTest {
     assertEquals(1, scheduled(noon).run());
     assertEquals(0, scheduled(noon.plusSeconds(3600)).run());
     assertEquals("3 foods expire soon", delivered.getFirst().title());
-    assertTrue(delivered.getFirst().body().startsWith("Offline answer based on measured data"));
+    assertEquals(Briefer.OPEN_THE_APP, delivered.getFirst().body());
   }
 
   @Test

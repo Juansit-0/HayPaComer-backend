@@ -21,7 +21,7 @@ public final class MarkdownReport extends ReportTemplate {
   protected String header(ReportContext report) {
     return "# "
         + clean(report.householdName())
-        + " kitchen report\n\n"
+        + " kitchen report\n\nFrom "
         + report.metrics().from()
         + " to "
         + report.metrics().to()

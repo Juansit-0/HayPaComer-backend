@@ -46,7 +46,7 @@ public record WeeklyDigest(
             .append(" of what left the fridge, ")
             .append(trend(now.wasteRate(), before.wasteRate()))
             .append(").");
-    topRescuer().ifPresent(name -> text.append(" Top rescuer: ").append(name).append('.'));
+    topRescuer().ifPresent(name -> text.append("\nTop rescuer: ").append(name).append('.'));
     tips.forEach(tip -> text.append('\n').append(tip.text()));
     if (tips.isEmpty() && !now.discarded().isZero()) {
       text.append("\nNo food was thrown away twice; keep using what expires first.");

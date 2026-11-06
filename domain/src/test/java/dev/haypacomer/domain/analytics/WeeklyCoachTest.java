@@ -107,8 +107,8 @@ class WeeklyCoachTest {
 
     assertEquals(
         "This week you rescued 500 g before it expired and saved 11000.00 COP. You threw away"
-            + " 100 g (10% of what left the fridge, 40 points better than last week). Top rescuer:"
-            + " Ana.\nNo food was thrown away twice; keep using what expires first.",
+            + " 100 g (10% of what left the fridge, 40 points better than last week).\nTop"
+            + " rescuer: Ana.\nNo food was thrown away twice; keep using what expires first.",
         digest.text());
     WeeklyDigest same =
         new WeeklyDigest(lastWeek, lastWeek, List.of(), Currency.getInstance("COP"), Map.of());

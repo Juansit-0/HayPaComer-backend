@@ -9,7 +9,6 @@ import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.domain.household.HouseholdId;
 import java.time.Clock;
 import java.util.Optional;
-import java.util.function.UnaryOperator;
 
 public final class Briefer {
 
@@ -46,33 +45,16 @@ public final class Briefer {
     return digest;
   }
 
-  private static String shortened(String answer) {
+  // Without AI the agent answers with a raw list of readings, which nobody should have to read.
+  private static String readable(String answer) {
+    if (answer.startsWith(RuleBasedPlanner.RAW_ANSWER)) {
+      return OPEN_THE_APP;
+    }
     return answer.length() > MAX_BODY ? answer.substring(0, MAX_BODY) : answer;
-  }
-
-  // Without AI the agent answers with a raw list of readings, which must not bury the alert.
-  public Optional<Notification> briefAlert(
-      HouseholdId household, String specialist, String goal, String title) {
-    return brief(
-        household,
-        specialist,
-        goal,
-        title,
-        answer ->
-            answer.startsWith(RuleBasedPlanner.RAW_ANSWER) ? OPEN_THE_APP : shortened(answer));
   }
 
   public Optional<Notification> brief(
       HouseholdId household, String specialist, String goal, String title) {
-    return brief(household, specialist, goal, title, Briefer::shortened);
-  }
-
-  private Optional<Notification> brief(
-      HouseholdId household,
-      String specialist,
-      String goal,
-      String title,
-      UnaryOperator<String> body) {
     return households
         .findById(household)
         .map(
@@ -86,7 +68,7 @@ public final class Briefer {
                       household,
                       NotificationType.BRIEFING,
                       title,
-                      body.apply(answer),
+                      readable(answer),
                       clock.instant());
               delivery.publish(briefing);
               return briefing;

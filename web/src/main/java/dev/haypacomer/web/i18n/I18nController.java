@@ -43,7 +43,7 @@ public class I18nController {
 
   @GetMapping("/api/v1/i18n")
   LocalesResponse locales() {
-    return new LocalesResponse(localizer.locale(), listLocales.list());
+    return new LocalesResponse(localizer.locale(), localizer.saved(), listLocales.list());
   }
 
   @GetMapping("/api/v1/i18n/{locale}")
@@ -69,5 +69,5 @@ public class I18nController {
 
   record LocaleResponse(String locale) {}
 
-  record LocalesResponse(String current, List<LocaleOption> available) {}
+  record LocalesResponse(String current, boolean saved, List<LocaleOption> available) {}
 }

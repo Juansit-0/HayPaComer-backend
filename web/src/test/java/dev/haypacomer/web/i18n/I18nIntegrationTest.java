@@ -112,7 +112,8 @@ class I18nIntegrationTest {
     mvc.perform(get(missing).header("Authorization", juan).header("Accept-Language", "es"))
         .andExpect(jsonPath("$.detail").value("Household not found"));
     mvc.perform(get("/api/v1/i18n").header("Authorization", juan))
-        .andExpect(jsonPath("$.current").value("en"));
+        .andExpect(jsonPath("$.current").value("en"))
+        .andExpect(jsonPath("$.saved").value(true));
     mvc.perform(
             put("/api/v1/me/locale")
                 .header("Authorization", juan)

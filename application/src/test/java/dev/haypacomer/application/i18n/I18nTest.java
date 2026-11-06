@@ -16,6 +16,19 @@ import org.junit.jupiter.api.Test;
 
 class I18nTest {
 
+  @Test
+  void foodsInsideMessagesTakeTheirName() {
+    MessageTranslator translator =
+        new MessageTranslator(
+            java.util.Map.of(
+                "You threw away {} {} times", "Botaste {} {} veces", "{} is out", "{} se acabó"),
+            java.util.Map.of("food.rice", "Arroz"));
+
+    assertEquals("Botaste arroz 3 veces", translator.translate("You threw away rice 3 times"));
+    assertEquals("Arroz se acabó", translator.translate("Rice is out"));
+    assertEquals("Botaste lulo 2 veces", translator.translate("You threw away lulo 2 times"));
+  }
+
   private static final Map<String, String> SPANISH_TEMPLATES =
       Map.of(
           "Not found", "No encontrado",

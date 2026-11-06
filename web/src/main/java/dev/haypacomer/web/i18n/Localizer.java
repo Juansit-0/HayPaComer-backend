@@ -70,6 +70,10 @@ public class Localizer {
     }
   }
 
+  public boolean saved() {
+    return user().flatMap(userLocales::locale).isPresent();
+  }
+
   public String lines(String text) {
     return text.lines().map(this::message).collect(Collectors.joining("\n"));
   }

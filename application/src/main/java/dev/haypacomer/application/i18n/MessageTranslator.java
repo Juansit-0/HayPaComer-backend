@@ -3,6 +3,7 @@ package dev.haypacomer.application.i18n;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,8 +16,14 @@ public final class MessageTranslator {
 
   private final Map<String, String> exact;
   private final List<Template> patterns;
+  private final Map<String, String> texts;
 
   public MessageTranslator(Map<String, String> templates) {
+    this(templates, Map.of());
+  }
+
+  public MessageTranslator(Map<String, String> templates, Map<String, String> texts) {
+    this.texts = Map.copyOf(texts);
     this.exact = Map.copyOf(templates);
     List<Template> compiled = new ArrayList<>();
     templates.forEach(
@@ -60,16 +67,26 @@ public final class MessageTranslator {
     return new Template(Pattern.compile(regex.toString(), Pattern.DOTALL), target, literal);
   }
 
-  private static String fill(String target, Matcher matcher) {
+  private String fill(String target, Matcher matcher) {
     StringBuilder result = new StringBuilder();
     int group = 1;
     int from = 0;
     int hole;
     while ((hole = target.indexOf(HOLE, from)) >= 0) {
       result.append(target, from, hole);
-      result.append(group <= matcher.groupCount() ? matcher.group(group++) : HOLE);
+      result.append(
+          group <= matcher.groupCount() ? named(matcher.group(group++), hole == 0) : HOLE);
       from = hole + HOLE.length();
     }
     return result.append(target.substring(from)).toString();
+  }
+
+  // A hole holding a food takes its name in this language, lowercase inside a sentence.
+  private String named(String value, boolean starts) {
+    String name = texts.get("food." + value.strip().toLowerCase(Locale.ROOT));
+    if (name == null) {
+      return value;
+    }
+    return starts ? name : name.substring(0, 1).toLowerCase(Locale.ROOT) + name.substring(1);
   }
 }

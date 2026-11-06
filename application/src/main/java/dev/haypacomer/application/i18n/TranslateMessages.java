@@ -22,7 +22,7 @@ public final class TranslateMessages {
     if (known != null && known.templates() == templates) {
       return known.translator();
     }
-    MessageTranslator translator = new MessageTranslator(templates);
+    MessageTranslator translator = new MessageTranslator(templates, translations.texts(locale));
     compiled.put(locale, new Compiled(templates, translator));
     return translator;
   }

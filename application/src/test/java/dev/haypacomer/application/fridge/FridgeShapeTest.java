@@ -37,9 +37,9 @@ class FridgeShapeTest {
   void theStandardFridgeIsReadFromItsTraysAndNamesNewTraysInOrder() {
     Fridge fridge = FridgeLayout.STANDARD.build("Kitchen");
     FridgeShape inferred = FridgeShape.inferredFrom(fridge);
-    assertEquals(FridgeType.TOP_FREEZER, inferred.type());
+    assertEquals(FridgeType.SINGLE_DOOR, inferred.type());
     assertEquals(
-        List.of(3, 1, 1, 1),
+        List.of(3, 1, 1, 0),
         List.of(
             inferred.shelves(),
             inferred.doorRacks(),

@@ -53,11 +53,12 @@ public record FridgeShape(
         new FridgeExample("single-door", standard(FridgeType.SINGLE_DOOR, 3, 3, 1, 1)));
   }
 
-  // A fridge whose shape was never described: its counts from the tree, drawn as the top-freezer
-  // fridge the
-  // app always showed.
+  // A fridge whose shape was never described: its counts from the tree, with a freezer door only
+  // when it really has a freezer to open.
   public static FridgeShape inferredFrom(Fridge fridge) {
-    return standard(FridgeType.TOP_FREEZER, 0, 0, 0, 1).withCountsOf(fridge);
+    return count(fridge, ZoneKind.FREEZER) > 0
+        ? standard(FridgeType.TOP_FREEZER, 0, 0, 0, 1).withCountsOf(fridge)
+        : standard(FridgeType.SINGLE_DOOR, 0, 0, 0, 0).withCountsOf(fridge);
   }
 
   // The counts always come from the fridge itself, so a stored shape never disagrees with its

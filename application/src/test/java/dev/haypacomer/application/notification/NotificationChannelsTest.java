@@ -94,6 +94,13 @@ class NotificationChannelsTest {
   }
 
   @Test
+  void theInboxCannotBeTurnedOff() {
+    assertEquals(
+        Set.of(ChannelKind.WEB),
+        new UpdateNotificationPreferences(preferences).update(ana, Set.of(), null).channels());
+  }
+
+  @Test
   void eachMemberGetsTheChannelsTheyChose() {
     new UpdateNotificationPreferences(preferences)
         .update(ana, Set.of(ChannelKind.TELEGRAM, ChannelKind.WEB), "123456");

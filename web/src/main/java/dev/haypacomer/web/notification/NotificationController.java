@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -40,8 +41,10 @@ public class NotificationController {
       MarkNotificationRead markNotificationRead,
       ViewNotificationPreferences viewPreferences,
       UpdateNotificationPreferences updatePreferences,
-      Localizer localizer) {
+      Localizer localizer,
+      @Value("${haypacomer.notifications.telegram.bot-token:}") String telegramToken) {
     this.localizer = localizer;
+    this.telegramReady = !telegramToken.isBlank();
     this.listNotifications = listNotifications;
     this.markNotificationRead = markNotificationRead;
     this.viewPreferences = viewPreferences;
@@ -49,6 +52,7 @@ public class NotificationController {
   }
 
   private final Localizer localizer;
+  private final boolean telegramReady;
 
   @GetMapping("/api/v1/notifications")
   List<NotificationResponse> notifications(@AuthenticationPrincipal Jwt jwt) {
@@ -75,23 +79,25 @@ public class NotificationController {
 
   @GetMapping("/api/v1/me/notification-preferences")
   PreferencesResponse preferences(@AuthenticationPrincipal Jwt jwt) {
-    return PreferencesResponse.from(viewPreferences.view(CurrentUser.of(jwt)));
+    return PreferencesResponse.from(viewPreferences.view(CurrentUser.of(jwt)), telegramReady);
   }
 
   @PutMapping("/api/v1/me/notification-preferences")
   PreferencesResponse updatePreferences(
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody PreferencesRequest request) {
     return PreferencesResponse.from(
-        updatePreferences.update(
-            CurrentUser.of(jwt), request.channels(), request.telegramChatId()));
+        updatePreferences.update(CurrentUser.of(jwt), request.channels(), request.telegramChatId()),
+        telegramReady);
   }
 
   record PreferencesRequest(@NotNull Set<ChannelKind> channels, String telegramChatId) {}
 
-  record PreferencesResponse(Set<ChannelKind> channels, String telegramChatId) {
+  record PreferencesResponse(
+      Set<ChannelKind> channels, String telegramChatId, boolean telegramReady) {
 
-    static PreferencesResponse from(NotificationPreferences preferences) {
-      return new PreferencesResponse(preferences.channels(), preferences.telegram().orElse(null));
+    static PreferencesResponse from(NotificationPreferences preferences, boolean telegramReady) {
+      return new PreferencesResponse(
+          preferences.channels(), preferences.telegram().orElse(null), telegramReady);
     }
   }
 

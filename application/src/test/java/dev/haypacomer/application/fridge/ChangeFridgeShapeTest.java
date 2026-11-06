@@ -85,7 +85,7 @@ class ChangeFridgeShapeTest {
 
   @Test
   void aStandardFridgeBecomesTheChallengerMinibarAndIsReadBackSo() {
-    assertEquals(FridgeType.TOP_FREEZER, view.view(ana, household.id(), fridge.id()).type());
+    assertEquals(FridgeType.SINGLE_DOOR, view.view(ana, household.id(), fridge.id()).type());
 
     FridgeShape changed = change.change(juan, household.id(), fridge.id(), CR121);
 

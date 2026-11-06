@@ -1,0 +1,48 @@
+-- Recipe steps, the Markdown report and the weekly digest in Spanish.
+INSERT INTO translations (locale, key, text) VALUES
+    ('es-CO', 'step.toast the arepas on a hot pan', 'Tuesta las arepas en un sartén caliente'),
+    ('en', 'step.toast the arepas on a hot pan', 'Toast the arepas on a hot pan'),
+    ('es-CO', 'step.open them and fill with cheese', 'Ábrelas y rellénalas con queso'),
+    ('en', 'step.open them and fill with cheese', 'Open them and fill with cheese'),
+    ('es-CO', 'step.cook the rice', 'Cocina el arroz'),
+    ('en', 'step.cook the rice', 'Cook the rice'),
+    ('es-CO', 'step.warm the beans with the onion', 'Calienta los fríjoles con la cebolla'),
+    ('en', 'step.warm the beans with the onion', 'Warm the beans with the onion'),
+    ('es-CO', 'step.boil the pasta', 'Hierve la pasta'),
+    ('en', 'step.boil the pasta', 'Boil the pasta'),
+    ('es-CO', 'step.cook the tomato and onion into a sauce', 'Cocina el tomate y la cebolla hasta hacer una salsa'),
+    ('en', 'step.cook the tomato and onion into a sauce', 'Cook the tomato and onion into a sauce'),
+    ('es-CO', 'step.scramble the eggs with the tomato', 'Revuelve los huevos con el tomate'),
+    ('en', 'step.scramble the eggs with the tomato', 'Scramble the eggs with the tomato'),
+    ('es-CO', 'step.fry the potato and onion', 'Fríe la papa y la cebolla'),
+    ('en', 'step.fry the potato and onion', 'Fry the potato and onion'),
+    ('es-CO', 'step.add the beaten eggs and set both sides', 'Agrega los huevos batidos y dora por ambos lados'),
+    ('en', 'step.add the beaten eggs and set both sides', 'Add the beaten eggs and set both sides')
+ON CONFLICT (locale, key) DO UPDATE SET text = EXCLUDED.text, updated_at = now();
+
+INSERT INTO message_templates (locale, source, target) VALUES
+    ('es-CO', '# {} kitchen report', '# Reporte de cocina de {}'),
+    ('es-CO', 'From {} to {}', 'Del {} al {}'),
+    ('es-CO', '## Summary', '## Resumen'),
+    ('es-CO', '- Eaten: {}', '- Comido: {}'),
+    ('es-CO', '- Rescued before expiring: {}', '- Rescatado antes de vencer: {}'),
+    ('es-CO', '- Thrown away: {} ({} of what left the fridge)', '- Botado: {} ({} de lo que salió de la nevera)'),
+    ('es-CO', '- Money saved: {}', '- Dinero ahorrado: {}'),
+    ('es-CO', '- Money wasted: {}', '- Dinero perdido: {}'),
+    ('es-CO', '- Foods without a price: {}', '- Alimentos sin precio: {}'),
+    ('es-CO', '## Foods', '## Alimentos'),
+    ('es-CO', 'No food left the fridge in this period.', 'Ningún alimento salió de la nevera en este período.'),
+    ('es-CO', '| Food | Eaten | Rescued | Thrown away |', '| Alimento | Comido | Rescatado | Botado |'),
+    ('es-CO', '## Members', '## Miembros'),
+    ('es-CO', '| Member | Eaten | Rescued | Thrown away |', '| Miembro | Comido | Rescatado | Botado |'),
+    ('es-CO', '## Days with activity', '## Días con actividad'),
+    ('es-CO', '- {}: {} eaten, {} thrown away', '- {}: {} comido, {} botado'),
+    ('es-CO', 'Grams come from measured inventory movements; money uses the price per kilogram of each food.', 'Los gramos vienen de los movimientos medidos del inventario; el dinero usa el precio por kilo de cada alimento.'),
+    ('es-CO', 'Former member', 'Exmiembro'),
+    ('es-CO', 'This week you rescued {} before it expired and saved {} {}. You threw away {} ({} of what left the fridge, the same as last week).', 'Esta semana rescataste {} antes de que venciera y ahorraste {} {}. Botaste {} ({} de lo que salió de la nevera, igual que la semana pasada).'),
+    ('es-CO', 'This week you rescued {} before it expired and saved {} {}. You threw away {} ({} of what left the fridge, {} points better than last week).', 'Esta semana rescataste {} antes de que venciera y ahorraste {} {}. Botaste {} ({} de lo que salió de la nevera, {} puntos mejor que la semana pasada).'),
+    ('es-CO', 'This week you rescued {} before it expired and saved {} {}. You threw away {} ({} of what left the fridge, {} points worse than last week).', 'Esta semana rescataste {} antes de que venciera y ahorraste {} {}. Botaste {} ({} de lo que salió de la nevera, {} puntos peor que la semana pasada).'),
+    ('es-CO', 'Top rescuer: {}.', 'Quien más rescató: {}.'),
+    ('es-CO', 'You threw away {} {} times ({}). Buy about {}% less, or plan a dish for it earlier.', 'Botaste {} {} veces ({}). Compra cerca de {}% menos, o planea un plato antes.'),
+    ('es-CO', 'No food was thrown away twice; keep using what expires first.', 'Ningún alimento se botó dos veces; sigue usando primero lo que vence antes.')
+ON CONFLICT (locale, source) DO UPDATE SET target = EXCLUDED.target;

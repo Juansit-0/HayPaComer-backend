@@ -64,6 +64,11 @@ haypacomer:
   mail:
     base-url: ${PUBLIC_BASE_URL:https://haypacomer.dev}
     log-links: ${MAIL_LOG_LINKS:false}
+    provider: ${MAIL_PROVIDER:log}
+    from: ${MAIL_FROM:}
+    from-name: ${MAIL_FROM_NAME:HayPaComer}
+    brevo:
+      api-key: ${BREVO_API_KEY:}
   notifications:
     telegram:
       bot-token: ${TELEGRAM_BOT_TOKEN:}

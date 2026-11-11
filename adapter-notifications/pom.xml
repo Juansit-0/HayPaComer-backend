@@ -12,12 +12,16 @@
 
   <artifactId>adapter-notifications</artifactId>
   <name>HayPaComer - adapter-notifications</name>
-  <description>Notification channels: Telegram, web, and log</description>
+  <description>Notification channels: Telegram, web, and log; email through Brevo</description>
 
   <dependencies>
     <dependency>
       <groupId>dev.haypacomer</groupId>
       <artifactId>application</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

@@ -41,12 +41,18 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: PUBLIC_BASE_URL
-        value: https://haypacomer.dev
+        value: https://haypacomer.onrender.com
       - key: AI_PROVIDER
         value: offline
       - key: GEMINI_API_KEY
         sync: false
       - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: MAIL_PROVIDER
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: BREVO_API_KEY
         sync: false
 
   - type: keyvalue

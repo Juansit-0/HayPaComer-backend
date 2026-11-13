@@ -1,6 +1,7 @@
 package dev.haypacomer.sensors.pipeline;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -266,12 +267,28 @@ class SensorPipelineRobustnessTest {
   @Test
   void productRemovalIsSeenOnlyThroughStableReadings() {
     clock.set(T0.plusSeconds(10));
+    device =
+        Device.register(
+            device.household(), device.fridge(), "Scale", DeviceKind.ESP32_SCALE, "cd", T0);
 
     IngestionReport report = send(simulator.productRemoval("842", "650", T0));
 
     assertEquals(1, report.count(Verdict.DROPPED));
     assertEquals(FindingKind.STOCK_DECREASE, report.findings().getFirst().kind());
     assertEquals(List.of(AlertPattern.WEIGHT_CONFIRMED_BLINK), buzzer());
+  }
+
+  @Test
+  void aDoorDeviceCannotSendWeights() {
+    clock.set(T0.plusSeconds(10));
+
+    IngestionReport report = send(simulator.productRemoval("842", "650", T0));
+
+    List<EventResult> weights =
+        report.events().stream().filter(event -> event.type().contains("WEIGHT")).toList();
+    assertFalse(weights.isEmpty());
+    assertTrue(weights.stream().allMatch(event -> event.verdict() == Verdict.REJECTED));
+    assertTrue(report.findings().isEmpty());
   }
 
   @Test

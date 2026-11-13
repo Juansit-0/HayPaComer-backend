@@ -74,7 +74,11 @@ public final class IngestSensorEvents {
     List<EventResult> results = new ArrayList<>();
     List<Finding> findings = new ArrayList<>();
     for (SensorEvent event : events) {
-      ValidationResult checked = validation.validate(event);
+      ValidationResult checked =
+          device.kind().emits(event)
+              ? validation.validate(event)
+              : ValidationResult.rejected(
+                  "a " + device.kind() + " device does not send " + SensorEventTypes.of(event));
       // Parallel posts can all pass the check; the insert decides which one counts.
       ValidationResult verdict =
           checked.accepted() && !log.accept(event, clock.instant())

@@ -81,11 +81,12 @@ public final class MessageTranslator {
     return result.append(target.substring(from)).toString();
   }
 
-  // A hole holding a food takes its name in this language, lowercase inside a sentence.
+  // A hole holding a food takes its name in this language, lowercase inside a sentence; a hole
+  // holding a whole known message, such as a fallback name, takes its translation.
   private String named(String value, boolean starts) {
     String name = texts.get("food." + value.strip().toLowerCase(Locale.ROOT));
     if (name == null) {
-      return value;
+      return exact.getOrDefault(value, value);
     }
     return starts ? name : name.substring(0, 1).toLowerCase(Locale.ROOT) + name.substring(1);
   }

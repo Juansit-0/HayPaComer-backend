@@ -89,6 +89,20 @@ class I18nTest {
   }
 
   @Test
+  void aKnownMessageInsideAHoleIsTranslatedToo() {
+    MessageTranslator translator =
+        new MessageTranslator(
+            Map.of(
+                "Top rescuer: {}.", "Quien más rescató: {}.",
+                "A former member", "Alguien que ya no está en el hogar"));
+
+    assertEquals(
+        "Quien más rescató: Alguien que ya no está en el hogar.",
+        translator.translate("Top rescuer: A former member."));
+    assertEquals("Quien más rescató: Ana.", translator.translate("Top rescuer: Ana."));
+  }
+
+  @Test
   void theMostSpecificTemplateWins() {
     MessageTranslator translator =
         new MessageTranslator(

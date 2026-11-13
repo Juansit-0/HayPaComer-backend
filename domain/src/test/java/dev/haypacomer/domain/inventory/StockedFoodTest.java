@@ -66,6 +66,15 @@ class StockedFoodTest {
   }
 
   @Test
+  void onlyTheLeftoversFoodIsMarkedAsLeftover() {
+    StockedFood leftovers = LeftoverFood.markIfLeftover(plain("Leftovers", TODAY.plusDays(3)));
+    StockedFood soup = LeftoverFood.markIfLeftover(plain("Soup", TODAY.plusDays(3)));
+
+    assertTrue(leftovers.has(FoodStatus.LEFTOVER));
+    assertFalse(soup.has(FoodStatus.LEFTOVER));
+  }
+
+  @Test
   void expiredFoodIsNotEdible() {
     StockedFood expired = new ExpiredFood(yogurt(TODAY.minusDays(1)));
 

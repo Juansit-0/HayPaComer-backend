@@ -13,6 +13,7 @@ import dev.haypacomer.domain.fridge.Fridge;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.inventory.FreshnessPolicy;
+import dev.haypacomer.domain.inventory.LeftoverFood;
 import dev.haypacomer.domain.inventory.OwnedFood;
 import dev.haypacomer.domain.inventory.PlainFood;
 import dev.haypacomer.domain.inventory.PrivateFoodProxy;
@@ -97,7 +98,7 @@ public final class ViewInventory {
             .find(item.id())
             .<StockedFood>map(ownership -> new OwnedFood(new PlainFood(item), ownership))
             .orElseGet(() -> new PlainFood(item));
-    StockedFood fresh = freshness.apply(food, today);
+    StockedFood fresh = freshness.apply(LeftoverFood.markIfLeftover(food), today);
     return underReview && item.food().perishable() ? new UnderReviewFood(fresh) : fresh;
   }
 }

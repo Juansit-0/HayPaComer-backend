@@ -1,6 +1,7 @@
 package dev.haypacomer.application.agent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -165,5 +166,33 @@ class HouseholdMemoryTest {
                 new MemoryNote(MemoryTopic.DECISION, "second", "v")));
     assertEquals("v", stored.get(home.id()).get("decision:n1"));
     assertEquals(RememberForHousehold.MAX_NOTES - 1, stored.get(home.id()).size());
+  }
+
+  @Test
+  void anEditForgetsAndRemembersTogetherOrNotAtAll() {
+    EditHouseholdMemory edit = new EditHouseholdMemory(households, memory);
+    for (int i = 0; i < EditHouseholdMemory.MAX_NOTES; i++) {
+      memory.remember(home.id(), "decision:n" + i, "v");
+    }
+
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            edit.edit(
+                owner,
+                home.id(),
+                List.of("decision:n0"),
+                List.of(
+                    new MemoryNote(MemoryTopic.DECISION, "first", "v"),
+                    new MemoryNote(MemoryTopic.DECISION, "second", "v"))));
+    assertEquals("v", stored.get(home.id()).get("decision:n0"));
+
+    edit.edit(
+        owner,
+        home.id(),
+        List.of(MemoryNote.keyOf(MemoryTopic.DECISION, " N0 ")),
+        List.of(new MemoryNote(MemoryTopic.DECISION, "first", "v")));
+    assertFalse(stored.get(home.id()).containsKey("decision:n0"));
+    assertEquals("v", stored.get(home.id()).get("decision:first"));
   }
 }

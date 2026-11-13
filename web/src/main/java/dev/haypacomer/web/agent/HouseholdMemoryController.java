@@ -1,10 +1,9 @@
 package dev.haypacomer.web.agent;
 
 import dev.haypacomer.application.agent.ClearHouseholdMemory;
-import dev.haypacomer.application.agent.ForgetForHousehold;
+import dev.haypacomer.application.agent.EditHouseholdMemory;
 import dev.haypacomer.application.agent.MemoryNote;
 import dev.haypacomer.application.agent.MemoryTopic;
-import dev.haypacomer.application.agent.RememberForHousehold;
 import dev.haypacomer.application.agent.ViewHouseholdMemory;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
@@ -32,18 +31,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class HouseholdMemoryController {
 
   private final ViewHouseholdMemory view;
-  private final RememberForHousehold remember;
-  private final ForgetForHousehold forget;
+  private final EditHouseholdMemory edit;
   private final ClearHouseholdMemory clear;
 
   public HouseholdMemoryController(
-      ViewHouseholdMemory view,
-      RememberForHousehold remember,
-      ForgetForHousehold forget,
-      ClearHouseholdMemory clear) {
+      ViewHouseholdMemory view, EditHouseholdMemory edit, ClearHouseholdMemory clear) {
     this.view = view;
-    this.remember = remember;
-    this.forget = forget;
+    this.edit = edit;
     this.clear = clear;
   }
 
@@ -63,13 +57,13 @@ public class HouseholdMemoryController {
     HouseholdId household = new HouseholdId(householdId);
     List<NoteRequest> forgotten = request.forget() == null ? List.of() : request.forget();
     List<NoteRequest> remembered = request.remember() == null ? List.of() : request.remember();
-    forgotten.forEach(note -> forget.forget(actor, household, note.topic(), note.subject()));
-    remember.remember(
+    edit.edit(
         actor,
         household,
+        forgotten.stream().map(note -> MemoryNote.keyOf(note.topic(), note.subject())).toList(),
         remembered.stream()
             .map(note -> new MemoryNote(note.topic(), note.subject(), note.valueOrEmpty()))
-            .toArray(MemoryNote[]::new));
+            .toList());
     return list(jwt, householdId);
   }
 

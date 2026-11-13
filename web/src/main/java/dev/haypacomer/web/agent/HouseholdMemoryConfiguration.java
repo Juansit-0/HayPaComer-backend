@@ -1,7 +1,7 @@
 package dev.haypacomer.web.agent;
 
 import dev.haypacomer.application.agent.ClearHouseholdMemory;
-import dev.haypacomer.application.agent.ForgetForHousehold;
+import dev.haypacomer.application.agent.EditHouseholdMemory;
 import dev.haypacomer.application.agent.RememberForHousehold;
 import dev.haypacomer.application.agent.ViewHouseholdMemory;
 import dev.haypacomer.application.port.HouseholdMemory;
@@ -25,8 +25,9 @@ public class HouseholdMemoryConfiguration {
   }
 
   @Bean
-  ForgetForHousehold forgetForHousehold(HouseholdRepository households, HouseholdMemory memory) {
-    return new ForgetForHousehold(households, memory);
+  EditHouseholdMemory editHouseholdMemory(
+      HouseholdRepository households, HouseholdMemory memory, UnitOfWork unitOfWork) {
+    return new EditHouseholdMemory(households, memory, unitOfWork);
   }
 
   @Bean

@@ -14,7 +14,7 @@ public record MemoryNote(MemoryTopic topic, String subject, String value) {
     Objects.requireNonNull(topic, "topic");
     Objects.requireNonNull(subject, "subject");
     Objects.requireNonNull(value, "value");
-    subject = subject.strip().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
+    subject = normalized(subject);
     value = value.strip();
     if (subject.isEmpty() || subject.length() > MAX_SUBJECT || subject.contains(":")) {
       throw new IllegalArgumentException(
@@ -29,7 +29,15 @@ public record MemoryNote(MemoryTopic topic, String subject, String value) {
   }
 
   public String key() {
-    return topic.prefix() + ":" + subject;
+    return keyOf(topic, subject);
+  }
+
+  public static String keyOf(MemoryTopic topic, String subject) {
+    return topic.prefix() + ":" + normalized(subject);
+  }
+
+  private static String normalized(String subject) {
+    return subject.strip().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
   }
 
   public static Optional<MemoryNote> fromEntry(String key, String value) {

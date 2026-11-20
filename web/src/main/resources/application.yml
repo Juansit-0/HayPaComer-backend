@@ -56,6 +56,9 @@ info:
     description: Smart fridge with live inventory, cook-now, and cold chain
 
 haypacomer:
+  demo:
+    email: ${DEMO_EMAIL:}
+    password: ${DEMO_PASSWORD:}
   security:
     jwt:
       secret: ${JWT_SECRET:}

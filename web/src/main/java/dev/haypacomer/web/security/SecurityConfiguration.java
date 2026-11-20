@@ -68,6 +68,7 @@ public class SecurityConfiguration {
                         "/actuator/info",
                         "/api/v1/i18n",
                         "/api/v1/i18n/*",
+                        "/api/v1/auth/demo",
                         "/",
                         "/index.html",
                         "/app/**",

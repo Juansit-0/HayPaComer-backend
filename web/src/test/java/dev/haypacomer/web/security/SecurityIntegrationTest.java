@@ -104,7 +104,8 @@ class SecurityIntegrationTest {
         for (RequestMethod method : info.getMethodsCondition().getMethods()) {
           boolean publicEndpoint =
               method == RequestMethod.POST && pattern.startsWith("/api/v1/auth/")
-                  || method == RequestMethod.GET && pattern.startsWith("/api/v1/i18n");
+                  || method == RequestMethod.GET && pattern.startsWith("/api/v1/i18n")
+                  || method == RequestMethod.GET && pattern.equals("/api/v1/auth/demo");
           if (publicEndpoint) {
             continue;
           }

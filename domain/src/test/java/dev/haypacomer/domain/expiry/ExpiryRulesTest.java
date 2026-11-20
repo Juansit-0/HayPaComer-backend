@@ -31,7 +31,49 @@ class ExpiryRulesTest {
   }
 
   @Test
-  void milkOrMeatAMonthAwayIsRejectedWithTheReason() {
+  void sealedPackagesKeepTheDatePrintedOnThem() {
+    assertEquals(
+        TODAY.plusDays(40),
+        rules
+            .check(
+                MILK,
+                MILK_LIFE,
+                ZoneKind.SHELF,
+                false,
+                TODAY.plusDays(40),
+                ExpirySource.USER,
+                TODAY)
+            .date());
+    assertEquals(
+        TODAY.plusYears(2),
+        rules
+            .check(
+                BEEF,
+                BEEF_LIFE,
+                ZoneKind.DRAWER,
+                false,
+                TODAY.plusYears(2),
+                ExpirySource.LABEL,
+                TODAY)
+            .date());
+    assertEquals(
+        "The expiry date is more than 10 years away; check the label",
+        assertThrows(
+                ImpossibleExpiryException.class,
+                () ->
+                    rules.check(
+                        MILK,
+                        MILK_LIFE,
+                        ZoneKind.SHELF,
+                        false,
+                        TODAY.plusYears(11),
+                        ExpirySource.USER,
+                        TODAY))
+            .getMessage());
+  }
+
+  @Test
+  void openedFoodCannotOutlastItsLifeOnceOpened() {
     ImpossibleExpiryException milk =
         assertThrows(
             ImpossibleExpiryException.class,
@@ -40,53 +82,28 @@ class ExpiryRulesTest {
                     MILK,
                     MILK_LIFE,
                     ZoneKind.SHELF,
-                    false,
+                    true,
                     TODAY.plusDays(40),
                     ExpirySource.USER,
                     TODAY));
     assertEquals(
-        "Milk lasts about 7 days in the fridge, so a date 40 days away is not possible;"
+        "Milk lasts about 4 days once opened, so a date 40 days away is not possible;"
             + " check the label or let HayPaComer estimate it",
         milk.getMessage());
-    assertThrows(
-        ImpossibleExpiryException.class,
-        () ->
-            rules.check(
-                BEEF,
-                BEEF_LIFE,
-                ZoneKind.DRAWER,
-                false,
-                TODAY.plusMonths(1),
-                ExpirySource.LABEL,
-                TODAY));
     assertTrue(
         assertThrows(
                 ImpossibleExpiryException.class,
                 () ->
                     rules.check(
-                        MILK,
-                        MILK_LIFE,
-                        ZoneKind.DOOR,
-                        false,
-                        TODAY.plusDays(9),
-                        ExpirySource.USER,
-                        TODAY))
-            .getMessage()
-            .contains("in the fridge door"));
-    assertTrue(
-        assertThrows(
-                ImpossibleExpiryException.class,
-                () ->
-                    rules.check(
-                        MILK,
-                        MILK_LIFE,
-                        ZoneKind.SHELF,
+                        BEEF,
+                        BEEF_LIFE,
+                        ZoneKind.FREEZER,
                         true,
-                        TODAY.plusDays(8),
+                        TODAY.plusYears(1),
                         ExpirySource.USER,
                         TODAY))
             .getMessage()
-            .contains("once opened"));
+            .contains("in the freezer"));
   }
 
   @Test
@@ -132,24 +149,10 @@ class ExpiryRulesTest {
                     MILK,
                     MILK_LIFE,
                     ZoneKind.SHELF,
-                    false,
-                    TODAY.plusDays(8),
+                    true,
+                    TODAY.plusDays(5),
                     ExpirySource.USER,
                     TODAY));
-    assertTrue(
-        assertThrows(
-                ImpossibleExpiryException.class,
-                () ->
-                    rules.check(
-                        BEEF,
-                        BEEF_LIFE,
-                        ZoneKind.FREEZER,
-                        false,
-                        TODAY.plusYears(1),
-                        ExpirySource.USER,
-                        TODAY))
-            .getMessage()
-            .contains("in the freezer"));
     assertThrows(IllegalArgumentException.class, () -> new ExpiryRules(-1));
   }
 

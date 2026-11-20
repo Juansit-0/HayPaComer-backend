@@ -9,6 +9,7 @@ import java.util.Objects;
 public record ExpiryRules(int marginDays) {
 
   public static final ExpiryRules DEFAULT = new ExpiryRules(3);
+  public static final int MAX_YEARS_AHEAD = 10;
 
   public ExpiryRules {
     if (marginDays < 0) {
@@ -34,9 +35,14 @@ public record ExpiryRules(int marginDays) {
     if (date.isBefore(today)) {
       throw new ImpossibleExpiryException("The expiry date is in the past");
     }
+    if (date.isAfter(today.plusYears(MAX_YEARS_AHEAD))) {
+      throw new ImpossibleExpiryException(
+          "The expiry date is more than " + MAX_YEARS_AHEAD + " years away; check the label");
+    }
     int days = life.daysIn(zone, opened);
     long away = ChronoUnit.DAYS.between(today, date);
-    if (away > (long) days + marginDays) {
+    // A sealed package keeps the date printed on it (cans last years); once opened, storage wins.
+    if (opened && away > (long) days + marginDays) {
       throw new ImpossibleExpiryException(
           food.name()
               + " lasts about "

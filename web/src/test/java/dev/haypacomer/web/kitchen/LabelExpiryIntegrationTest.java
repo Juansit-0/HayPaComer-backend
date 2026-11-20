@@ -117,7 +117,7 @@ class LabelExpiryIntegrationTest {
         .andExpect(jsonPath("$.productOnLabel").value("Leche entera"))
         .andExpect(jsonPath("$.saved").value(false));
 
-    daysAhead = 40;
+    daysAhead = 4100;
     mvc.perform(
             multipart(path)
                 .file(photo)
@@ -127,7 +127,7 @@ class LabelExpiryIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.source").value("ESTIMATED"))
         .andExpect(jsonPath("$.expiresOn").value(today.plusDays(7).toString()))
-        .andExpect(jsonPath("$.printedDate").value(today.plusDays(40).toString()));
+        .andExpect(jsonPath("$.printedDate").value(today.plusDays(4100).toString()));
 
     providerDown = true;
     mvc.perform(

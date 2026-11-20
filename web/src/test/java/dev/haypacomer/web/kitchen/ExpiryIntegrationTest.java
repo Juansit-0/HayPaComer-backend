@@ -98,7 +98,7 @@ class ExpiryIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     place
-                        + "\"food\":\"Milk\",\"grams\":900,\"expiresOn\":\""
+                        + "\"food\":\"Milk\",\"grams\":900,\"opened\":true,\"expiresOn\":\""
                         + today.plusDays(40)
                         + "\"}"))
         .andExpect(status().isUnprocessableContent())
@@ -106,7 +106,7 @@ class ExpiryIntegrationTest {
         .andExpect(
             jsonPath("$.detail")
                 .value(
-                    "Leche dura unos 7 días en la nevera, así que una fecha a 40 días no es"
+                    "Leche dura unos 4 días una vez abierto, así que una fecha a 40 días no es"
                         + " posible; revisa la etiqueta o deja que HayPaComer la estime"));
     String milk =
         body(

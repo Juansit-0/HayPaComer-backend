@@ -119,14 +119,16 @@ class ReadExpiryFromLabelTest {
 
   @Test
   void impossibleUnreadableOrUnsureDatesFallBackToTheEstimate() {
-    ExpiryProposal impossible = label(TODAY.plusDays(40), 0.95);
+    ExpiryProposal sealed = label(TODAY.plusDays(40), 0.95);
+    assertEquals(ExpirySource.LABEL, sealed.source());
+    assertEquals(TODAY.plusDays(40), sealed.expiresOn());
+
+    ExpiryProposal impossible = label(TODAY.plusYears(11), 0.95);
     assertEquals(ExpirySource.ESTIMATED, impossible.source());
     assertEquals(TODAY.plusDays(7), impossible.expiresOn());
-    assertEquals(TODAY.plusDays(40), impossible.printedDate());
+    assertEquals(TODAY.plusYears(11), impossible.printedDate());
     assertEquals(
-        "Milk lasts about 7 days in the fridge, so a date 40 days away is not possible;"
-            + " check the label or let HayPaComer estimate it",
-        impossible.reason());
+        "The expiry date is more than 10 years away; check the label", impossible.reason());
 
     assertEquals(ReadExpiryFromLabel.NO_DATE, label(null, 0.9).reason());
     assertEquals(ReadExpiryFromLabel.UNSURE, label(TODAY.plusDays(3), 0.3).reason());

@@ -129,8 +129,7 @@ class ExpiryInventoryTest {
 
   @Test
   void impossibleDatesAreRejectedAndRealOnesKeepTheirSource() {
-    assertThrows(
-        ImpossibleExpiryException.class, () -> stock(top, TODAY.plusDays(40), false, null));
+    assertThrows(ImpossibleExpiryException.class, () -> stock(top, TODAY.plusDays(40), true, null));
     assertTrue(fridges.findByHousehold(household.id()).getFirst().foodItems().findAny().isEmpty());
 
     FoodItem typed = item(stock(top, TODAY.plusDays(6), false, null));

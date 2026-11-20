@@ -35,6 +35,15 @@ public enum ParameterType {
           .orElse(Optional.of("must be a whole number between 1 and " + MAX_COUNT));
     }
   },
+  MONEY {
+    @Override
+    Optional<String> problem(String value) {
+      return integer(value)
+          .filter(amount -> amount >= 1 && amount <= MAX_MONEY)
+          .map(amount -> Optional.<String>empty())
+          .orElse(Optional.of("must be a whole amount between 1 and " + MAX_MONEY));
+    }
+  },
   DATE {
     @Override
     Optional<String> problem(String value) {
@@ -61,6 +70,7 @@ public enum ParameterType {
   public static final int MAX_TEXT = 200;
   public static final long MAX_GRAMS = 100_000;
   public static final long MAX_COUNT = 50;
+  public static final long MAX_MONEY = 10_000_000_000L;
 
   abstract Optional<String> problem(String value);
 

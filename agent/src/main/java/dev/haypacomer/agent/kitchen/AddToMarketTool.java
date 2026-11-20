@@ -72,14 +72,21 @@ public final class AddToMarketTool implements AgentTool {
 
   @Override
   public Observation invoke(ToolInvocation invocation) {
+    Grams grams = Grams.of(invocation.arguments().get("grams").strip());
     MarketItem item =
         add.add(
             invocation.user(),
             invocation.household(),
             food(invocation),
-            Grams.of(invocation.arguments().get("grams").strip()),
+            grams,
             MarketSource.AGENT_CONFIRMED);
     return Observation.of(
-        SPEC.name(), "Added " + item.grams() + " of " + item.food().name() + " to the market list");
+        SPEC.name(),
+        "Added "
+            + grams
+            + " of "
+            + item.food().name()
+            + " to the market list"
+            + (item.grams().equals(grams) ? "" : "; " + item.grams() + " pending in total"));
   }
 }

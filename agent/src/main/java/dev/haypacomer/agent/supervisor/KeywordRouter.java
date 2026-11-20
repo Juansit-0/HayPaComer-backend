@@ -1,11 +1,14 @@
 package dev.haypacomer.agent.supervisor;
 
+import dev.haypacomer.agent.runtime.AgentTask;
+import dev.haypacomer.agent.runtime.OfflineIntents;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 public final class KeywordRouter implements SpecialistRouter {
 
@@ -18,17 +21,28 @@ public final class KeywordRouter implements SpecialistRouter {
         Specialist.COLD,
         List.of(
             "temperature",
-            "cold",
+            "cold chain",
             "warm",
-            "door",
+            "door open",
+            "open door",
+            "door was open",
+            "door left",
             "fridge broke",
+            "not cooling",
+            "degrees",
             "power",
             "temperatura",
-            "frio",
+            "cadena de frio",
             "caliente",
-            "puerta",
-            "luz",
-            "nevera"));
+            "calor",
+            "grados",
+            "puerta abierta",
+            "abrieron la puerta",
+            "dejaron la puerta",
+            "dejaste la puerta",
+            "no enfria",
+            "se fue la luz",
+            "apagon"));
     KEYWORDS.put(
         Specialist.MARKET,
         List.of(
@@ -41,7 +55,11 @@ public final class KeywordRouter implements SpecialistRouter {
             "mercado",
             "lista",
             "tienda",
-            "surtir"));
+            "surtir",
+            "presupuesto",
+            "budget",
+            "carrito",
+            "cart"));
     KEYWORDS.put(
         Specialist.COACH,
         List.of(
@@ -71,12 +89,28 @@ public final class KeywordRouter implements SpecialistRouter {
             "almuerzo",
             "desayuno",
             "comer",
-            "comida"));
+            "comida",
+            "cocin",
+            "inventario",
+            "inventory",
+            "paso",
+            "step"));
   }
 
   @Override
   public List<Specialist> route(String goal) {
-    String text = normalize(goal);
+    String asked = AgentTask.asked(goal);
+    Optional<Specialist> owner =
+        OfflineIntents.match(asked)
+            .flatMap(
+                intent ->
+                    Specialist.ALL.stream()
+                        .filter(specialist -> specialist.tools().contains(intent.tool()))
+                        .findFirst());
+    if (owner.isPresent()) {
+      return List.of(owner.get());
+    }
+    String text = normalize(asked);
     List<Specialist> chosen = new ArrayList<>();
     KEYWORDS.forEach(
         (specialist, words) -> {

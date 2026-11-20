@@ -1,5 +1,6 @@
 package dev.haypacomer.agent.chat;
 
+import dev.haypacomer.agent.runtime.AgentTask;
 import dev.haypacomer.agent.supervisor.Supervisor;
 import dev.haypacomer.agent.supervisor.SupervisorAnswer;
 import dev.haypacomer.application.agent.ChatMessage;
@@ -73,7 +74,7 @@ public final class ChefChat {
                         + ": "
                         + clip(message.text(), 300))
             .collect(Collectors.joining("\n"));
-    return text + "\n\nEarlier in this conversation:\n" + context;
+    return text + AgentTask.EARLIER + context;
   }
 
   private static String clip(String text) {

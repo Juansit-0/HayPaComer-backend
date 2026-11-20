@@ -27,7 +27,18 @@ public record Specialist(
               "view_expiries",
               "view_weekly_plan",
               "remember",
-              "estimate_expiry"),
+              "estimate_expiry",
+              "stock_food",
+              "use_food",
+              "discard_food",
+              "mark_opened",
+              "undo_last_change",
+              "list_recipes",
+              "suggest_dishes",
+              "start_cooking",
+              "cooking_step",
+              "view_cooking",
+              "generate_week_plan"),
           List.of("view_expiries", "query_inventory", "recall_memory"));
 
   public static final Specialist MARKET =
@@ -40,7 +51,13 @@ public record Specialist(
               "query_inventory",
               "recall_memory",
               "add_to_market",
-              "review_budget"),
+              "review_budget",
+              "update_market",
+              "clear_checked_market",
+              "set_market_budget",
+              "missing_to_market",
+              "plan_to_market",
+              "generate_week_plan"),
           List.of("view_market_list", "review_budget", "view_weekly_plan"));
 
   public static final Specialist COLD =
@@ -54,7 +71,17 @@ public record Specialist(
       new Specialist(
           "coach",
           "Habits that reduce waste, based on what expires and household notes.",
-          Set.of("view_expiries", "waste_patterns", "query_inventory", "recall_memory", "remember"),
+          Set.of(
+              "view_expiries",
+              "waste_patterns",
+              "query_inventory",
+              "recall_memory",
+              "remember",
+              "stock_food",
+              "use_food",
+              "discard_food",
+              "mark_opened",
+              "undo_last_change"),
           List.of("view_expiries", "waste_patterns", "recall_memory"));
 
   public static final List<Specialist> ALL = List.of(CHEF, MARKET, COLD, COACH);

@@ -85,4 +85,51 @@ class RuleBasedPlannerTest {
             3);
     return ((Decision.CallTool) planner.next(context)).arguments();
   }
+
+  @Test
+  void anOrderProposesItsToolAndAFailureSaysNothingChanged() {
+    AgentTask used =
+        new AgentTask(
+            HouseholdId.newId(),
+            UserId.newId(),
+            "chef",
+            "usé 200 g de arroz" + AgentTask.EARLIER + "user: agrega tomate a la lista");
+    Decision.CallTool call =
+        new Decision.CallTool(
+            "use_food",
+            Map.of("food", "arroz", "grams", "200"),
+            "Offline rules match what the person asked");
+    Set<String> tools = Set.of("use_food", "add_to_market", "view_expiries");
+
+    assertEquals(call, planner.next(new AgentContext(used, tools, List.of(), 3)));
+    assertEquals(
+        new Decision.FinalAnswer("Nothing was changed: No Rice in stock"),
+        planner.next(
+            new AgentContext(
+                used,
+                tools,
+                List.of(new Exchange(call, Observation.failure("use_food", "No Rice in stock"))),
+                2)));
+  }
+
+  @Test
+  void aMatchedReadAnswersWithWhatItRead() {
+    AgentTask asked =
+        new AgentTask(HouseholdId.newId(), UserId.newId(), "chef", "¿Qué recetas tengo?");
+    Decision.CallTool call =
+        new Decision.CallTool(
+            "list_recipes", Map.of(), "Offline rules match what the person asked");
+
+    assertEquals(call, planner.next(new AgentContext(asked, Set.of("list_recipes"), List.of(), 3)));
+    assertEquals(
+        new Decision.FinalAnswer("Rice bowl: 2 servings, 20 min"),
+        planner.next(
+            new AgentContext(
+                asked,
+                Set.of("list_recipes"),
+                List.of(
+                    new Exchange(
+                        call, Observation.of("list_recipes", "Rice bowl: 2 servings, 20 min"))),
+                2)));
+  }
 }

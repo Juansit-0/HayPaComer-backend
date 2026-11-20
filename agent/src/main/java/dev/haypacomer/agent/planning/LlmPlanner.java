@@ -3,8 +3,11 @@ package dev.haypacomer.agent.planning;
 import dev.haypacomer.agent.runtime.AgentContext;
 import dev.haypacomer.agent.runtime.Decision;
 import dev.haypacomer.agent.runtime.Exchange;
+import dev.haypacomer.agent.runtime.OfflineIntents;
 import dev.haypacomer.agent.runtime.Planner;
 import dev.haypacomer.agent.runtime.PlannerUnavailableException;
+import dev.haypacomer.agent.runtime.RuleBasedPlanner;
+import dev.haypacomer.agent.runtime.ToolKind;
 import dev.haypacomer.agent.supervisor.Specialist;
 import dev.haypacomer.agent.tools.ParameterSpec;
 import dev.haypacomer.agent.tools.ToolRegistry;
@@ -12,6 +15,7 @@ import dev.haypacomer.agent.tools.ToolSpec;
 import dev.haypacomer.application.agent.ChatModelUnavailableException;
 import dev.haypacomer.application.port.ChatModel;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +29,7 @@ public final class LlmPlanner implements Planner {
   static final int MAX_OBSERVATION = 1500;
   static final int MAX_ANSWER = 1500;
   private static final JsonMapper JSON = JsonMapper.builder().build();
+  private static final Planner ORDERS = new RuleBasedPlanner(List.of());
   private static final Pattern GRAMS =
       Pattern.compile("(\\d+(?:[.,]\\d+)?)\\s*(?:g|gr|grams|gramos)\\b", Pattern.CASE_INSENSITIVE);
 
@@ -45,6 +50,14 @@ public final class LlmPlanner implements Planner {
 
   @Override
   public Decision next(AgentContext context) {
+    // A clear order becomes its confirmation at once; the model is kept for questions.
+    if (OfflineIntents.match(context.task().asked())
+        .map(OfflineIntents.Intent::tool)
+        .filter(context.tools()::contains)
+        .filter(this::writes)
+        .isPresent()) {
+      return ORDERS.next(context);
+    }
     String answer;
     try {
       answer = model.completeJson(system(context), user(context));
@@ -52,6 +65,11 @@ public final class LlmPlanner implements Planner {
       throw new PlannerUnavailableException(unavailable.getMessage());
     }
     return parse(answer, context);
+  }
+
+  private boolean writes(String tool) {
+    return tools.specs().stream()
+        .anyMatch(spec -> spec.name().equals(tool) && spec.kind() == ToolKind.WRITE);
   }
 
   private String system(AgentContext context) {

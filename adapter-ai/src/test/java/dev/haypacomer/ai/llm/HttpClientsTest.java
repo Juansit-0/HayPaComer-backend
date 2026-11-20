@@ -79,7 +79,23 @@ class HttpClientsTest {
     assertEquals("test-key", auth.get());
     assertTrue(requestBody.get().contains("\"responseMimeType\":\"application/json\""));
     assertFalse(requestBody.get().contains("test-key"));
+    assertFalse(requestBody.get().contains("thinkingConfig"));
     assertEquals(AdvisorSource.GEMINI, gemini.source());
+  }
+
+  @Test
+  void geminiThreeModelsThinkOnlyBriefly() {
+    responseBody = "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"{}\"}]}}]}";
+    LlmSettings quick =
+        new LlmSettings(
+            URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/v1/"),
+            "test-key",
+            "gemini-3.5-flash",
+            Duration.ofSeconds(2));
+
+    new GeminiClient(quick).completeJson(new LlmPrompt("rules", "question"));
+
+    assertTrue(requestBody.get().contains("\"thinkingLevel\":\"minimal\""));
   }
 
   @Test

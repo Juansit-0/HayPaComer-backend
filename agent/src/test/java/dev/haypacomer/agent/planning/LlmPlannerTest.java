@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.haypacomer.agent.kitchen.KitchenFixture;
 import dev.haypacomer.agent.kitchen.QueryInventoryTool;
+import dev.haypacomer.agent.kitchen.UndoLastChangeTool;
 import dev.haypacomer.agent.kitchen.ViewExpiriesTool;
 import dev.haypacomer.agent.runtime.AgentContext;
 import dev.haypacomer.agent.runtime.AgentTask;
@@ -93,6 +94,27 @@ class LlmPlannerTest {
     assertTrue(users.getFirst().contains("and observed: Chicken breast 650 g"));
     assertTrue(users.getFirst().contains("and it failed: down"));
     assertEquals("gemini", planner("{}").name());
+  }
+
+  @Test
+  void aClearOrderBecomesItsConfirmationWithoutTheModel() {
+    ToolRegistry withUndo =
+        new ToolRegistry(
+            List.of(
+                new QueryInventoryTool(kitchen.inventory, kitchen.today),
+                new UndoLastChangeTool(null)));
+    AgentContext undo =
+        new AgentContext(
+            new AgentTask(kitchen.home.id(), kitchen.owner, "chef", "deshaz lo último"),
+            Set.of("query_inventory", "undo_last_change"),
+            List.of(),
+            8);
+
+    Decision decision = new LlmPlanner(model("{}"), Specialist.CHEF, withUndo).next(undo);
+
+    assertTrue(
+        decision instanceof Decision.CallTool call && call.tool().equals("undo_last_change"));
+    assertTrue(systems.isEmpty());
   }
 
   @Test

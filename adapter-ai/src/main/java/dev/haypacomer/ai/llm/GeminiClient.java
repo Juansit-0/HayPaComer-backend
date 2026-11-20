@@ -3,6 +3,7 @@ package dev.haypacomer.ai.llm;
 import dev.haypacomer.application.ai.AdvisorSource;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,13 +39,24 @@ public final class GeminiClient implements LlmClient {
                 "contents",
                 List.of(Map.of("role", "user", "parts", parts(prompt))),
                 "generationConfig",
-                Map.of("responseMimeType", "application/json", "temperature", 0.2)));
+                generation()));
     JsonNode text =
         answer.path("candidates").path(0).path("content").path("parts").path(0).path("text");
     if (!text.isString()) {
       throw new InvalidAiResponseException("Gemini answered without text");
     }
     return text.asString();
+  }
+
+  // Gemini 3 thinks by default, which doubles the wait; the planner only needs short JSON.
+  private Map<String, Object> generation() {
+    Map<String, Object> config = Map.of("responseMimeType", "application/json", "temperature", 0.2);
+    if (!settings.model().startsWith("gemini-3")) {
+      return config;
+    }
+    Map<String, Object> quick = new HashMap<>(config);
+    quick.put("thinkingConfig", Map.of("thinkingLevel", "minimal"));
+    return quick;
   }
 
   private static List<Map<String, Object>> parts(LlmPrompt prompt) {

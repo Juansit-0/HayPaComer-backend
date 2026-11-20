@@ -8,12 +8,14 @@ import dev.haypacomer.ai.llm.GeminiClient;
 import dev.haypacomer.ai.llm.LlmChatModel;
 import dev.haypacomer.ai.llm.LlmClient;
 import dev.haypacomer.ai.llm.LlmFoodClassifier;
+import dev.haypacomer.ai.llm.LlmFoodDensityEstimator;
 import dev.haypacomer.ai.llm.LlmKitchenAdvisor;
 import dev.haypacomer.ai.llm.LlmLabelPhotoReader;
 import dev.haypacomer.ai.llm.LlmRecipePhotoReader;
 import dev.haypacomer.ai.llm.LlmSettings;
 import dev.haypacomer.ai.llm.OpenAiCompatibleClient;
 import dev.haypacomer.ai.offline.OfflineFoodClassifier;
+import dev.haypacomer.ai.offline.OfflineFoodDensityEstimator;
 import dev.haypacomer.ai.offline.OfflineLabelPhotoReader;
 import dev.haypacomer.ai.offline.OfflineRecipePhotoReader;
 import dev.haypacomer.ai.offline.OfflineRuleEngine;
@@ -21,10 +23,12 @@ import dev.haypacomer.ai.resilience.NullChatModel;
 import dev.haypacomer.ai.resilience.ProviderCircuit;
 import dev.haypacomer.ai.resilience.ResilientChatModel;
 import dev.haypacomer.ai.resilience.ResilientFoodClassifier;
+import dev.haypacomer.ai.resilience.ResilientFoodDensityEstimator;
 import dev.haypacomer.ai.resilience.ResilientKitchenAdvisor;
 import dev.haypacomer.ai.resilience.ResilientLabelPhotoReader;
 import dev.haypacomer.ai.resilience.ResilientRecipePhotoReader;
 import dev.haypacomer.application.ai.ReadRecipePhoto;
+import dev.haypacomer.application.inventory.EstimateFoodDensity;
 import dev.haypacomer.application.inventory.ExpiryDesk;
 import dev.haypacomer.application.inventory.LearnFood;
 import dev.haypacomer.application.inventory.ReadExpiryFromLabel;
@@ -34,6 +38,7 @@ import dev.haypacomer.application.port.AiResponseCache;
 import dev.haypacomer.application.port.CircuitBreakerStore;
 import dev.haypacomer.application.port.FoodCatalogRepository;
 import dev.haypacomer.application.port.FoodClassifier;
+import dev.haypacomer.application.port.FoodDensityEstimator;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.KitchenAdvisor;
 import dev.haypacomer.application.port.LabelPhotoReader;
@@ -167,6 +172,30 @@ public class AiConfiguration {
       FoodClassifier classifier,
       AiRateLimiter rateLimiter) {
     return new LearnFood(households, catalog, classifier, rateLimiter);
+  }
+
+  @Bean
+  FoodDensityEstimator foodDensityEstimator(
+      AiProperties properties,
+      CircuitBreakerStore breaker,
+      ServiceHealth health,
+      PolicySource policies,
+      Clock clock) {
+    if (properties.provider() == AiProperties.Provider.OFFLINE) {
+      return new OfflineFoodDensityEstimator();
+    }
+    LlmClient client = client(properties);
+    return new ResilientFoodDensityEstimator(
+        new LlmFoodDensityEstimator(client), circuit(client, breaker, health, policies, clock));
+  }
+
+  @Bean
+  EstimateFoodDensity estimateFoodDensity(
+      HouseholdRepository households,
+      FoodCatalogRepository catalog,
+      FoodDensityEstimator estimator,
+      AiRateLimiter rateLimiter) {
+    return new EstimateFoodDensity(households, catalog, estimator, rateLimiter);
   }
 
   @Bean

@@ -3,11 +3,14 @@ package dev.haypacomer.application.inventory;
 import dev.haypacomer.application.live.BroadcastLiveUpdate;
 import dev.haypacomer.application.live.LiveUpdate;
 import dev.haypacomer.application.live.LiveUpdateKind;
+import dev.haypacomer.application.notification.Notification;
+import dev.haypacomer.application.notification.NotificationType;
 import dev.haypacomer.application.port.AccessRequestRepository;
 import dev.haypacomer.application.port.FoodOwnershipRepository;
 import dev.haypacomer.application.port.FridgeRepository;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InventoryMovementLog;
+import dev.haypacomer.application.port.NotificationListener;
 import dev.haypacomer.application.port.UserRepository;
 import dev.haypacomer.domain.fridge.FoodItemId;
 import dev.haypacomer.domain.household.Household;
@@ -28,6 +31,7 @@ public final class AskForFood {
 
   private final FoodRequests shared;
   private final BroadcastLiveUpdate live;
+  private final NotificationListener notify;
   private final Clock clock;
 
   public AskForFood(
@@ -38,9 +42,11 @@ public final class AskForFood {
       AccessRequestRepository requests,
       UserRepository users,
       BroadcastLiveUpdate live,
+      NotificationListener notify,
       Clock clock) {
     this.shared = new FoodRequests(households, fridges, ownerships, movements, requests, users);
     this.live = Objects.requireNonNull(live, "live");
+    this.notify = Objects.requireNonNull(notify, "notify");
     this.clock = Objects.requireNonNull(clock, "clock");
   }
 
@@ -71,6 +77,18 @@ public final class AskForFood {
                   live.publish(
                       LiveUpdate.of(
                           householdId, LiveUpdateKind.INVENTORY, null, FoodRequests.ASKED, now));
+                  FoodRequestView asked = shared.view(household, opened, me);
+                  // The person who stocked it hears about it in their notifications.
+                  if (asked.ownerUserId() != null) {
+                    notify.onNotification(
+                        Notification.to(
+                            new UserId(asked.ownerUserId()),
+                            householdId,
+                            NotificationType.FOOD_REQUEST,
+                            "Food request",
+                            asked.requesterName() + " asked to use your " + asked.food(),
+                            now));
+                  }
                   return opened;
                 });
     return shared.view(household, request, me);

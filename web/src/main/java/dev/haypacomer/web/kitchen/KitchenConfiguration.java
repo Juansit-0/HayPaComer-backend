@@ -33,6 +33,7 @@ import dev.haypacomer.application.inventory.ViewInventory;
 import dev.haypacomer.application.live.BroadcastLiveUpdate;
 import dev.haypacomer.application.market.AddMissingToMarketList;
 import dev.haypacomer.application.moving.UnpackFood;
+import dev.haypacomer.application.notification.ChannelDispatcher;
 import dev.haypacomer.application.port.AccessRequestRepository;
 import dev.haypacomer.application.port.AiRateLimiter;
 import dev.haypacomer.application.port.AuditLog;
@@ -367,8 +368,10 @@ public class KitchenConfiguration {
       AccessRequestRepository requests,
       UserRepository users,
       BroadcastLiveUpdate live,
+      ChannelDispatcher notify,
       Clock clock) {
-    return new AskForFood(households, fridges, ownerships, movements, requests, users, live, clock);
+    return new AskForFood(
+        households, fridges, ownerships, movements, requests, users, live, notify, clock);
   }
 
   @Bean
@@ -391,9 +394,10 @@ public class KitchenConfiguration {
       AccessRequestRepository requests,
       UserRepository users,
       BroadcastLiveUpdate live,
+      ChannelDispatcher notify,
       Clock clock) {
     return new AnswerFoodRequest(
-        households, fridges, ownerships, movements, requests, users, live, clock);
+        households, fridges, ownerships, movements, requests, users, live, notify, clock);
   }
 
   @Bean

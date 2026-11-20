@@ -33,6 +33,10 @@ public final class ChannelDispatcher implements NotificationListener {
             household ->
                 household.memberships().stream()
                     .map(Membership::user)
+                    .filter(
+                        user ->
+                            notification.recipient() == null
+                                || notification.recipient().equals(user))
                     .map(preferences::find)
                     .forEach(
                         recipient ->

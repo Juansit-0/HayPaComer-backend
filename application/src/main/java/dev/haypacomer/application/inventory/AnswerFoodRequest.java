@@ -3,11 +3,14 @@ package dev.haypacomer.application.inventory;
 import dev.haypacomer.application.live.BroadcastLiveUpdate;
 import dev.haypacomer.application.live.LiveUpdate;
 import dev.haypacomer.application.live.LiveUpdateKind;
+import dev.haypacomer.application.notification.Notification;
+import dev.haypacomer.application.notification.NotificationType;
 import dev.haypacomer.application.port.AccessRequestRepository;
 import dev.haypacomer.application.port.FoodOwnershipRepository;
 import dev.haypacomer.application.port.FridgeRepository;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InventoryMovementLog;
+import dev.haypacomer.application.port.NotificationListener;
 import dev.haypacomer.application.port.UserRepository;
 import dev.haypacomer.domain.household.AccessDeniedException;
 import dev.haypacomer.domain.household.Household;
@@ -26,6 +29,7 @@ public final class AnswerFoodRequest {
 
   private final FoodRequests shared;
   private final BroadcastLiveUpdate live;
+  private final NotificationListener notify;
   private final Clock clock;
 
   public AnswerFoodRequest(
@@ -36,9 +40,11 @@ public final class AnswerFoodRequest {
       AccessRequestRepository requests,
       UserRepository users,
       BroadcastLiveUpdate live,
+      NotificationListener notify,
       Clock clock) {
     this.shared = new FoodRequests(households, fridges, ownerships, movements, requests, users);
     this.live = Objects.requireNonNull(live, "live");
+    this.notify = Objects.requireNonNull(notify, "notify");
     this.clock = Objects.requireNonNull(clock, "clock");
   }
 
@@ -63,6 +69,20 @@ public final class AnswerFoodRequest {
     shared.requests.save(decided);
     live.publish(
         LiveUpdate.of(householdId, LiveUpdateKind.INVENTORY, null, FoodRequests.ANSWERED, now));
-    return shared.view(household, decided, me);
+    FoodRequestView answered = shared.view(household, decided, me);
+    // Whoever asked hears the answer in their notifications.
+    if (answered.requesterUserId() != null) {
+      notify.onNotification(
+          Notification.to(
+              new UserId(answered.requesterUserId()),
+              householdId,
+              NotificationType.FOOD_REQUEST_ANSWERED,
+              "Answer to your request",
+              approve
+                  ? answered.ownerName() + " let you use " + answered.food()
+                  : answered.ownerName() + " would rather keep " + answered.food(),
+              now));
+    }
+    return answered;
   }
 }

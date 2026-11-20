@@ -171,4 +171,17 @@ class NotificationChannelsTest {
         NotificationNotFoundException.class,
         () -> new MarkNotificationRead(inbox, clock).mark(ana, door.id()));
   }
+
+  @Test
+  void aNotificationForOnePersonReachesOnlyThem() {
+    ChannelDispatcher dispatcher =
+        new ChannelDispatcher(households, preferences, List.of(channel(ChannelKind.WEB)));
+
+    dispatcher.onNotification(
+        Notification.to(
+            ana, household.id(), NotificationType.FOOD_REQUEST_ANSWERED, "Answer", "Yes", NOW));
+    dispatcher.onNotification(doorOpen(household.id()));
+
+    assertEquals(List.of("WEB:ana", "WEB:juan", "WEB:ana"), deliveries);
+  }
 }

@@ -111,13 +111,14 @@ class HouseholdTest {
   }
 
   @Test
-  void ownerRenamesAndConfigures() {
+  void anyMemberRenamesAndConfigures() {
     household.rename(juan, "Casa");
     household.configure(juan, Currency.getInstance("USD"), ZoneId.of("UTC"));
 
     assertEquals("Casa", household.name());
     assertEquals(Currency.getInstance("USD"), household.currency());
-    assertThrows(AccessDeniedException.class, () -> household.rename(ana, "Mine"));
+    household.rename(ana, "Mine");
+    assertEquals("Mine", household.name());
     assertThrows(IllegalArgumentException.class, () -> household.rename(juan, " "));
   }
 

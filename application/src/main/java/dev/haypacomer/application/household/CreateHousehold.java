@@ -17,6 +17,7 @@ public final class CreateHousehold {
   }
 
   public Household create(UserId actor, CreateHouseholdCommand command) {
+    OneHousehold.requireNone(households, actor);
     Household household =
         Household.create(
             command.name(),

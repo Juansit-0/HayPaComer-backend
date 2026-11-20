@@ -13,4 +13,9 @@ public interface HouseholdRepository {
   Optional<Household> findById(HouseholdId id);
 
   List<Household> findByUser(UserId user);
+
+  /** Removes the home and, through the database, everything that hangs from it. */
+  default void delete(HouseholdId id) {
+    throw new UnsupportedOperationException("This store cannot delete households");
+  }
 }

@@ -5,18 +5,24 @@ import dev.haypacomer.application.household.AcceptInvitation;
 import dev.haypacomer.application.household.CancelInvitation;
 import dev.haypacomer.application.household.ChangeMemberRole;
 import dev.haypacomer.application.household.CreateHousehold;
+import dev.haypacomer.application.household.CreateJoinCode;
+import dev.haypacomer.application.household.DeleteHousehold;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.household.InviteMember;
+import dev.haypacomer.application.household.JoinHouseholdWithCode;
 import dev.haypacomer.application.household.ListHouseholds;
 import dev.haypacomer.application.household.ListInvitations;
 import dev.haypacomer.application.household.RemoveMember;
+import dev.haypacomer.application.household.RevokeJoinCode;
 import dev.haypacomer.application.household.TransferOwnership;
 import dev.haypacomer.application.household.UpdateHousehold;
+import dev.haypacomer.application.household.ViewJoinCode;
 import dev.haypacomer.application.inventory.FoodAccessGuard;
 import dev.haypacomer.application.mail.MailLinks;
 import dev.haypacomer.application.port.EmailSender;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InvitationRepository;
+import dev.haypacomer.application.port.JoinCodeRepository;
 import dev.haypacomer.application.port.UnitOfWork;
 import dev.haypacomer.application.port.UserRepository;
 import java.time.Clock;
@@ -29,6 +35,11 @@ public class HouseholdConfiguration {
   @Bean
   CreateHousehold createHousehold(HouseholdRepository households, Clock clock) {
     return new CreateHousehold(households, clock);
+  }
+
+  @Bean
+  DeleteHousehold deleteHousehold(HouseholdRepository households) {
+    return new DeleteHousehold(households);
   }
 
   @Bean
@@ -94,6 +105,31 @@ public class HouseholdConfiguration {
       UnitOfWork unitOfWork,
       Clock clock) {
     return new AcceptInvitation(invitations, households, users, opaqueTokens, unitOfWork, clock);
+  }
+
+  @Bean
+  CreateJoinCode createJoinCode(
+      HouseholdRepository households, JoinCodeRepository codes, Clock clock) {
+    return new CreateJoinCode(households, codes, clock);
+  }
+
+  @Bean
+  ViewJoinCode viewJoinCode(HouseholdRepository households, JoinCodeRepository codes, Clock clock) {
+    return new ViewJoinCode(households, codes, clock);
+  }
+
+  @Bean
+  RevokeJoinCode revokeJoinCode(HouseholdRepository households, JoinCodeRepository codes) {
+    return new RevokeJoinCode(households, codes);
+  }
+
+  @Bean
+  JoinHouseholdWithCode joinHouseholdWithCode(
+      JoinCodeRepository codes,
+      HouseholdRepository households,
+      UnitOfWork unitOfWork,
+      Clock clock) {
+    return new JoinHouseholdWithCode(codes, households, unitOfWork, clock);
   }
 
   @Bean

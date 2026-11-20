@@ -29,4 +29,9 @@ public final class InMemoryHouseholdRepository implements HouseholdRepository {
         .filter(household -> household.membershipOf(user).isPresent())
         .toList();
   }
+
+  @Override
+  public void delete(HouseholdId id) {
+    byId.remove(id);
+  }
 }

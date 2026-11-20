@@ -18,10 +18,13 @@ import dev.haypacomer.application.auth.UserNotFoundException;
 import dev.haypacomer.application.coldchain.FridgeNotFoundException;
 import dev.haypacomer.application.device.DeviceNotFoundException;
 import dev.haypacomer.application.fridge.TrayFullException;
+import dev.haypacomer.application.household.AlreadyInHouseholdException;
 import dev.haypacomer.application.household.HouseholdNotFoundException;
 import dev.haypacomer.application.household.InvitationEmailMismatchException;
 import dev.haypacomer.application.household.InvitationNotFoundException;
+import dev.haypacomer.application.household.JoinCodeInvalidException;
 import dev.haypacomer.application.i18n.UnknownLocaleException;
+import dev.haypacomer.application.inventory.AccessRequestNotFoundException;
 import dev.haypacomer.application.inventory.FoodItemNotFoundException;
 import dev.haypacomer.application.inventory.FoodNotInCatalogException;
 import dev.haypacomer.application.inventory.NotFoodException;
@@ -368,6 +371,21 @@ public class ApiExceptionHandler {
   @ExceptionHandler(ConfirmationRefusedException.class)
   ProblemDetail confirmationRefused(ConfirmationRefusedException exception) {
     return problem(HttpStatus.CONFLICT, "Confirmation refused", exception.getMessage());
+  }
+
+  @ExceptionHandler(AlreadyInHouseholdException.class)
+  ProblemDetail alreadyInHousehold(AlreadyInHouseholdException exception) {
+    return problem(HttpStatus.CONFLICT, "Already in a household", exception.getMessage());
+  }
+
+  @ExceptionHandler(JoinCodeInvalidException.class)
+  ProblemDetail joinCodeInvalid(JoinCodeInvalidException exception) {
+    return problem(HttpStatus.BAD_REQUEST, "Invalid household code", exception.getMessage());
+  }
+
+  @ExceptionHandler(AccessRequestNotFoundException.class)
+  ProblemDetail accessRequestNotFound(AccessRequestNotFoundException exception) {
+    return problem(HttpStatus.NOT_FOUND, "Request not found", exception.getMessage());
   }
 
   @ExceptionHandler(PermissionRequiredException.class)

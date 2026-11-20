@@ -23,7 +23,6 @@ import dev.haypacomer.domain.fridge.Fridge;
 import dev.haypacomer.domain.fridge.FridgeNode;
 import dev.haypacomer.domain.fridge.Traversal;
 import dev.haypacomer.domain.fridge.Tray;
-import dev.haypacomer.domain.household.AccessDeniedException;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.household.Role;
 import dev.haypacomer.domain.identity.UserId;
@@ -112,9 +111,8 @@ class HayPaComerFacadeTest {
     assertEquals(List.of(fridge), facade.fridges(ana, household.id()));
     assertEquals(
         0, facade.setUpFridge(juan, household.id(), "Garage", FridgeLayout.EMPTY).itemCount());
-    assertThrows(
-        AccessDeniedException.class,
-        () -> facade.setUpFridge(ana, household.id(), "Mine", FridgeLayout.STANDARD));
+    assertEquals(
+        "Mine", facade.setUpFridge(ana, household.id(), "Mine", FridgeLayout.EMPTY).name());
     assertThrows(
         HouseholdNotFoundException.class, () -> facade.fridges(UserId.newId(), household.id()));
   }

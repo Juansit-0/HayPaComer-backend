@@ -15,7 +15,6 @@ import dev.haypacomer.domain.device.Device;
 import dev.haypacomer.domain.device.DeviceId;
 import dev.haypacomer.domain.device.DeviceKind;
 import dev.haypacomer.domain.fridge.FridgeId;
-import dev.haypacomer.domain.household.AccessDeniedException;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Role;
@@ -144,10 +143,7 @@ class ScaleUseCasesTest {
     assertFalse(read().read(ana, household.id(), scale.id()).calibrated());
 
     samples.record(scale.id(), new RawSample(298_000, NOW.minusSeconds(1)));
-    assertThrows(
-        AccessDeniedException.class,
-        () -> calibrate().calibrate(ana, household.id(), scale.id(), Grams.of(500)));
-    calibrate().calibrate(juan, household.id(), scale.id(), Grams.of(500));
+    calibrate().calibrate(ana, household.id(), scale.id(), Grams.of(500));
 
     samples.record(scale.id(), new RawSample(84_000 + 428L * 842, NOW));
     ScaleReading reading = read().read(ana, household.id(), scale.id());

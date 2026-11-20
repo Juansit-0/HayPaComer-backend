@@ -1,0 +1,28 @@
+-- One home per person, the same permissions for everyone in it, and the Casa tab to make, join, rename, leave or delete a home.
+INSERT INTO translations (locale, key, text) VALUES
+    ('es-CO', 'You already belong to a household; leave it or delete it first', 'Ya estás en una casa: sal de ella o elimínala primero'),
+    ('es-CO', 'home-tab.lead', 'Tu casa y quiénes comparten la nevera. Cada persona está en una sola casa a la vez.'),
+    ('en', 'home-tab.lead', 'Your home and who shares the fridge. Each person is in one home at a time.'),
+    ('es-CO', 'home-tab.name', 'Nombre de la casa'),
+    ('en', 'home-tab.name', 'Home name'),
+    ('es-CO', 'home-tab.rename', 'Guardar nombre'),
+    ('en', 'home-tab.rename', 'Save name'),
+    ('es-CO', 'home-tab.code', 'Código para unirse'),
+    ('en', 'home-tab.code', 'Code to join'),
+    ('es-CO', 'home-tab.code-hint', 'Quien lo escriba entra a esta casa y ve la misma nevera.'),
+    ('en', 'home-tab.code-hint', 'Whoever types it joins this home and sees the same fridge.'),
+    ('es-CO', 'home-tab.members', 'Integrantes'),
+    ('en', 'home-tab.members', 'Members'),
+    ('es-CO', 'home-tab.delete', 'Eliminar casa'),
+    ('en', 'home-tab.delete', 'Delete home'),
+    ('es-CO', 'home-tab.delete-ask', '¿Eliminar {household}? Se borran su nevera y su comida, y todos quedan sin casa.'),
+    ('en', 'home-tab.delete-ask', 'Delete {household}? Its fridge and food are erased, and everyone is left without a home.'),
+    ('es-CO', 'home-tab.enter', 'Crear o unirse'),
+    ('en', 'home-tab.enter', 'Make or join'),
+    ('es-CO', 'home-tab.create', 'Crear una casa'),
+    ('en', 'home-tab.create', 'Make a home'),
+    ('es-CO', 'home-tab.one-home-creator', 'Ya estás en una casa. Para crear otra o unirte a otra, primero elimina la tuya.'),
+    ('en', 'home-tab.one-home-creator', 'You are already in a home. To make or join another, delete yours first.'),
+    ('es-CO', 'home-tab.one-home-member', 'Ya estás en una casa. Para crear otra o unirte a otra, primero sal de esta.'),
+    ('en', 'home-tab.one-home-member', 'You are already in a home. To make or join another, leave this one first.')
+ON CONFLICT (locale, key) DO UPDATE SET text = EXCLUDED.text, updated_at = now();

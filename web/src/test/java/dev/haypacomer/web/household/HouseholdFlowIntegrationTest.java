@@ -106,7 +106,7 @@ class HouseholdFlowIntegrationTest {
                 .header("Authorization", ana)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Mine\"}"))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isOk());
     mvc.perform(
             patch(path)
                 .header("Authorization", juan)

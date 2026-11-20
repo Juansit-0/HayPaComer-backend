@@ -11,6 +11,7 @@ import dev.haypacomer.application.inventory.ExecuteInventoryCommand;
 import dev.haypacomer.application.inventory.MarkFoodOpened;
 import dev.haypacomer.application.inventory.MoveFoodCommand;
 import dev.haypacomer.application.inventory.StockFoodCommand;
+import dev.haypacomer.application.port.FoodItemPieces;
 import dev.haypacomer.domain.expiry.ExpirySource;
 import dev.haypacomer.domain.fridge.FoodItem;
 import dev.haypacomer.domain.fridge.FoodItemId;
@@ -55,14 +56,17 @@ public class InventoryController {
   private final ExecuteInventoryCommand commands;
   private final ChangeFoodOwnership changeOwnership;
   private final MarkFoodOpened markFoodOpened;
+  private final FoodItemPieces pieces;
 
   public InventoryController(
       ExecuteInventoryCommand commands,
       ChangeFoodOwnership changeOwnership,
-      MarkFoodOpened markFoodOpened) {
+      MarkFoodOpened markFoodOpened,
+      FoodItemPieces pieces) {
     this.commands = commands;
     this.changeOwnership = changeOwnership;
     this.markFoodOpened = markFoodOpened;
+    this.pieces = pieces;
   }
 
   @PostMapping("/{itemId}/open")
@@ -85,7 +89,7 @@ public class InventoryController {
       @PathVariable UUID householdId,
       @RequestHeader(name = IDEMPOTENCY_KEY, required = false) UUID idempotencyKey,
       @Valid @RequestBody StockRequest request) {
-    return OutcomeResponse.from(
+    CommandOutcome stocked =
         commands.execute(
             CurrentUser.of(jwt),
             new StockFoodCommand(
@@ -99,7 +103,12 @@ public class InventoryController {
                 request.expiresOn(),
                 request.visibility(),
                 Boolean.TRUE.equals(request.opened()),
-                request.expirySource())));
+                request.expirySource()));
+    // Added by units (4 cans): keep what one weighs, so the fridge draws exactly that many.
+    if (request.pieceGrams() != null && !stocked.replayed()) {
+      pieces.save(stocked.item(), request.pieceGrams());
+    }
+    return OutcomeResponse.from(stocked);
   }
 
   @PostMapping("/{itemId}/consume")
@@ -214,7 +223,8 @@ public class InventoryController {
       LocalDate expiresOn,
       Visibility visibility,
       Boolean opened,
-      ExpirySource expirySource) {}
+      ExpirySource expirySource,
+      @DecimalMin(value = "0", inclusive = false) @DecimalMax("20000") BigDecimal pieceGrams) {}
 
   record OpenedResponse(
       UUID itemId, LocalDate expiresOn, ExpirySource expirySource, LocalDate openedOn) {}

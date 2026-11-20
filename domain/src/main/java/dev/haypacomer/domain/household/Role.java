@@ -5,13 +5,9 @@ import java.util.Set;
 
 public enum Role {
   OWNER(EnumSet.allOf(Permission.class)),
-  MEMBER(
-      EnumSet.of(
-          Permission.VIEW_HOUSEHOLD,
-          Permission.MANAGE_OWN_ITEMS,
-          Permission.EDIT_INVENTORY,
-          Permission.COOK,
-          Permission.MANAGE_MARKET_LIST)),
+  // Everyone in a home can do what the person who made it does, except take members out or delete
+  // the home.
+  MEMBER(EnumSet.complementOf(EnumSet.of(Permission.MANAGE_MEMBERS, Permission.DELETE_HOUSEHOLD))),
   GUEST(EnumSet.of(Permission.VIEW_HOUSEHOLD, Permission.MANAGE_OWN_ITEMS));
 
   private final Set<Permission> permissions;

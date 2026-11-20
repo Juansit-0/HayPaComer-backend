@@ -2,6 +2,7 @@ package dev.haypacomer.web.kitchen;
 
 import dev.haypacomer.application.HayPaComerFacade;
 import dev.haypacomer.application.fridge.FridgeLayout;
+import dev.haypacomer.application.port.FoodItemPieces;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.kitchen.KitchenDtos.InventoryItemResponse;
 import dev.haypacomer.web.kitchen.KitchenDtos.NodeResponse;
@@ -28,9 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class KitchenController {
 
   private final HayPaComerFacade facade;
+  private final FoodItemPieces foodPieces;
 
-  public KitchenController(HayPaComerFacade facade) {
+  public KitchenController(HayPaComerFacade facade, FoodItemPieces foodPieces) {
     this.facade = facade;
+    this.foodPieces = foodPieces;
   }
 
   @PostMapping("/fridges")
@@ -64,7 +67,10 @@ public class KitchenController {
         rescueFirst
             ? facade.rescueFirst(CurrentUser.of(jwt), household)
             : facade.inventory(CurrentUser.of(jwt), household);
-    return entries.stream().map(InventoryItemResponse::from).toList();
+    var pieces = foodPieces.find(entries.stream().map(entry -> entry.food().item().id()).toList());
+    return entries.stream()
+        .map(entry -> InventoryItemResponse.from(entry, pieces.get(entry.food().item().id())))
+        .toList();
   }
 
   @GetMapping("/kitchen")

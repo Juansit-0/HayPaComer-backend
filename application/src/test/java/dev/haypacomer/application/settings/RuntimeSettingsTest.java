@@ -12,7 +12,6 @@ import dev.haypacomer.application.support.InMemoryHouseholdRepository;
 import dev.haypacomer.application.support.InMemorySettingsRepository;
 import dev.haypacomer.domain.coldchain.investigation.ColdRule;
 import dev.haypacomer.domain.fridge.FridgeId;
-import dev.haypacomer.domain.household.AccessDeniedException;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Role;
@@ -110,10 +109,8 @@ class RuntimeSettingsTest {
   }
 
   @Test
-  void onlyOwnersChangeAndOnlyMembersSee() {
-    assertThrows(
-        AccessDeniedException.class,
-        () -> change.change(member, home.id(), "food.at-risk-days", Optional.of("3")));
+  void everyMemberChangesAndOnlyMembersSee() {
+    change.change(member, home.id(), "food.at-risk-days", Optional.of("3"));
     assertThrows(HouseholdNotFoundException.class, () -> view.view(UserId.newId(), home.id()));
   }
 

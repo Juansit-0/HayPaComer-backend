@@ -4,6 +4,7 @@ import dev.haypacomer.application.analytics.HouseholdMemberNames;
 import dev.haypacomer.application.household.ChangeMemberRole;
 import dev.haypacomer.application.household.CreateHousehold;
 import dev.haypacomer.application.household.CreateHouseholdCommand;
+import dev.haypacomer.application.household.DeleteHousehold;
 import dev.haypacomer.application.household.GetHousehold;
 import dev.haypacomer.application.household.ListHouseholds;
 import dev.haypacomer.application.household.RemoveMember;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HouseholdController {
 
   private final CreateHousehold createHousehold;
+  private final DeleteHousehold deleteHousehold;
   private final ListHouseholds listHouseholds;
   private final GetHousehold getHousehold;
   private final UpdateHousehold updateHousehold;
@@ -51,6 +53,7 @@ public class HouseholdController {
 
   public HouseholdController(
       CreateHousehold createHousehold,
+      DeleteHousehold deleteHousehold,
       ListHouseholds listHouseholds,
       GetHousehold getHousehold,
       UpdateHousehold updateHousehold,
@@ -59,6 +62,7 @@ public class HouseholdController {
       TransferOwnership transferOwnership,
       HouseholdMemberNames memberNames) {
     this.createHousehold = createHousehold;
+    this.deleteHousehold = deleteHousehold;
     this.listHouseholds = listHouseholds;
     this.getHousehold = getHousehold;
     this.updateHousehold = updateHousehold;
@@ -108,6 +112,12 @@ public class HouseholdController {
             new HouseholdId(householdId),
             new UpdateHouseholdCommand(request.name(), request.currency(), request.timezone())),
         actor);
+  }
+
+  @DeleteMapping("/{householdId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
+    deleteHousehold.delete(CurrentUser.of(jwt), new HouseholdId(householdId));
   }
 
   @PatchMapping("/{householdId}/members/{userId}")

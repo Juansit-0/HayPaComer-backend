@@ -196,10 +196,7 @@ class UndoAndSnapshotsTest {
     consume(ana, milk, 800);
     FoodItemId extra = stock(ana, 300, Visibility.SHARED);
 
-    assertThrows(
-        AccessDeniedException.class,
-        () -> restoreSnapshot.restore(ana, household.id(), snapshot.id()));
-    restoreSnapshot.restore(juan, household.id(), snapshot.id());
+    restoreSnapshot.restore(ana, household.id(), snapshot.id());
 
     assertEquals(Grams.of(842), quantity(milk));
     assertTrue(!present(extra));

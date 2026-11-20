@@ -89,9 +89,14 @@ final class KitchenDtos {
       Set<FoodStatus> statuses,
       boolean edible,
       boolean usable,
-      int rescuePriority) {
+      int rescuePriority,
+      BigDecimal pieceGrams) {
 
     static InventoryItemResponse from(InventoryEntry entry) {
+      return from(entry, null);
+    }
+
+    static InventoryItemResponse from(InventoryEntry entry, BigDecimal pieceGrams) {
       FoodItem item = entry.food().item();
       return new InventoryItemResponse(
           item.id().value(),
@@ -106,7 +111,8 @@ final class KitchenDtos {
           entry.food().statuses(),
           entry.food().isEdible(),
           entry.usable(),
-          entry.food().rescuePriority());
+          entry.food().rescuePriority(),
+          pieceGrams);
     }
   }
 

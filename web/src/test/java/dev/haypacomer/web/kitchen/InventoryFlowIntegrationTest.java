@@ -218,7 +218,7 @@ class InventoryFlowIntegrationTest {
 
     send(HttpMethod.POST, base + "/items/" + yogurtId + "/discard", juan, "", 200);
     String snapshotPath = base + "/snapshots/" + JsonPath.read(snapshot, "$.id") + "/restore";
-    send(HttpMethod.POST, snapshotPath, ana, "", 403);
+    send(HttpMethod.POST, snapshotPath, ana, "", 200);
     mvc.perform(request(HttpMethod.POST, snapshotPath).header("Authorization", juan))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items").value(1));

@@ -21,4 +21,9 @@ record SingleHousehold(Household household) implements HouseholdRepository {
   public List<Household> findByUser(UserId user) {
     return household.membershipOf(user).isPresent() ? List.of(household) : List.of();
   }
+
+  @Override
+  public void delete(dev.haypacomer.domain.household.HouseholdId id) {
+    throw new UnsupportedOperationException();
+  }
 }

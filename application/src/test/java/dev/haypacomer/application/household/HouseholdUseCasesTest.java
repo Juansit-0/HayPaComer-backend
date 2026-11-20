@@ -46,6 +46,7 @@ class HouseholdUseCasesTest {
   @Test
   void rejectsUnknownCurrencyOrTimezone() {
     CreateHousehold create = new CreateHousehold(repository, clock);
+    UserId juan = UserId.newId();
 
     assertThrows(
         IllegalArgumentException.class,
@@ -85,9 +86,8 @@ class HouseholdUseCasesTest {
     assertEquals("Casa", apartment.name());
     assertEquals(Currency.getInstance("USD"), apartment.currency());
     assertEquals(ZoneId.of("UTC"), apartment.timezone());
-    assertThrows(
-        AccessDeniedException.class,
-        () -> update.update(ana, apartment.id(), new UpdateHouseholdCommand("Mine", null, null)));
+    update.update(ana, apartment.id(), new UpdateHouseholdCommand("Mine", null, null));
+    assertEquals("Mine", apartment.name());
   }
 
   @Test

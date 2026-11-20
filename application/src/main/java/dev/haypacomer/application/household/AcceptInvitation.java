@@ -71,6 +71,7 @@ public final class AcceptInvitation {
     if (!user.email().equals(invitation.email())) {
       throw new InvitationEmailMismatchException();
     }
+    OneHousehold.requireNone(households, actor);
     Household household =
         households.findById(invitation.household()).orElseThrow(InvalidTokenException::new);
     household.join(actor, invitation.role(), now);

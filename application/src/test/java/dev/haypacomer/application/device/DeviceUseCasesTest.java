@@ -15,7 +15,6 @@ import dev.haypacomer.domain.device.DeviceId;
 import dev.haypacomer.domain.device.DeviceKind;
 import dev.haypacomer.domain.fridge.Fridge;
 import dev.haypacomer.domain.fridge.FridgeId;
-import dev.haypacomer.domain.household.AccessDeniedException;
 import dev.haypacomer.domain.household.Household;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Role;
@@ -64,6 +63,11 @@ class DeviceUseCasesTest {
         @Override
         public List<Household> findByUser(UserId user) {
           return List.of();
+        }
+
+        @Override
+        public void delete(HouseholdId id) {
+          householdStore.remove(id);
         }
       };
 
@@ -147,11 +151,7 @@ class DeviceUseCasesTest {
 
   @Test
   void onlyDeviceManagersRegisterForTheirOwnFridges() {
-    assertThrows(
-        AccessDeniedException.class,
-        () ->
-            registerDevice()
-                .register(ana, household.id(), fridge.id(), "Door", DeviceKind.ESP32_SCALE));
+    registerDevice().register(ana, household.id(), fridge.id(), "Door", DeviceKind.ESP32_SCALE);
     assertThrows(
         IllegalArgumentException.class,
         () ->
@@ -188,13 +188,8 @@ class DeviceUseCasesTest {
     assertThrows(
         InvalidDeviceKeyException.class, () -> authenticate(clock).authenticate("hpc_dev_nope"));
 
-    assertThrows(
-        AccessDeniedException.class,
-        () ->
-            new RevokeDevice(households, devices, clock)
-                .revoke(ana, household.id(), registered.device().id()));
     new RevokeDevice(households, devices, clock)
-        .revoke(juan, household.id(), registered.device().id());
+        .revoke(ana, household.id(), registered.device().id());
 
     assertThrows(
         InvalidDeviceKeyException.class,

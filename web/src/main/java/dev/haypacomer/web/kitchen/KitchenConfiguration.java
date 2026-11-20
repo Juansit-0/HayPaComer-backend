@@ -15,11 +15,14 @@ import dev.haypacomer.application.fridge.UseFridgeSession;
 import dev.haypacomer.application.fridge.ViewFridgeShape;
 import dev.haypacomer.application.fridge.ViewFridgeSpace;
 import dev.haypacomer.application.household.GetHousehold;
+import dev.haypacomer.application.inventory.AnswerFoodRequest;
+import dev.haypacomer.application.inventory.AskForFood;
 import dev.haypacomer.application.inventory.ChangeFoodOwnership;
 import dev.haypacomer.application.inventory.EstimateExpiry;
 import dev.haypacomer.application.inventory.ExecuteInventoryCommand;
 import dev.haypacomer.application.inventory.ExpiryDesk;
 import dev.haypacomer.application.inventory.FoodAccessGuard;
+import dev.haypacomer.application.inventory.ListFoodRequests;
 import dev.haypacomer.application.inventory.ListSnapshots;
 import dev.haypacomer.application.inventory.MarkFoodOpened;
 import dev.haypacomer.application.inventory.RestoreSnapshot;
@@ -29,6 +32,7 @@ import dev.haypacomer.application.inventory.UndoLastChange;
 import dev.haypacomer.application.inventory.ViewInventory;
 import dev.haypacomer.application.live.BroadcastLiveUpdate;
 import dev.haypacomer.application.market.AddMissingToMarketList;
+import dev.haypacomer.application.port.AccessRequestRepository;
 import dev.haypacomer.application.port.AiRateLimiter;
 import dev.haypacomer.application.port.AuditLog;
 import dev.haypacomer.application.port.ColdChainRepository;
@@ -52,6 +56,7 @@ import dev.haypacomer.application.port.SnapshotStore;
 import dev.haypacomer.application.port.StepTimerStore;
 import dev.haypacomer.application.port.SubstitutionRuleRepository;
 import dev.haypacomer.application.port.UnitOfWork;
+import dev.haypacomer.application.port.UserRepository;
 import dev.haypacomer.application.profile.FindDinerConflicts;
 import dev.haypacomer.application.profile.ListFoodProfiles;
 import dev.haypacomer.application.profile.UpdateFoodProfile;
@@ -338,6 +343,44 @@ public class KitchenConfiguration {
   @Bean
   ListActivity listActivity(HouseholdRepository households, AuditLog audit) {
     return new ListActivity(households, audit);
+  }
+
+  @Bean
+  AskForFood askForFood(
+      HouseholdRepository households,
+      FridgeRepository fridges,
+      FoodOwnershipRepository ownerships,
+      InventoryMovementLog movements,
+      AccessRequestRepository requests,
+      UserRepository users,
+      BroadcastLiveUpdate live,
+      Clock clock) {
+    return new AskForFood(households, fridges, ownerships, movements, requests, users, live, clock);
+  }
+
+  @Bean
+  ListFoodRequests listFoodRequests(
+      HouseholdRepository households,
+      FridgeRepository fridges,
+      FoodOwnershipRepository ownerships,
+      InventoryMovementLog movements,
+      AccessRequestRepository requests,
+      UserRepository users) {
+    return new ListFoodRequests(households, fridges, ownerships, movements, requests, users);
+  }
+
+  @Bean
+  AnswerFoodRequest answerFoodRequest(
+      HouseholdRepository households,
+      FridgeRepository fridges,
+      FoodOwnershipRepository ownerships,
+      InventoryMovementLog movements,
+      AccessRequestRepository requests,
+      UserRepository users,
+      BroadcastLiveUpdate live,
+      Clock clock) {
+    return new AnswerFoodRequest(
+        households, fridges, ownerships, movements, requests, users, live, clock);
   }
 
   @Bean

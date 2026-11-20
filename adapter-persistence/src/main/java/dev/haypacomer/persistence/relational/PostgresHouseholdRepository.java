@@ -159,4 +159,19 @@ public class PostgresHouseholdRepository implements HouseholdRepository, Househo
   }
 
   private record HouseholdRow(UUID id, String name, String currency, String timezone) {}
+
+  @Override
+  public void delete(HouseholdId id) {
+    // Grants name the member who gave them without a cascade, so they go first; the rest of the
+    // home cascades from the household row.
+    transaction.executeWithoutResult(
+        status -> {
+          jdbc.sql(
+                  "DELETE FROM food_access_grants WHERE food_item_id IN"
+                      + " (SELECT id FROM food_items WHERE household_id = :id)")
+              .param("id", id.value())
+              .update();
+          jdbc.sql("DELETE FROM households WHERE id = :id").param("id", id.value()).update();
+        });
+  }
 }

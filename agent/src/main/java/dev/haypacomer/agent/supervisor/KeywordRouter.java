@@ -68,8 +68,11 @@ public final class KeywordRouter implements SpecialistRouter {
             "habit",
             "tip",
             "throw away",
-            "desperdicio",
+            "desperdici",
             "botar",
+            "botando",
+            "boto ",
+            "botamos",
             "ahorrar",
             "habito",
             "consejo"));

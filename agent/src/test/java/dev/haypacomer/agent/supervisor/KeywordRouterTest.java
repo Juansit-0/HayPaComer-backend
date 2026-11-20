@@ -26,6 +26,8 @@ class KeywordRouterTest {
     assertEquals(List.of(Specialist.CHEF), router.route("¿qué hay en la nevera?"));
     assertEquals(List.of(Specialist.COLD), router.route("dejaron la puerta abierta"));
     assertEquals(List.of(Specialist.COLD), router.route("la temperatura de la nevera"));
+    assertEquals(List.of(Specialist.COACH), router.route("¿qué estoy botando más?"));
+    assertEquals(List.of(Specialist.COACH), router.route("¿cuánto desperdiciamos?"));
   }
 
   @Test

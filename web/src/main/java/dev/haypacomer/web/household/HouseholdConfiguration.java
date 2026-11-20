@@ -19,6 +19,9 @@ import dev.haypacomer.application.household.UpdateHousehold;
 import dev.haypacomer.application.household.ViewJoinCode;
 import dev.haypacomer.application.inventory.FoodAccessGuard;
 import dev.haypacomer.application.mail.MailLinks;
+import dev.haypacomer.application.moving.PackUpHouseholdFood;
+import dev.haypacomer.application.moving.PackUpMemberFood;
+import dev.haypacomer.application.port.CarriedFood;
 import dev.haypacomer.application.port.EmailSender;
 import dev.haypacomer.application.port.HouseholdRepository;
 import dev.haypacomer.application.port.InvitationRepository;
@@ -130,6 +133,16 @@ public class HouseholdConfiguration {
       UnitOfWork unitOfWork,
       Clock clock) {
     return new JoinHouseholdWithCode(codes, households, unitOfWork, clock);
+  }
+
+  @Bean
+  PackUpMemberFood packUpMemberFood(HouseholdRepository households, CarriedFood carried) {
+    return new PackUpMemberFood(households, carried);
+  }
+
+  @Bean
+  PackUpHouseholdFood packUpHouseholdFood(HouseholdRepository households, CarriedFood carried) {
+    return new PackUpHouseholdFood(households, carried);
   }
 
   @Bean

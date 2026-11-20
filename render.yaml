@@ -54,6 +54,13 @@ services:
         sync: false
       - key: BREVO_API_KEY
         sync: false
+      # Second test account on the sign-in page ("Prueba de casa"); the first one is DEMO_EMAIL and DEMO_PASSWORD.
+      - key: DEMO2_EMAIL
+        value: nicolasvietnam234@gmail.com
+      - key: DEMO2_PASSWORD
+        sync: false
+      - key: DEMO2_LABEL
+        value: Prueba de casa
 
   - type: keyvalue
     name: haypacomer-redis

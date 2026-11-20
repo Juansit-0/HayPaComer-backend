@@ -32,13 +32,16 @@ import dev.haypacomer.application.inventory.UndoLastChange;
 import dev.haypacomer.application.inventory.ViewInventory;
 import dev.haypacomer.application.live.BroadcastLiveUpdate;
 import dev.haypacomer.application.market.AddMissingToMarketList;
+import dev.haypacomer.application.moving.UnpackFood;
 import dev.haypacomer.application.port.AccessRequestRepository;
 import dev.haypacomer.application.port.AiRateLimiter;
 import dev.haypacomer.application.port.AuditLog;
+import dev.haypacomer.application.port.CarriedFood;
 import dev.haypacomer.application.port.ColdChainRepository;
 import dev.haypacomer.application.port.CookingSessionRepository;
 import dev.haypacomer.application.port.DeviceRepository;
 import dev.haypacomer.application.port.FoodCatalogRepository;
+import dev.haypacomer.application.port.FoodItemPieces;
 import dev.haypacomer.application.port.FoodOwnershipRepository;
 import dev.haypacomer.application.port.FoodProfileRepository;
 import dev.haypacomer.application.port.FridgeRepository;
@@ -343,6 +346,16 @@ public class KitchenConfiguration {
   @Bean
   ListActivity listActivity(HouseholdRepository households, AuditLog audit) {
     return new ListActivity(households, audit);
+  }
+
+  @Bean
+  UnpackFood unpackFood(
+      HouseholdRepository households,
+      FridgeRepository fridges,
+      CarriedFood carried,
+      ExecuteInventoryCommand commands,
+      FoodItemPieces pieces) {
+    return new UnpackFood(households, fridges, carried, commands, pieces);
   }
 
   @Bean

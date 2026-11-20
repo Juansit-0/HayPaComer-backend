@@ -2,6 +2,7 @@ package dev.haypacomer.web.kitchen;
 
 import dev.haypacomer.application.HayPaComerFacade;
 import dev.haypacomer.application.fridge.FridgeLayout;
+import dev.haypacomer.application.moving.UnpackFood;
 import dev.haypacomer.application.port.FoodItemPieces;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.kitchen.KitchenDtos.InventoryItemResponse;
@@ -30,10 +31,13 @@ public class KitchenController {
 
   private final HayPaComerFacade facade;
   private final FoodItemPieces foodPieces;
+  private final UnpackFood unpackFood;
 
-  public KitchenController(HayPaComerFacade facade, FoodItemPieces foodPieces) {
+  public KitchenController(
+      HayPaComerFacade facade, FoodItemPieces foodPieces, UnpackFood unpackFood) {
     this.facade = facade;
     this.foodPieces = foodPieces;
+    this.unpackFood = unpackFood;
   }
 
   @PostMapping("/fridges")
@@ -43,9 +47,16 @@ public class KitchenController {
       @PathVariable UUID householdId,
       @Valid @RequestBody SetUpFridgeRequest request) {
     FridgeLayout layout = request.layout() == null ? FridgeLayout.STANDARD : request.layout();
-    return NodeResponse.from(
+    var fridge =
         facade.setUpFridge(
-            CurrentUser.of(jwt), new HouseholdId(householdId), request.name(), layout));
+            CurrentUser.of(jwt), new HouseholdId(householdId), request.name(), layout);
+    // A home made before its fridge gets the food its members brought along now.
+    unpackFood.unpack(CurrentUser.of(jwt), new HouseholdId(householdId));
+    return NodeResponse.from(
+        facade.fridges(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
+            .filter(found -> found.id().equals(fridge.id()))
+            .findFirst()
+            .orElse(fridge));
   }
 
   @GetMapping("/fridges")

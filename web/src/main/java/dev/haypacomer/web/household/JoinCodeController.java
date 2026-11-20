@@ -4,6 +4,7 @@ import dev.haypacomer.application.household.CreateJoinCode;
 import dev.haypacomer.application.household.JoinHouseholdWithCode;
 import dev.haypacomer.application.household.RevokeJoinCode;
 import dev.haypacomer.application.household.ViewJoinCode;
+import dev.haypacomer.application.moving.UnpackFood;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.JoinCode;
 import dev.haypacomer.domain.household.Role;
@@ -33,16 +34,19 @@ public class JoinCodeController {
   private final ViewJoinCode viewCode;
   private final RevokeJoinCode revokeCode;
   private final JoinHouseholdWithCode joinWithCode;
+  private final UnpackFood unpackFood;
 
   public JoinCodeController(
       CreateJoinCode createCode,
       ViewJoinCode viewCode,
       RevokeJoinCode revokeCode,
-      JoinHouseholdWithCode joinWithCode) {
+      JoinHouseholdWithCode joinWithCode,
+      UnpackFood unpackFood) {
     this.createCode = createCode;
     this.viewCode = viewCode;
     this.revokeCode = revokeCode;
     this.joinWithCode = joinWithCode;
+    this.unpackFood = unpackFood;
   }
 
   @GetMapping("/api/v1/households/{householdId}/join-code")
@@ -72,7 +76,10 @@ public class JoinCodeController {
   HouseholdResponse join(
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody JoinRequest request) {
     UserId actor = CurrentUser.of(jwt);
-    return HouseholdResponse.from(joinWithCode.join(actor, request.code()), actor);
+    var joined = joinWithCode.join(actor, request.code());
+    // The food brought from the previous home goes into this fridge.
+    unpackFood.unpack(actor, joined.id());
+    return HouseholdResponse.from(joined, actor);
   }
 
   record CreateCodeRequest(Role role) {}

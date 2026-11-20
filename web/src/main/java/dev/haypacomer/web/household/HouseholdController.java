@@ -11,6 +11,8 @@ import dev.haypacomer.application.household.RemoveMember;
 import dev.haypacomer.application.household.TransferOwnership;
 import dev.haypacomer.application.household.UpdateHousehold;
 import dev.haypacomer.application.household.UpdateHouseholdCommand;
+import dev.haypacomer.application.moving.PackUpHouseholdFood;
+import dev.haypacomer.application.moving.PackUpMemberFood;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.web.household.HouseholdDtos.ChangeRoleRequest;
@@ -43,6 +45,8 @@ public class HouseholdController {
 
   private final CreateHousehold createHousehold;
   private final DeleteHousehold deleteHousehold;
+  private final PackUpMemberFood packUpMember;
+  private final PackUpHouseholdFood packUpHousehold;
   private final ListHouseholds listHouseholds;
   private final GetHousehold getHousehold;
   private final UpdateHousehold updateHousehold;
@@ -54,6 +58,8 @@ public class HouseholdController {
   public HouseholdController(
       CreateHousehold createHousehold,
       DeleteHousehold deleteHousehold,
+      PackUpMemberFood packUpMember,
+      PackUpHouseholdFood packUpHousehold,
       ListHouseholds listHouseholds,
       GetHousehold getHousehold,
       UpdateHousehold updateHousehold,
@@ -63,6 +69,8 @@ public class HouseholdController {
       HouseholdMemberNames memberNames) {
     this.createHousehold = createHousehold;
     this.deleteHousehold = deleteHousehold;
+    this.packUpMember = packUpMember;
+    this.packUpHousehold = packUpHousehold;
     this.listHouseholds = listHouseholds;
     this.getHousehold = getHousehold;
     this.updateHousehold = updateHousehold;
@@ -117,6 +125,8 @@ public class HouseholdController {
   @DeleteMapping("/{householdId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
+    // Everyone's own food leaves with them, to the next home they join.
+    packUpHousehold.packUp(CurrentUser.of(jwt), new HouseholdId(householdId));
     deleteHousehold.delete(CurrentUser.of(jwt), new HouseholdId(householdId));
   }
 
@@ -135,6 +145,8 @@ public class HouseholdController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void removeMember(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId, @PathVariable UUID userId) {
+    // Whoever leaves takes their own food along, to the next home they join.
+    packUpMember.packUp(CurrentUser.of(jwt), new HouseholdId(householdId), new UserId(userId));
     removeMember.remove(CurrentUser.of(jwt), new HouseholdId(householdId), new UserId(userId));
   }
 

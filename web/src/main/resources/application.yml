@@ -59,6 +59,9 @@ haypacomer:
   demo:
     email: ${DEMO_EMAIL:}
     password: ${DEMO_PASSWORD:}
+    second-email: ${DEMO2_EMAIL:}
+    second-password: ${DEMO2_PASSWORD:}
+    second-label: ${DEMO2_LABEL:}
   security:
     jwt:
       secret: ${JWT_SECRET:}

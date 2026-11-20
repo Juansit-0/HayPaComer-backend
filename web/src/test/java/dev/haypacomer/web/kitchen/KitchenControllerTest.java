@@ -63,6 +63,7 @@ class KitchenControllerTest {
   @Autowired private JwtProperties properties;
   @MockitoBean private HayPaComerFacade facade;
   @MockitoBean private dev.haypacomer.application.port.FoodItemPieces foodPieces;
+  @MockitoBean private dev.haypacomer.application.moving.UnpackFood unpackFood;
   @MockitoBean private AuthenticateDevice authenticateDevice;
 
   private final UserId juan = UserId.newId();

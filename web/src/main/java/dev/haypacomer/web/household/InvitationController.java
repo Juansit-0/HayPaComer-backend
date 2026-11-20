@@ -5,6 +5,7 @@ import dev.haypacomer.application.household.CancelInvitation;
 import dev.haypacomer.application.household.InviteMember;
 import dev.haypacomer.application.household.ListInvitations;
 import dev.haypacomer.application.household.SentInvitation;
+import dev.haypacomer.application.moving.UnpackFood;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Invitation;
 import dev.haypacomer.domain.household.Role;
@@ -36,16 +37,19 @@ public class InvitationController {
   private final ListInvitations listInvitations;
   private final CancelInvitation cancelInvitation;
   private final AcceptInvitation acceptInvitation;
+  private final UnpackFood unpackFood;
 
   public InvitationController(
       InviteMember inviteMember,
       ListInvitations listInvitations,
       CancelInvitation cancelInvitation,
-      AcceptInvitation acceptInvitation) {
+      AcceptInvitation acceptInvitation,
+      UnpackFood unpackFood) {
     this.inviteMember = inviteMember;
     this.listInvitations = listInvitations;
     this.cancelInvitation = cancelInvitation;
     this.acceptInvitation = acceptInvitation;
+    this.unpackFood = unpackFood;
   }
 
   @PostMapping("/api/v1/households/{householdId}/invitations")
@@ -80,7 +84,9 @@ public class InvitationController {
   HouseholdResponse accept(
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody AcceptRequest request) {
     UserId actor = CurrentUser.of(jwt);
-    return HouseholdResponse.from(acceptInvitation.accept(actor, request.token()), actor);
+    var joined = acceptInvitation.accept(actor, request.token());
+    unpackFood.unpack(actor, joined.id());
+    return HouseholdResponse.from(joined, actor);
   }
 
   record InviteRequest(@NotBlank @Email String email, @NotNull Role role) {}

@@ -32,7 +32,19 @@ public class PostgresFoodCatalogRepository implements FoodCatalogRepository {
 
   @Override
   public Optional<FoodMetadata> findByName(String name) {
-    return FoodRows.load(jdbc, "WHERE name_key = :key", Map.of("key", FoodMetadata.keyOf(name)))
+    String key = FoodMetadata.keyOf(name);
+    Optional<FoodMetadata> exact =
+        FoodRows.load(jdbc, "WHERE name_key = :key", Map.of("key", key)).values().stream()
+            .findFirst();
+    if (exact.isPresent()) {
+      return exact;
+    }
+    // A food typed by its translated name ("Tomate") is the catalog food, not a new one to learn.
+    return FoodRows.load(
+            jdbc,
+            "WHERE 'food.' || name_key IN (SELECT t.key FROM translations t"
+                + " WHERE t.key LIKE 'food.%' AND lower(t.text) = :key)",
+            Map.of("key", key))
         .values()
         .stream()
         .findFirst();

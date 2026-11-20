@@ -97,10 +97,10 @@ class ChefChatIntegrationTest {
             send(base + "/agent/chat", juan, "{\"message\":\"Que cocino esta noche?\"}")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.runs[0].specialist").value("chef"))
-                .andExpect(jsonPath("$.evidence[0].tool").value("view_expiries"))
+                .andExpect(jsonPath("$.evidence[0].tool").value("suggest_dishes"))
                 .andExpect(
                     jsonPath("$.evidence[0].content")
-                        .value(org.hamcrest.Matchers.containsString("Chicken breast 650 g"))));
+                        .value(org.hamcrest.Matchers.containsString("No recipes are saved yet"))));
     String conversation = JsonPath.read(first, "$.conversationId");
 
     send(

@@ -8,8 +8,6 @@ import java.util.Objects;
 public final class SearchFoods {
 
   private static final int MAX_RESULTS = 20;
-  // Browsing lists the whole catalog for the add panel and the drop bar; it grows with what the AI
-  // learns, so the cap stays well above it instead of hiding foods like the tomato.
   private static final int BROWSE_RESULTS = 1000;
 
   private final FoodCatalogRepository catalog;

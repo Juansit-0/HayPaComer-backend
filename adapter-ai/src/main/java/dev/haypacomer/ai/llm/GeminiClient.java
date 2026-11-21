@@ -48,7 +48,6 @@ public final class GeminiClient implements LlmClient {
     return text.asString();
   }
 
-  // Gemini 3 thinks by default, which doubles the wait; the planner only needs short JSON.
   private Map<String, Object> generation() {
     Map<String, Object> config = Map.of("responseMimeType", "application/json", "temperature", 0.2);
     if (!settings.model().startsWith("gemini-3")) {

@@ -7,7 +7,6 @@ import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
 import java.util.Objects;
 
-/** The person who made the home deletes it, with its fridge and food, so everyone in it is free. */
 public final class DeleteHousehold {
 
   private final HouseholdRepository households;

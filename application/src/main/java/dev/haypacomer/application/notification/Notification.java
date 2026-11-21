@@ -6,9 +6,6 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * A message for a home; with a recipient it reaches only that person (an answer to their request).
- */
 public record Notification(
     UUID id,
     HouseholdId household,

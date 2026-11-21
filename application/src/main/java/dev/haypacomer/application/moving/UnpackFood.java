@@ -22,10 +22,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Puts the food the members of a home brought along into its fridge, on the first shelf, each one
- * still theirs and as visible as before. A food that does not fit stays waiting for the next try.
- */
 public final class UnpackFood {
 
   private final GetHousehold households;
@@ -66,7 +62,6 @@ public final class UnpackFood {
           try {
             outcome = stock(membership.user(), id, fridge, tray.get(), item, true);
           } catch (RuntimeException dateNoLongerFits) {
-            // A date that is no longer possible (it passed while waiting) gives way to an estimate.
             if (item.expiresOn() == null) {
               throw dateNoLongerFits;
             }
@@ -78,7 +73,6 @@ public final class UnpackFood {
           carried.unpacked(item.id());
           unpacked++;
         } catch (RuntimeException notNow) {
-          // It stays waiting: a full shelf or a food that cannot go in yet does not lose it.
         }
       }
     }

@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-/** The owner answers a request once; a yes grants the food, as granting it by hand would. */
 public final class AnswerFoodRequest {
 
   private final FoodRequests shared;
@@ -70,7 +69,6 @@ public final class AnswerFoodRequest {
     live.publish(
         LiveUpdate.of(householdId, LiveUpdateKind.INVENTORY, null, FoodRequests.ANSWERED, now));
     FoodRequestView answered = shared.view(household, decided, me);
-    // Whoever asked hears the answer in their notifications.
     if (answered.requesterUserId() != null) {
       notify.onNotification(
           Notification.to(

@@ -28,7 +28,6 @@ public class PostgresCarriedFood implements CarriedFood {
 
   @Override
   public int packUp(HouseholdId household, UserId user) {
-    // Copy the person's own food out, then take it from the fridge, in one go.
     Integer packed =
         transaction.execute(
             status -> {

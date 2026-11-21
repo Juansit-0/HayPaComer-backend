@@ -6,7 +6,6 @@ import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import java.util.Objects;
 
-/** Turns the household code off, so nobody else joins with it. */
 public final class RevokeJoinCode {
 
   private final HouseholdRepository households;

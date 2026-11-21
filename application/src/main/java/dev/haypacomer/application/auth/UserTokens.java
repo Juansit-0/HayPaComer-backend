@@ -19,7 +19,6 @@ final class UserTokens {
     this.opaqueTokens = Objects.requireNonNull(opaqueTokens, "opaqueTokens");
   }
 
-  // Links in flight are the limit: enough for a lost email, too few to flood someone's inbox.
   boolean mayIssue(UserId user, UserTokenType type, Instant now) {
     return store.countUsable(user, type, now) < MAX_OPEN_LINKS;
   }

@@ -119,7 +119,6 @@ public final class MarketList {
     items.remove(require(id).id());
   }
 
-  // Bought food leaves the cart but stays on record: the month's spending is counted from it.
   public int clearChecked(Instant at) {
     int cleared = (int) items.values().stream().filter(MarketItem::isInCart).count();
     items.replaceAll((id, item) -> item.isInCart() ? item.cleared(at) : item);

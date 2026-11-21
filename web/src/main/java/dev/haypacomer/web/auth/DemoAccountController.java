@@ -30,10 +30,6 @@ public class DemoAccountController {
             : new Account(secondLabel.isBlank() ? null : secondLabel, secondEmail, secondPassword);
   }
 
-  /**
-   * The shared test accounts. The first one is also given as email and password, as before; a
-   * second one, with its own label, appears in the list when it is configured.
-   */
   @Operation(summary = "Get the shared demo accounts when they are configured")
   @GetMapping("/api/v1/auth/demo")
   ResponseEntity<DemoAccount> demo() {

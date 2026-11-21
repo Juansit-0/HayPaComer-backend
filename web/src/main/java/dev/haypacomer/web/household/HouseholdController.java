@@ -133,7 +133,6 @@ public class HouseholdController {
   @DeleteMapping("/{householdId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
-    // Everyone's own food leaves with them, to the next home they join.
     packUpHousehold.packUp(CurrentUser.of(jwt), new HouseholdId(householdId));
     deleteHousehold.delete(CurrentUser.of(jwt), new HouseholdId(householdId));
   }
@@ -155,7 +154,6 @@ public class HouseholdController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void removeMember(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId, @PathVariable UUID userId) {
-    // Whoever leaves takes their own food along, to the next home they join.
     packUpMember.packUp(CurrentUser.of(jwt), new HouseholdId(householdId), new UserId(userId));
     removeMember.remove(CurrentUser.of(jwt), new HouseholdId(householdId), new UserId(userId));
   }

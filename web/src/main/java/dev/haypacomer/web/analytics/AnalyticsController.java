@@ -137,7 +137,6 @@ public class AnalyticsController {
     return markdown.lines().map(this::reportLine).collect(Collectors.joining("\n", "", "\n"));
   }
 
-  // A table row starts with a food or a member; a translated line is a heading, not a row.
   private String reportLine(String line) {
     String translated = localizer.message(line);
     String[] cells = line.split(" \\| ", 2);

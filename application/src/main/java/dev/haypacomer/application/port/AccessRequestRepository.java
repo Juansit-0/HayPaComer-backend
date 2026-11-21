@@ -16,6 +16,5 @@ public interface AccessRequestRepository {
 
   Optional<AccessRequest> findPending(FoodItemId item, MemberId requester);
 
-  /** Pending requests the member has to answer, and the member's own recent requests. */
   List<AccessRequest> involving(HouseholdId household, MemberId member);
 }

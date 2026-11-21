@@ -57,8 +57,6 @@ public final class QuantityParser {
     throw new InvalidQuantityException("Cannot read a quantity from \"" + term.strip() + "\"");
   }
 
-  // Three digits after a separator are thousands, as Colombia writes 1.000 g; a mistaken 1.500 kg
-  // then lands over the limit in Amount and is refused instead of stored a thousand times off.
   private static BigDecimal number(String text) {
     return THOUSANDS.matcher(text).matches()
         ? new BigDecimal(text.replaceAll("[.,]", ""))

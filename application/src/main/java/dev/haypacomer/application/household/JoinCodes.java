@@ -6,7 +6,6 @@ import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
 
-/** Only whoever manages the members sees or changes the household code. */
 final class JoinCodes {
 
   private JoinCodes() {}

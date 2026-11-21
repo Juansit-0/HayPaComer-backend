@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-/** What the three request use cases share: the household's food, the requests, and the names. */
 final class FoodRequests {
 
   static final String ASKED = "Someone asked to use a food";

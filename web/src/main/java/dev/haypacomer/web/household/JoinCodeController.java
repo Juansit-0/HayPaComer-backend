@@ -84,7 +84,6 @@ public class JoinCodeController {
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody JoinRequest request) {
     UserId actor = CurrentUser.of(jwt);
     var joined = joinWithCode.join(actor, request.code());
-    // The food brought from the previous home goes into this fridge.
     unpackFood.unpack(actor, joined.id());
     return HouseholdResponse.from(joined, actor);
   }

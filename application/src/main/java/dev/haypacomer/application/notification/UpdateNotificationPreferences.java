@@ -16,7 +16,6 @@ public final class UpdateNotificationPreferences {
 
   public NotificationPreferences update(
       UserId actor, Set<ChannelKind> channels, String telegramChatId) {
-    // The inbox stays on: a cold chain alert must reach someone even with every other channel off.
     Set<ChannelKind> kept = EnumSet.of(ChannelKind.WEB);
     kept.addAll(channels);
     NotificationPreferences updated = new NotificationPreferences(actor, kept, telegramChatId);

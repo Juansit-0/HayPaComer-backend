@@ -53,8 +53,6 @@ final class InventoryCaretaker {
                               .findByName(key)
                               .orElseThrow(() -> new FoodNotInCatalogException(key)))));
     }
-    // Who may see a food is its owner's current decision: only food coming back recovers its old
-    // terms.
     memento
         .ownerships()
         .forEach(

@@ -57,7 +57,6 @@ public final class AddToMarketTool implements AgentTool {
         + " to the market list";
   }
 
-  // People name food in their own language; the catalog search knows those names too.
   private Optional<String> catalogName(String food) {
     return catalog
         .findByName(food)

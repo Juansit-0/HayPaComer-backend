@@ -162,8 +162,6 @@ public class PostgresHouseholdRepository implements HouseholdRepository, Househo
 
   @Override
   public void delete(HouseholdId id) {
-    // Grants name the member who gave them without a cascade, so they go first; the rest of the
-    // home cascades from the household row.
     transaction.executeWithoutResult(
         status -> {
           jdbc.sql(

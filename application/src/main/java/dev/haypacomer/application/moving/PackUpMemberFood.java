@@ -11,10 +11,6 @@ import dev.haypacomer.domain.household.Role;
 import dev.haypacomer.domain.identity.UserId;
 import java.util.Objects;
 
-/**
- * Before someone leaves a home (or is taken out of it), their own food leaves the fridge with them;
- * it goes into the fridge of the next home they join. The same rules as leaving apply first.
- */
 public final class PackUpMemberFood {
 
   private final GetHousehold households;

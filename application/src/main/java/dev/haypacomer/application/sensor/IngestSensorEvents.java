@@ -79,7 +79,6 @@ public final class IngestSensorEvents {
               ? validation.validate(event)
               : ValidationResult.rejected(
                   "a " + device.kind() + " device does not send " + SensorEventTypes.of(event));
-      // Parallel posts can all pass the check; the insert decides which one counts.
       ValidationResult verdict =
           checked.accepted() && !log.accept(event, clock.instant())
               ? ValidationResult.duplicate()

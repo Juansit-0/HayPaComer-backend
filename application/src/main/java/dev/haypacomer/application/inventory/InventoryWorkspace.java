@@ -22,8 +22,6 @@ record InventoryWorkspace(
     FridgeShapeRepository shapes,
     Instant now) {
 
-  // Refuses food that would not fit where it goes; without shapes (older wiring and tests) any
-  // amount fits.
   void requireRoom(Fridge fridge, TrayId tray, FoodMetadata food, Grams grams) {
     if (shapes == null) {
       return;

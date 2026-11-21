@@ -11,7 +11,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Objects;
 
-/** Joins the household behind a code, so its fridge shows up for the new member right away. */
 public final class JoinHouseholdWithCode {
 
   private final JoinCodeRepository codes;

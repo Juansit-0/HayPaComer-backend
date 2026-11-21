@@ -10,12 +10,6 @@ import dev.haypacomer.domain.quantity.Grams;
 import java.util.List;
 import java.util.Objects;
 
-// The room in each part of a fridge, from its shape, and the room its food takes. A shelf holds the
-// box between it and the shelf above,
-// a drawer its own box, a door rack a narrow ledge; only three quarters of that is usable, since
-// food does not stack like water. Food takes
-// its weight divided by how dense it sits in a fridge: a kilo of loose vegetables fills about two
-// litres, a kilo of milk one.
 public record FridgeRoom(FridgeShape shape) {
 
   static final double USABLE = 0.75;
@@ -35,7 +29,6 @@ public record FridgeRoom(FridgeShape shape) {
         .toList();
   }
 
-  // Refuses food that would not fit in the tray, saying how much room is left.
   public void requireRoom(Fridge fridge, TrayId trayId, FoodMetadata food, Grams adding) {
     Zone zone =
         fridge
@@ -70,9 +63,6 @@ public record FridgeRoom(FridgeShape shape) {
     return tray.children().stream().mapToDouble(item -> liters(item.food(), item.quantity())).sum();
   }
 
-  // Litres a tray of each kind holds, from the same layout the app draws: the cold section, its
-  // shelves spread above the drawers, an ice box
-  // inside a fridge with no freezer door, and the freezer shared by its shelves.
   double capacity(ZoneKind kind) {
     double width = shape.widthCm();
     double depth = shape.depthCm();

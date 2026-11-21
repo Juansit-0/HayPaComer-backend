@@ -39,7 +39,6 @@ public class PostgresFoodCatalogRepository implements FoodCatalogRepository {
     if (exact.isPresent()) {
       return exact;
     }
-    // A food typed by its translated name ("Tomate") is the catalog food, not a new one to learn.
     return FoodRows.load(
             jdbc,
             "WHERE 'food.' || name_key IN (SELECT t.key FROM translations t"

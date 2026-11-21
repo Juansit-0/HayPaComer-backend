@@ -12,9 +12,6 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.random.RandomGenerator;
 
-/**
- * The home's code, which anyone in it can see and share; it is made the first time someone looks.
- */
 public final class ViewJoinCode {
 
   private final HouseholdRepository households;

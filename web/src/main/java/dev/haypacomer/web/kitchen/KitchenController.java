@@ -54,7 +54,6 @@ public class KitchenController {
     var fridge =
         facade.setUpFridge(
             CurrentUser.of(jwt), new HouseholdId(householdId), request.name(), layout);
-    // A home made before its fridge gets the food its members brought along now.
     unpackFood.unpack(CurrentUser.of(jwt), new HouseholdId(householdId));
     return NodeResponse.from(
         facade.fridges(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()

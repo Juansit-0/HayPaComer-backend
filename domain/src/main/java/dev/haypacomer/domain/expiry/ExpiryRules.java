@@ -41,7 +41,6 @@ public record ExpiryRules(int marginDays) {
     }
     int days = life.daysIn(zone, opened);
     long away = ChronoUnit.DAYS.between(today, date);
-    // A sealed package keeps the date printed on it (cans last years); once opened, storage wins.
     if (opened && away > (long) days + marginDays) {
       throw new ImpossibleExpiryException(
           food.name()

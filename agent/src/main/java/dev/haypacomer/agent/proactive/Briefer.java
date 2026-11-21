@@ -45,7 +45,6 @@ public final class Briefer {
     return digest;
   }
 
-  // Without AI the agent answers with a raw list of readings, which nobody should have to read.
   private static String readable(String answer) {
     if (answer.startsWith(RuleBasedPlanner.RAW_ANSWER)) {
       return OPEN_THE_APP;

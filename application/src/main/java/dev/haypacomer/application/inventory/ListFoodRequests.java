@@ -12,7 +12,6 @@ import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.domain.member.MemberId;
 import java.util.List;
 
-/** The requests waiting for your answer, and how your own asks went. */
 public final class ListFoodRequests {
 
   private final FoodRequests shared;

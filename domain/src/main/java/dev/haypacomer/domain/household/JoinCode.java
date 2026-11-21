@@ -7,11 +7,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.random.RandomGenerator;
 
-/**
- * A short code that lets anyone who has it join a household and share its fridge, without an email
- * invitation. One code per household, kept for as long as the home exists; making a new one
- * replaces the old.
- */
 public record JoinCode(
     HouseholdId household,
     String code,
@@ -48,10 +43,6 @@ public record JoinCode(
     return new JoinCode(household, code.toString(), role, createdBy, now, now.plus(TIME_TO_LIVE));
   }
 
-  /**
-   * What people type: any case, with or without dashes or spaces. The alphabet leaves out O, 0, I
-   * and 1, so a code read aloud is never ambiguous.
-   */
   public static String normalize(String typed) {
     if (typed == null) {
       return "";
@@ -59,7 +50,6 @@ public record JoinCode(
     return typed.toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9]", "");
   }
 
-  /** The code as shown: two groups of four, easy to read aloud. */
   public String display() {
     return code.substring(0, LENGTH / 2) + "-" + code.substring(LENGTH / 2);
   }

@@ -50,7 +50,6 @@ public final class RefreshSession {
       refreshTokens.revokeFamily(current.family(), now);
       throw new InvalidCredentialsException();
     }
-    // The child exists before the claim, so that a reuse caught by anyone also revokes it.
     SessionIssuer.Issued next = sessions.issue(current.user(), current.family(), now);
     if (!refreshTokens.claim(current.id(), now)) {
       refreshTokens.revokeFamily(current.family(), now);

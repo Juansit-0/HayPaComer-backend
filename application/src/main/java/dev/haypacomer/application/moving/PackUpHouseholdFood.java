@@ -10,7 +10,6 @@ import dev.haypacomer.domain.household.Permission;
 import dev.haypacomer.domain.identity.UserId;
 import java.util.Objects;
 
-/** Before a home is deleted, everyone takes their own food along to their next home. */
 public final class PackUpHouseholdFood {
 
   private final GetHousehold households;

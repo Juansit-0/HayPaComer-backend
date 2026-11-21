@@ -48,7 +48,6 @@ public class StatusController {
         status.degraded().stream().map(ComponentResponse::from).toList());
   }
 
-  // Nothing else touches Redis while the Chef is idle, so the status asks it directly.
   private void checkChefMemory() {
     try (RedisConnection connection = redis.getConnection()) {
       connection.ping();

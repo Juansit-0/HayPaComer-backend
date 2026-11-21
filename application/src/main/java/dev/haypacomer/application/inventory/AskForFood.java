@@ -24,9 +24,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Objects;
 
-/**
- * Asks whoever stocked a food marked "ask first" to let you use it; asking twice is one request.
- */
 public final class AskForFood {
 
   private final FoodRequests shared;
@@ -78,7 +75,6 @@ public final class AskForFood {
                       LiveUpdate.of(
                           householdId, LiveUpdateKind.INVENTORY, null, FoodRequests.ASKED, now));
                   FoodRequestView asked = shared.view(household, opened, me);
-                  // The person who stocked it hears about it in their notifications.
                   if (asked.ownerUserId() != null) {
                     notify.onNotification(
                         Notification.to(

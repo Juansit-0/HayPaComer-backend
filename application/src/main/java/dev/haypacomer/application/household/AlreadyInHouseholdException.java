@@ -1,6 +1,5 @@
 package dev.haypacomer.application.household;
 
-/** Someone belongs to one home at a time: to make or join another, they leave or delete theirs. */
 public final class AlreadyInHouseholdException extends RuntimeException {
 
   public AlreadyInHouseholdException() {

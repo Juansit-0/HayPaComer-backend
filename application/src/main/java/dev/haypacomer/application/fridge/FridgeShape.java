@@ -38,10 +38,6 @@ public record FridgeShape(
     within("depthCm", depthCm, 20, 250);
   }
 
-  // The fridges people start from: the Challenger CR 121 of the demo first, then the common shapes
-  // of a Colombian kitchen.
-  // shortcut: shelves, racks and hinge are those of the old demo minibar, set them from the real
-  // one.
   public static List<FridgeExample> examples() {
     return List.of(
         new FridgeExample(
@@ -53,16 +49,12 @@ public record FridgeShape(
         new FridgeExample("single-door", standard(FridgeType.SINGLE_DOOR, 3, 3, 1, 1)));
   }
 
-  // A fridge whose shape was never described: its counts from the tree, with a freezer door only
-  // when it really has a freezer to open.
   public static FridgeShape inferredFrom(Fridge fridge) {
     return count(fridge, ZoneKind.FREEZER) > 0
         ? standard(FridgeType.TOP_FREEZER, 0, 0, 0, 1).withCountsOf(fridge)
         : standard(FridgeType.SINGLE_DOOR, 0, 0, 0, 0).withCountsOf(fridge);
   }
 
-  // The counts always come from the fridge itself, so a stored shape never disagrees with its
-  // trays.
   public FridgeShape withCountsOf(Fridge fridge) {
     return new FridgeShape(
         type,
@@ -78,9 +70,6 @@ public record FridgeShape(
         depthCm);
   }
 
-  // Adds the trays the shape asks for and removes the ones it no longer has, the lowest first; a
-  // tray
-  // that still holds food is never removed (TrayNotEmptyException). Kept trays keep their names.
   public void fit(Fridge fridge) {
     fitZone(fridge, ZoneKind.SHELF, shelves);
     fitZone(fridge, ZoneKind.DOOR, doorRacks);
@@ -90,8 +79,6 @@ public record FridgeShape(
     nameLevels(fridge, ZoneKind.FREEZER);
   }
 
-  // Shelves are named from the top down by how many there are: two read Top and Bottom, three add
-  // Middle, and more are numbered between Top and Bottom. A name the household chose is kept.
   private static void nameLevels(Fridge fridge, ZoneKind kind) {
     List<Zone> zones = fridge.children().stream().filter(zone -> zone.kind() == kind).toList();
     int count = zones.stream().mapToInt(zone -> zone.children().size()).sum();
@@ -133,7 +120,6 @@ public record FridgeShape(
     for (Zone zone : lastFirst) {
       List<Tray> trays =
           zone.children().stream().sorted(Comparator.comparingInt(Tray::position)).toList();
-      // A shelf with food is the last one to go, so nobody has to empty a shelf they meant to keep.
       List<Tray> emptiestFirst =
           trays.reversed().stream()
               .sorted(Comparator.comparing(tray -> !tray.children().isEmpty()))
@@ -180,8 +166,6 @@ public record FridgeShape(
     };
   }
 
-  // Names the translations know: shelves get their level from nameLevels; Rack, then Rack 2;
-  // Vegetables, then Drawer 2.
   private static String trayName(ZoneKind kind, int index) {
     return switch (kind) {
       case SHELF, FREEZER -> "Shelf " + (index + 1);

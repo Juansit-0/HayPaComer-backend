@@ -51,7 +51,6 @@ public final class Zone implements FridgeNode {
     return tray;
   }
 
-  // A tray keeps its id, position, and food under its new name.
   public void renameTray(TrayId trayId, String name) {
     Tray tray =
         find(trayId)

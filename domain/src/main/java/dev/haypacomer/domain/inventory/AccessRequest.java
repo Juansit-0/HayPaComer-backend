@@ -7,10 +7,6 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Someone asking the person who stocked a food marked "ask first" whether they may use it. The
- * owner answers once; a yes adds the asker to the food's grants.
- */
 public record AccessRequest(
     UUID id,
     HouseholdId household,

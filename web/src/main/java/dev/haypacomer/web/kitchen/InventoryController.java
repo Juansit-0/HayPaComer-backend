@@ -109,7 +109,6 @@ public class InventoryController {
                 request.visibility(),
                 Boolean.TRUE.equals(request.opened()),
                 request.expirySource()));
-    // Added by units (4 cans): keep what one weighs, so the fridge draws exactly that many.
     if (request.pieceGrams() != null && !stocked.replayed()) {
       pieces.save(stocked.item(), request.pieceGrams());
     }
@@ -169,8 +168,6 @@ public class InventoryController {
                 new TrayId(request.trayId()))));
   }
 
-  // A key means "this same request again": the same person, household, action and body, never a
-  // stranger's result.
   private static UUID commandId(UUID idempotencyKey, Jwt jwt, Object... request) {
     if (idempotencyKey == null) {
       return UUID.randomUUID();

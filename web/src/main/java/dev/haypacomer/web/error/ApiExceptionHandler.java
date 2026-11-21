@@ -78,7 +78,6 @@ import tools.jackson.databind.exc.MismatchedInputException;
 public class ApiExceptionHandler {
 
   private static final String INVALID_VALUE = "A value is not valid";
-  // What the JDK says about a value it could not read is written for programmers.
   private static final Pattern TECHNICAL =
       Pattern.compile("No enum constant|Invalid UUID string|For input string");
 

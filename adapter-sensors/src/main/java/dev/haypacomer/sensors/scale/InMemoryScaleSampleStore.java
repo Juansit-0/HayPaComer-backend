@@ -28,7 +28,6 @@ public final class InMemoryScaleSampleStore implements ScaleSampleStore {
     this.clock = clock;
   }
 
-  // Newest wins below, so one sample from a wrong clock would hide every real one after it.
   private boolean fromTheFuture(Instant at) {
     return at.isAfter(clock.instant().plus(CLOCK_SKEW));
   }

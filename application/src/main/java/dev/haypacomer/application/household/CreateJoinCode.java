@@ -11,7 +11,6 @@ import java.time.Clock;
 import java.util.Objects;
 import java.util.random.RandomGenerator;
 
-/** Makes the code people type to join the household and share its fridge, replacing the old one. */
 public final class CreateJoinCode {
 
   private final HouseholdRepository households;

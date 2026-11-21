@@ -50,7 +50,6 @@ public final class LlmPlanner implements Planner {
 
   @Override
   public Decision next(AgentContext context) {
-    // A clear order becomes its confirmation at once; the model is kept for questions.
     if (OfflineIntents.match(context.task().asked())
         .map(OfflineIntents.Intent::tool)
         .filter(context.tools()::contains)

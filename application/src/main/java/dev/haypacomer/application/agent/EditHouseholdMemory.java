@@ -42,8 +42,6 @@ public final class EditHouseholdMemory {
         });
   }
 
-  // Everything is counted before anything is written, so an edit that does not fit changes
-  // nothing.
   private void editInTurn(
       UserId actor, HouseholdId household, List<String> forgetKeys, List<MemoryNote> notes) {
     households.get(actor, household).requirePermission(actor, Permission.COOK);

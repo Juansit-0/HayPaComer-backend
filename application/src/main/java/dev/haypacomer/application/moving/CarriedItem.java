@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/** One food someone took along from the home they left, waiting for the next fridge. */
 public record CarriedItem(
     UUID id,
     String food,

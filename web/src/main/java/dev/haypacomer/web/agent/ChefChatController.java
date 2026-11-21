@@ -12,6 +12,7 @@ import dev.haypacomer.application.agent.ConversationSummary;
 import dev.haypacomer.application.agent.PendingConfirmation;
 import dev.haypacomer.application.agent.RunStatus;
 import dev.haypacomer.domain.household.HouseholdId;
+import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,10 +41,12 @@ public class ChefChatController {
 
   private final ChefChat chat;
   private final ReadConversation readConversation;
+  private final Localizer localizer;
 
-  public ChefChatController(ChefChat chat, ReadConversation readConversation) {
+  public ChefChatController(ChefChat chat, ReadConversation readConversation, Localizer localizer) {
     this.chat = chat;
     this.readConversation = readConversation;
+    this.localizer = localizer;
   }
 
   @Operation(summary = "Send a message to the chef and get a grounded answer")
@@ -61,10 +64,10 @@ public class ChefChatController {
             Optional.ofNullable(request.specialist()));
     return new ChatResponse(
         reply.conversation().value(),
-        reply.answer().answer(),
+        localizer.lines(reply.answer().answer()),
         reply.answer().parts().stream().map(part -> RunBrief.from(part.run())).toList(),
         reply.evidence().stream().map(Evidence::from).toList(),
-        reply.answer().pending().map(Pending::from).orElse(null));
+        reply.answer().pending().map(pending -> Pending.from(pending, localizer)).orElse(null));
   }
 
   @Operation(summary = "List your conversations with the chef")
@@ -112,12 +115,12 @@ public class ChefChatController {
   record Pending(
       UUID id, String tool, Map<String, String> arguments, String summary, Instant expiresAt) {
 
-    static Pending from(PendingConfirmation pending) {
+    static Pending from(PendingConfirmation pending, Localizer localizer) {
       return new Pending(
           pending.id(),
           pending.tool(),
           pending.arguments(),
-          pending.summary(),
+          localizer.message(pending.summary()),
           pending.expiresAt());
     }
   }

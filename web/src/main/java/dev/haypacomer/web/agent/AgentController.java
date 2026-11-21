@@ -14,6 +14,7 @@ import dev.haypacomer.application.agent.TraceKind;
 import dev.haypacomer.application.agent.TraceStep;
 import dev.haypacomer.application.agent.ViewAgentRun;
 import dev.haypacomer.domain.household.HouseholdId;
+import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,18 +50,21 @@ public class AgentController {
   private final ListPendingConfirmations listPendingConfirmations;
   private final ApproveConfirmation approveConfirmation;
   private final RejectConfirmation rejectConfirmation;
+  private final Localizer localizer;
 
   public AgentController(
       Supervisor supervisor,
       ViewAgentRun viewAgentRun,
       ListPendingConfirmations listPendingConfirmations,
       ApproveConfirmation approveConfirmation,
-      RejectConfirmation rejectConfirmation) {
+      RejectConfirmation rejectConfirmation,
+      Localizer localizer) {
     this.supervisor = supervisor;
     this.viewAgentRun = viewAgentRun;
     this.listPendingConfirmations = listPendingConfirmations;
     this.approveConfirmation = approveConfirmation;
     this.rejectConfirmation = rejectConfirmation;
+    this.localizer = localizer;
   }
 
   @Operation(
@@ -79,8 +83,8 @@ public class AgentController {
             Optional.ofNullable(request.specialist()));
     return new RunResponse(
         answer.parts().stream().map(part -> RunSummary.from(part.run())).toList(),
-        answer.answer(),
-        answer.pending().map(ConfirmationResponse::from).orElse(null));
+        localizer.lines(answer.answer()),
+        answer.pending().map(this::confirmation).orElse(null));
   }
 
   @Operation(summary = "Show the step-by-step trace of an agent run")
@@ -95,7 +99,7 @@ public class AgentController {
   @GetMapping("/agent/confirmations")
   List<ConfirmationResponse> confirmations(@AuthenticationPrincipal Jwt jwt) {
     return listPendingConfirmations.list(CurrentUser.of(jwt)).stream()
-        .map(ConfirmationResponse::from)
+        .map(this::confirmation)
         .toList();
   }
 
@@ -103,14 +107,18 @@ public class AgentController {
   @PostMapping("/agent/confirmations/{confirmationId}/approve")
   ApprovalResponse approve(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID confirmationId) {
     return new ApprovalResponse(
-        approveConfirmation.approve(CurrentUser.of(jwt), confirmationId).content());
+        localizer.lines(
+            approveConfirmation.approve(CurrentUser.of(jwt), confirmationId).content()));
   }
 
   @Operation(summary = "Reject a pending agent action")
   @PostMapping("/agent/confirmations/{confirmationId}/reject")
   ConfirmationResponse reject(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID confirmationId) {
-    return ConfirmationResponse.from(
-        rejectConfirmation.reject(CurrentUser.of(jwt), confirmationId));
+    return confirmation(rejectConfirmation.reject(CurrentUser.of(jwt), confirmationId));
+  }
+
+  private ConfirmationResponse confirmation(PendingConfirmation pending) {
+    return ConfirmationResponse.from(pending, localizer.message(pending.summary()));
   }
 
   record RunRequest(
@@ -161,14 +169,14 @@ public class AgentController {
       Instant proposedAt,
       Instant expiresAt) {
 
-    static ConfirmationResponse from(PendingConfirmation pending) {
+    static ConfirmationResponse from(PendingConfirmation pending, String summary) {
       return new ConfirmationResponse(
           pending.id(),
           pending.run().value(),
           pending.household().value(),
           pending.tool(),
           pending.arguments(),
-          pending.summary(),
+          summary,
           pending.proposedAt(),
           pending.expiresAt());
     }

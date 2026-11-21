@@ -124,4 +124,77 @@ class ChefChatIntegrationTest {
     send(base + "/agent/chat", stranger, "{\"message\":\"Peek\"}").andExpect(status().isNotFound());
     send(base + "/agent/chat", juan, "{\"message\":\"\"}").andExpect(status().isBadRequest());
   }
+
+  @Test
+  void theChefAnswersInSpanishWhenTheCallerAsksForIt() throws Exception {
+    String juan = signUp("chat-es@haypacomer.dev");
+    String base =
+        "/api/v1/households/"
+            + JsonPath.read(
+                body(
+                    send(
+                        "/api/v1/households",
+                        juan,
+                        "{\"name\":\"Casa\",\"currency\":\"COP\",\"timezone\":\"UTC\"}")),
+                "$.id");
+    String fridge = body(send(base + "/fridges", juan, "{\"name\":\"Kitchen\"}"));
+    send(
+            base + "/items",
+            juan,
+            "{\"fridgeId\":\""
+                + JsonPath.read(fridge, "$.id")
+                + "\",\"trayId\":\""
+                + JsonPath.read(fridge, "$.children[0].children[0].id")
+                + "\",\"food\":\"Chicken breast\",\"grams\":650}")
+        .andExpect(status().isCreated());
+    String body = "{\"message\":\"I used 200 g of chicken breast\",\"specialist\":\"chef\"}";
+
+    send(base + "/agent/chat", juan, body)
+        .andExpect(
+            jsonPath("$.answer")
+                .value(
+                    org.hamcrest.Matchers.startsWith(
+                        "Waiting for your confirmation: Use 200 g of Chicken breast")));
+    String spanish =
+        body(
+            mvc.perform(
+                    post(base + "/agent/chat")
+                        .header("Authorization", juan)
+                        .header("Accept-Language", "es-CO")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(
+                    jsonPath("$.answer")
+                        .value(
+                            org.hamcrest.Matchers.startsWith(
+                                "Esperando tu confirmación: Usar 200 g de pechuga de pollo")))
+                .andExpect(
+                    jsonPath("$.confirmation.summary")
+                        .value(
+                            org.hamcrest.Matchers.startsWith("Usar 200 g de pechuga de pollo"))));
+
+    mvc.perform(
+            post("/api/v1/agent/confirmations/"
+                    + JsonPath.read(spanish, "$.confirmation.id")
+                    + "/approve")
+                .header("Authorization", juan)
+                .header("Accept-Language", "es-CO"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.result").value("Usaste 200 g de pechuga de pollo; quedan 450 g"));
+
+    send(
+            base + "/items",
+            juan,
+            "{\"fridgeId\":\""
+                + JsonPath.read(fridge, "$.id")
+                + "\",\"trayId\":\""
+                + JsonPath.read(fridge, "$.children[0].children[0].id")
+                + "\",\"food\":\"Rice\",\"grams\":100,\"visibility\":\"NOPE\"}")
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors.visibility").value("has an invalid value"));
+    mvc.perform(get(base + "/expiry-estimate").header("Authorization", juan))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors.food").value("is required"));
+  }
 }

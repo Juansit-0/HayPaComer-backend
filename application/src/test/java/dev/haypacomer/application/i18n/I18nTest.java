@@ -103,6 +103,22 @@ class I18nTest {
   }
 
   @Test
+  void aTemplatedMessageInsideAHoleIsTranslatedToo() {
+    MessageTranslator translator =
+        new MessageTranslator(
+            Map.of(
+                "Nothing was changed: {}", "No se cambió nada: {}",
+                "No {} in stock", "No hay {} en la nevera",
+                "{}", "ignored"),
+            Map.of("food.rice", "Arroz"));
+
+    assertEquals(
+        "No se cambió nada: No hay arroz en la nevera",
+        translator.translate("Nothing was changed: No Rice in stock"));
+    assertEquals("Plain words", translator.translate("Plain words"));
+  }
+
+  @Test
   void theMostSpecificTemplateWins() {
     MessageTranslator translator =
         new MessageTranslator(

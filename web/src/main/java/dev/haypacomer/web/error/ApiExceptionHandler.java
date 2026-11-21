@@ -49,6 +49,7 @@ import dev.haypacomer.domain.quantity.UnconvertibleQuantityException;
 import dev.haypacomer.domain.session.IllegalSessionTransitionException;
 import dev.haypacomer.web.security.ProblemTypes;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -67,10 +68,14 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.InvalidNullException;
 import tools.jackson.databind.exc.MismatchedInputException;
 
 @RestControllerAdvice
@@ -101,12 +106,49 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   ProblemDetail unreadableBody(HttpMessageNotReadableException exception) {
-    return problem(
-        HttpStatus.BAD_REQUEST,
-        "Invalid request",
-        exception.getMostSpecificCause() instanceof MismatchedInputException
-            ? "Some fields are missing or out of range"
-            : "The request body is not valid JSON");
+    if (!(exception.getMostSpecificCause() instanceof MismatchedInputException mismatch)) {
+      return problem(
+          HttpStatus.BAD_REQUEST, "Invalid request", "The request body is not valid JSON");
+    }
+    ProblemDetail problem =
+        problem(
+            HttpStatus.BAD_REQUEST, "Invalid request", "Some fields are missing or out of range");
+    String field = fieldPath(mismatch.getPath());
+    if (!field.isEmpty()) {
+      problem.setProperty("errors", Map.of(field, reason(mismatch)));
+    }
+    return problem;
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  ProblemDetail missingParameter(MissingServletRequestParameterException exception) {
+    ProblemDetail problem =
+        problem(
+            HttpStatus.BAD_REQUEST, "Invalid request", "Some fields are missing or out of range");
+    problem.setProperty("errors", Map.of(exception.getParameterName(), "is required"));
+    return problem;
+  }
+
+  private static String fieldPath(List<JacksonException.Reference> path) {
+    StringBuilder field = new StringBuilder();
+    for (JacksonException.Reference reference : path) {
+      if (reference.getPropertyName() != null) {
+        field.append(field.isEmpty() ? "" : ".").append(reference.getPropertyName());
+      } else if (reference.getIndex() >= 0) {
+        field.append('[').append(reference.getIndex()).append(']');
+      }
+    }
+    return field.toString();
+  }
+
+  private static String reason(MismatchedInputException mismatch) {
+    if (mismatch instanceof InvalidNullException) {
+      return "is required";
+    }
+    if (mismatch instanceof InvalidFormatException) {
+      return "has an invalid value";
+    }
+    return "is missing or has the wrong type";
   }
 
   @ExceptionHandler(InvitationNotFoundException.class)

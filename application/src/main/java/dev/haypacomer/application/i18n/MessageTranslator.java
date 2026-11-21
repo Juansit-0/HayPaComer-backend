@@ -28,7 +28,7 @@ public final class MessageTranslator {
     List<Template> compiled = new ArrayList<>();
     templates.forEach(
         (source, target) -> {
-          if (source.contains(HOLE)) {
+          if (source.contains(HOLE) && !source.replace(HOLE, "").isEmpty()) {
             compiled.add(compile(source, target));
           }
         });
@@ -84,7 +84,7 @@ public final class MessageTranslator {
   private String named(String value, boolean starts) {
     String name = texts.get("food." + value.strip().toLowerCase(Locale.ROOT));
     if (name == null) {
-      return exact.getOrDefault(value, value);
+      return translate(value);
     }
     return starts ? name : name.substring(0, 1).toLowerCase(Locale.ROOT) + name.substring(1);
   }

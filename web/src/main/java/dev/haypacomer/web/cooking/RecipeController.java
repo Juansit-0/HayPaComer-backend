@@ -69,7 +69,7 @@ public class RecipeController {
                 request.minutes(),
                 request.requirements(),
                 List.of()),
-            request.targetServings())
+            request.target())
         .stream()
         .map(
             item ->
@@ -101,12 +101,7 @@ public class RecipeController {
     HouseholdId household = new HouseholdId(householdId);
     return EvaluationResponse.from(
         evaluateRecipe.evaluate(
-            CurrentUser.of(jwt),
-            household,
-            recipe,
-            request.targetServings(),
-            request.strategy(),
-            diners),
+            CurrentUser.of(jwt), household, recipe, request.target(), request.strategy(), diners),
         findDinerConflicts.find(CurrentUser.of(jwt), household, recipe, diners));
   }
 
@@ -115,7 +110,12 @@ public class RecipeController {
       @Min(1) @Max(100) int servings,
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
-      @Min(1) @Max(100) int targetServings) {}
+      @Min(1) @Max(100) Integer targetServings) {
+
+    int target() {
+      return targetServings == null ? servings : targetServings;
+    }
+  }
 
   record MissingResponse(
       String food, BigDecimal shortfallGrams, BigDecimal addedGrams, BigDecimal pendingGrams) {}
@@ -125,9 +125,14 @@ public class RecipeController {
       @Min(1) @Max(100) int servings,
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
-      @Min(1) @Max(100) int targetServings,
+      @Min(1) @Max(100) Integer targetServings,
       @NotNull StrategyKind strategy,
-      List<UUID> diners) {}
+      List<UUID> diners) {
+
+    int target() {
+      return targetServings == null ? servings : targetServings;
+    }
+  }
 
   record RequirementResponse(
       String food,

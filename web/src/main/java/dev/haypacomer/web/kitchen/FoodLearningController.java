@@ -37,9 +37,7 @@ public class FoodLearningController {
   @Operation(summary = "Estimate the density of a food")
   @GetMapping("/api/v1/households/{householdId}/foods/density")
   DensityEstimate density(
-      @AuthenticationPrincipal Jwt jwt,
-      @PathVariable UUID householdId,
-      @RequestParam(defaultValue = "") String food) {
+      @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId, @RequestParam String food) {
     return estimateFoodDensity.estimate(CurrentUser.of(jwt), new HouseholdId(householdId), food);
   }
 

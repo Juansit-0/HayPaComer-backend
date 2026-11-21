@@ -54,7 +54,8 @@ public class I18nController {
   @GetMapping("/api/v1/i18n/{locale}")
   ResponseEntity<Map<String, String>> translations(
       @PathVariable String locale, WebRequest request) {
-    Map<String, String> texts = new TreeMap<>(viewTranslations.view(locale));
+    Map<String, String> texts =
+        new TreeMap<>(viewTranslations.view("es".equalsIgnoreCase(locale) ? "es-CO" : locale));
     String tag = "\"" + Integer.toHexString(texts.hashCode()) + "\"";
     if (request.checkNotModified(tag)) {
       return null;

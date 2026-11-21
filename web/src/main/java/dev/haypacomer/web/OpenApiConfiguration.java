@@ -9,6 +9,8 @@ import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class OpenApiConfiguration {
@@ -42,5 +44,15 @@ public class OpenApiConfiguration {
                         .in(SecurityScheme.In.HEADER)
                         .name("X-Device-Key")))
         .addSecurityItem(new SecurityRequirement().addList(BEARER));
+  }
+
+  @Bean
+  WebMvcConfigurer docsWithTrailingSlash() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/docs/", "/docs");
+      }
+    };
   }
 }

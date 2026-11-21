@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
@@ -49,6 +50,7 @@ class ApiContractIntegrationTest {
     int paths = JsonPath.<Map<String, Object>>read(docs, "$.paths").size();
     assertTrue(paths > 60);
     mvc.perform(get("/docs")).andExpect(status().is3xxRedirection());
+    mvc.perform(get("/docs/")).andExpect(redirectedUrl("/docs"));
   }
 
   @Test
@@ -70,13 +72,13 @@ class ApiContractIntegrationTest {
   void everyErrorIsAProblemDocument() throws Exception {
     mvc.perform(get("/api/v1/me"))
         .andExpect(status().isUnauthorized())
-        .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(content().contentType("application/problem+json;charset=UTF-8"))
         .andExpect(header().string("WWW-Authenticate", "Bearer"))
         .andExpect(jsonPath("$.type").value("https://haypacomer.dev/problems/unauthorized"))
         .andExpect(jsonPath("$.instance").value("/api/v1/me"));
     mvc.perform(get("/api/v1/device/whoami"))
         .andExpect(status().isUnauthorized())
-        .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(content().contentType("application/problem+json;charset=UTF-8"))
         .andExpect(header().string("WWW-Authenticate", "X-Device-Key"));
     mvc.perform(
             post("/api/v1/auth/register")
@@ -89,6 +91,13 @@ class ApiContractIntegrationTest {
     mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content("{nope"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.detail").value("The request body is not valid JSON"));
+    mvc.perform(
+            post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":{\"nested\":1},\"password\":\"x\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.detail").value("Some fields are missing or out of range"))
+        .andExpect(jsonPath("$.errors.email").value("is missing or has the wrong type"));
     mvc.perform(
             post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

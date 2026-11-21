@@ -5,6 +5,7 @@ import static dev.haypacomer.persistence.relational.PersistenceFixtures.EGG;
 import static dev.haypacomer.persistence.relational.PersistenceFixtures.NOW;
 import static dev.haypacomer.persistence.relational.PersistenceFixtures.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.haypacomer.domain.household.Household;
@@ -128,6 +129,26 @@ class PostgresPlanningRepositoriesTest extends PostgresTestSupport {
     plans.save(replacement);
     assertEquals(replacement.id(), plans.current(household.id(), MONDAY).orElseThrow().id());
     assertTrue(plans.findByEntry(household.id(), lunch.id()).isEmpty());
+  }
+
+  @Test
+  void deletesOnlyTheHouseholdRecipeAndKnowsWhichArePlanned() {
+    Household household = household();
+    PostgresRecipeRepository recipes = new PostgresRecipeRepository(dataSource);
+    recipes.save(household.id(), OMELETTE);
+    recipes.save(household.id(), BOILED_EGG);
+    new PostgresWeeklyPlanRepository(dataSource)
+        .save(
+            WeeklyPlan.create(
+                household.id(), MONDAY, List.of(PlanEntry.of(1, Meal.LUNCH, OMELETTE, 2, false))));
+
+    assertTrue(recipes.planned(household.id(), OMELETTE.id()));
+    assertFalse(recipes.planned(household.id(), BOILED_EGG.id()));
+    assertFalse(recipes.planned(HouseholdId.newId(), OMELETTE.id()));
+
+    recipes.delete(HouseholdId.newId(), BOILED_EGG.id());
+    recipes.delete(household.id(), BOILED_EGG.id());
+    assertEquals(List.of(OMELETTE), recipes.findByHousehold(household.id()));
   }
 
   @Test

@@ -85,6 +85,25 @@ public class PostgresRecipeRepository implements RecipeRepository, RecipeTemplat
             .list());
   }
 
+  @Override
+  public boolean planned(HouseholdId household, RecipeId id) {
+    return jdbc.sql(
+            "SELECT EXISTS (SELECT 1 FROM plan_entries e JOIN weekly_plans p ON p.id = e.plan_id"
+                + " WHERE e.recipe_id = :id AND p.household_id = :household)")
+        .param("id", id.value())
+        .param("household", household.value())
+        .query(Boolean.class)
+        .single();
+  }
+
+  @Override
+  public void delete(HouseholdId household, RecipeId id) {
+    jdbc.sql("DELETE FROM recipes WHERE id = :id AND household_id = :household")
+        .param("id", id.value())
+        .param("household", household.value())
+        .update();
+  }
+
   List<Recipe> loadByIds(Collection<UUID> ids) {
     return load(null, ids);
   }

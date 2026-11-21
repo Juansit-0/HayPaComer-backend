@@ -6,6 +6,7 @@ import dev.haypacomer.application.planning.AddPlanDeltaToMarketList;
 import dev.haypacomer.application.planning.ChangePlanEntry;
 import dev.haypacomer.application.planning.CloneRecipe;
 import dev.haypacomer.application.planning.CloneWeeklyPlan;
+import dev.haypacomer.application.planning.DeleteRecipe;
 import dev.haypacomer.application.planning.GenerateWeeklyPlan;
 import dev.haypacomer.application.planning.ListRecipeTemplates;
 import dev.haypacomer.application.planning.ListRecipes;
@@ -29,6 +30,11 @@ public class PlanningConfiguration {
   @Bean
   SaveRecipe saveRecipe(HouseholdRepository households, RecipeRepository recipes) {
     return new SaveRecipe(households, recipes);
+  }
+
+  @Bean
+  DeleteRecipe deleteRecipe(HouseholdRepository households, RecipeRepository recipes) {
+    return new DeleteRecipe(households, recipes);
   }
 
   @Bean

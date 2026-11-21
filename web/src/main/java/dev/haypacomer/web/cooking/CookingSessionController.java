@@ -96,7 +96,7 @@ public class CookingSessionController {
                 request.minutes(),
                 request.requirements(),
                 request.steps()),
-            request.targetServings(),
+            request.target(),
             Optional.ofNullable(request.scaleId()).map(DeviceId::new)));
   }
 
@@ -219,8 +219,13 @@ public class CookingSessionController {
       @Min(1) int minutes,
       @NotEmpty List<@Valid RequirementRequest> requirements,
       @Size(max = 50) List<@Valid StepRequest> steps,
-      @Min(1) @Max(100) int targetServings,
-      UUID scaleId) {}
+      @Min(1) @Max(100) Integer targetServings,
+      UUID scaleId) {
+
+    int target() {
+      return targetServings == null ? servings : targetServings;
+    }
+  }
 
   record WeighRequest(@DecimalMin("0") @DecimalMax("100000") BigDecimal grams) {}
 

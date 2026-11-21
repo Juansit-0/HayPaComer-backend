@@ -1,5 +1,6 @@
 package dev.haypacomer.web.planning;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -151,12 +152,24 @@ class PlanningIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(5))
                 .andExpect(jsonPath("$[0].name").value("Arepa with cheese")));
     String arepa = JsonPath.read(templates, "$[0].id");
-    send(base + "/recipes/" + arepa + "/clone", juan, "")
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.clonedFrom").value(arepa))
-        .andExpect(jsonPath("$.requirements[0].food").value("Arepa"));
+    String copy =
+        body(
+            send(base + "/recipes/" + arepa + "/clone", juan, "")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.clonedFrom").value(arepa))
+                .andExpect(jsonPath("$.requirements[0].food").value("Arepa")));
     mvc.perform(get(base + "/recipes").header("Authorization", juan))
         .andExpect(jsonPath("$.length()").value(3));
+    mvc.perform(
+            delete(base + "/recipes/" + JsonPath.read(stew, "$.id")).header("Authorization", juan))
+        .andExpect(status().isConflict());
+    mvc.perform(delete(base + "/recipes/" + UUID.randomUUID()).header("Authorization", juan))
+        .andExpect(status().isNotFound());
+    mvc.perform(
+            delete(base + "/recipes/" + JsonPath.read(copy, "$.id")).header("Authorization", juan))
+        .andExpect(status().isNoContent());
+    mvc.perform(get(base + "/recipes").header("Authorization", juan))
+        .andExpect(jsonPath("$.length()").value(2));
     String planId = JsonPath.read(plan, "$.id");
     String nextWeek = LocalDate.now(ZoneOffset.UTC).plusWeeks(1).toString();
     send(base + "/weekly-plans/" + planId + "/clone", juan, "{\"weekStart\":\"" + nextWeek + "\"}")

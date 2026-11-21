@@ -204,4 +204,21 @@ class WeeklyPlanUseCasesTest {
     assertEquals(
         14, generate().generate(juan, household.id(), 1, Set.of(juanMember)).entries().size());
   }
+
+  @Test
+  void deletesRecipesThatNoPlanUses() {
+    DeleteRecipe delete = new DeleteRecipe(households, planning.recipes);
+
+    assertThrows(
+        AccessDeniedException.class, () -> delete.delete(guest, household.id(), lentilStew.id()));
+    assertThrows(
+        RecipeNotFoundException.class, () -> delete.delete(juan, household.id(), RecipeId.newId()));
+    delete.delete(juan, household.id(), lentilStew.id());
+    assertEquals(List.of(chickenRice), planning.recipes.findByHousehold(household.id()));
+
+    generate().generate(juan, household.id(), 2, Set.of());
+    assertThrows(
+        RecipeInPlanException.class, () -> delete.delete(juan, household.id(), chickenRice.id()));
+    assertEquals(List.of(chickenRice), planning.recipes.findByHousehold(household.id()));
+  }
 }

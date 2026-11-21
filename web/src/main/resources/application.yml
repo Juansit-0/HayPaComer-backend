@@ -51,7 +51,7 @@ management:
 
 info:
   app:
-    commit: ${RENDER_GIT_COMMIT:local}
+    commit: ${APP_COMMIT:${RENDER_GIT_COMMIT:local}}
     name: HayPaComer
     description: Smart fridge with live inventory, cook-now, and cold chain
 

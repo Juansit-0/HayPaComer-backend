@@ -65,6 +65,22 @@ public final class InMemoryPlanningStores {
               .filter(recipe -> household.equals(recipeOwners.get(recipe.id())))
               .toList();
         }
+
+        @Override
+        public boolean planned(HouseholdId household, RecipeId id) {
+          return planList.stream()
+              .filter(plan -> plan.household().equals(household))
+              .flatMap(plan -> plan.entries().stream())
+              .anyMatch(entry -> entry.recipe().id().equals(id));
+        }
+
+        @Override
+        public void delete(HouseholdId household, RecipeId id) {
+          if (household.equals(recipeOwners.get(id))) {
+            recipeOwners.remove(id);
+            recipeMap.remove(id);
+          }
+        }
       };
 
   public final WeeklyPlanRepository plans =

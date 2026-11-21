@@ -16,4 +16,8 @@ public interface RecipeRepository {
   Optional<Recipe> find(HouseholdId household, RecipeId id);
 
   List<Recipe> findByHousehold(HouseholdId household);
+
+  boolean planned(HouseholdId household, RecipeId id);
+
+  void delete(HouseholdId household, RecipeId id);
 }

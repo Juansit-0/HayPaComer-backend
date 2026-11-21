@@ -98,7 +98,7 @@ class CookingSessionIntegrationTest {
                 .andExpect(jsonPath("$.steps[1].timerSeconds").value(900)));
     String session = sessions + "/" + JsonPath.read(created, "$.id");
 
-    send(sessions, juan, RICE_BOWL)
+    send(sessions, juan, RICE_BOWL.replace("\"targetServings\":4,", ""))
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.activeSessionId").value(JsonPath.<String>read(created, "$.id")));
     send(session + "/pause", juan, "")

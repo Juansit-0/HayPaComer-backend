@@ -5,6 +5,7 @@ import dev.haypacomer.application.planning.ChangePlanEntry;
 import dev.haypacomer.application.planning.ChangedEntry;
 import dev.haypacomer.application.planning.CloneRecipe;
 import dev.haypacomer.application.planning.CloneWeeklyPlan;
+import dev.haypacomer.application.planning.DeleteRecipe;
 import dev.haypacomer.application.planning.GenerateWeeklyPlan;
 import dev.haypacomer.application.planning.ListRecipes;
 import dev.haypacomer.application.planning.SaveRecipe;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +61,7 @@ public class PlanningController {
 
   private final SaveRecipe saveRecipe;
   private final ListRecipes listRecipes;
+  private final DeleteRecipe deleteRecipe;
   private final GenerateWeeklyPlan generateWeeklyPlan;
   private final ViewCurrentPlan viewCurrentPlan;
   private final ChangePlanEntry changePlanEntry;
@@ -70,6 +73,7 @@ public class PlanningController {
   public PlanningController(
       SaveRecipe saveRecipe,
       ListRecipes listRecipes,
+      DeleteRecipe deleteRecipe,
       GenerateWeeklyPlan generateWeeklyPlan,
       ViewCurrentPlan viewCurrentPlan,
       ChangePlanEntry changePlanEntry,
@@ -79,6 +83,7 @@ public class PlanningController {
       RecipeAssembler assembler) {
     this.saveRecipe = saveRecipe;
     this.listRecipes = listRecipes;
+    this.deleteRecipe = deleteRecipe;
     this.generateWeeklyPlan = generateWeeklyPlan;
     this.viewCurrentPlan = viewCurrentPlan;
     this.changePlanEntry = changePlanEntry;
@@ -113,6 +118,16 @@ public class PlanningController {
     return listRecipes.list(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
         .map(RecipeResponse::from)
         .toList();
+  }
+
+  @Operation(summary = "Delete a household recipe that no weekly plan uses")
+  @DeleteMapping("/recipes/{recipeId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void deleteRecipe(
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID householdId,
+      @PathVariable UUID recipeId) {
+    deleteRecipe.delete(CurrentUser.of(jwt), new HouseholdId(householdId), new RecipeId(recipeId));
   }
 
   @Operation(summary = "Copy a recipe")

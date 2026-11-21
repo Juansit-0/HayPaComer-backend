@@ -10,6 +10,8 @@ import dev.haypacomer.domain.device.DeviceKind;
 import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Devices", description = "Register and manage the household's ESP32 devices")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/devices")
 public class DeviceController {
@@ -44,6 +47,7 @@ public class DeviceController {
     this.revokeDevice = revokeDevice;
   }
 
+  @Operation(summary = "Register a device and get its key, shown only once")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   RegisteredDeviceResponse register(
@@ -61,6 +65,7 @@ public class DeviceController {
         DeviceResponse.from(registered.device()), registered.apiKey());
   }
 
+  @Operation(summary = "List the household devices")
   @GetMapping
   List<DeviceResponse> list(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listDevices.list(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -68,6 +73,7 @@ public class DeviceController {
         .toList();
   }
 
+  @Operation(summary = "Revoke a device so its key stops working")
   @DeleteMapping("/{deviceId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void revoke(

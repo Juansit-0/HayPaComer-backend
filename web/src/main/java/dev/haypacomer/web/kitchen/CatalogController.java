@@ -7,6 +7,8 @@ import dev.haypacomer.domain.food.Allergen;
 import dev.haypacomer.domain.food.FoodCategory;
 import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.quantity.Unit;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Food catalog", description = "Food catalog search and quantity reading")
 @RestController
 @RequestMapping("/api/v1/foods")
 public class CatalogController {
@@ -32,11 +35,13 @@ public class CatalogController {
     this.interpretQuantity = interpretQuantity;
   }
 
+  @Operation(summary = "Search the food catalog by name")
   @GetMapping
   List<FoodResponse> search(@RequestParam(name = "q", defaultValue = "") String query) {
     return searchFoods.search(query).stream().map(FoodResponse::from).toList();
   }
 
+  @Operation(summary = "Turn a written quantity such as '2 cups' into grams")
   @PostMapping("/interpret")
   InterpretationResponse interpret(@Valid @RequestBody InterpretRequest request) {
     return InterpretationResponse.from(

@@ -13,6 +13,8 @@ import dev.haypacomer.domain.member.MemberId;
 import dev.haypacomer.domain.member.ProfileConflict;
 import dev.haypacomer.domain.recipe.Recipe;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Recipes", description = "Check recipes against the stock and fill the market list")
 @RestController
 public class RecipeController {
 
@@ -50,6 +53,7 @@ public class RecipeController {
     this.assembler = assembler;
   }
 
+  @Operation(summary = "Add what a recipe is missing to the market list")
   @PostMapping("/api/v1/households/{householdId}/recipes/missing-to-market")
   List<MissingResponse> missingToMarket(
       @AuthenticationPrincipal Jwt jwt,
@@ -77,6 +81,7 @@ public class RecipeController {
         .toList();
   }
 
+  @Operation(summary = "Check whether a recipe can be cooked with the current stock")
   @PostMapping("/api/v1/households/{householdId}/recipes/evaluate")
   EvaluationResponse evaluate(
       @AuthenticationPrincipal Jwt jwt,

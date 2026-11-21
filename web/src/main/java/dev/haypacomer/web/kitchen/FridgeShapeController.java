@@ -10,6 +10,8 @@ import dev.haypacomer.application.fridge.ViewFridgeSpace;
 import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Fridge shape", description = "Fridge layout, shelves, and free space")
 @RestController
 public class FridgeShapeController {
 
@@ -38,6 +41,7 @@ public class FridgeShapeController {
     this.viewFridgeSpace = viewFridgeSpace;
   }
 
+  @Operation(summary = "Show the used and free space on each shelf")
   @GetMapping("/api/v1/households/{householdId}/fridges/{fridgeId}/space")
   List<SpaceResponse> space(
       @AuthenticationPrincipal Jwt jwt,
@@ -60,6 +64,7 @@ public class FridgeShapeController {
     }
   }
 
+  @Operation(summary = "List example fridge layouts")
   @GetMapping("/api/v1/fridge-examples")
   List<ExampleResponse> examples() {
     return FridgeShape.examples().stream()
@@ -67,6 +72,7 @@ public class FridgeShapeController {
         .toList();
   }
 
+  @Operation(summary = "Show the fridge layout")
   @GetMapping("/api/v1/households/{householdId}/fridges/{fridgeId}/shape")
   ShapeBody shape(
       @AuthenticationPrincipal Jwt jwt,
@@ -77,6 +83,7 @@ public class FridgeShapeController {
             CurrentUser.of(jwt), new HouseholdId(householdId), new FridgeId(fridgeId)));
   }
 
+  @Operation(summary = "Change the fridge layout")
   @PutMapping("/api/v1/households/{householdId}/fridges/{fridgeId}/shape")
   ShapeBody change(
       @AuthenticationPrincipal Jwt jwt,

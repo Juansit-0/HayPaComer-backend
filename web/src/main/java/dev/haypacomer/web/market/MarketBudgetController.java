@@ -7,6 +7,8 @@ import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.market.BudgetLine;
 import dev.haypacomer.domain.market.BudgetPlan;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Market budget", description = "Monthly market budget")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/market-budget")
 public class MarketBudgetController {
@@ -33,11 +36,13 @@ public class MarketBudgetController {
     this.setBudget = setBudget;
   }
 
+  @Operation(summary = "Show the monthly budget, spending, and what fits")
   @GetMapping
   BudgetResponse view(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return BudgetResponse.from(viewBudget.view(CurrentUser.of(jwt), new HouseholdId(householdId)));
   }
 
+  @Operation(summary = "Set the monthly market budget")
   @PutMapping
   BudgetResponse set(
       @AuthenticationPrincipal Jwt jwt,

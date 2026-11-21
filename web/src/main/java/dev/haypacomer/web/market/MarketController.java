@@ -17,6 +17,8 @@ import dev.haypacomer.domain.market.MarketList;
 import dev.haypacomer.domain.market.MarketSource;
 import dev.haypacomer.domain.quantity.Grams;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Market list", description = "Shared shopping list grouped by aisle")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/market-list")
 public class MarketController {
@@ -56,12 +59,14 @@ public class MarketController {
     this.updateMarketList = updateMarketList;
   }
 
+  @Operation(summary = "Show the market list grouped by aisle")
   @GetMapping
   MarketListResponse view(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return MarketListResponse.from(
         viewMarketList.view(CurrentUser.of(jwt), new HouseholdId(householdId)));
   }
 
+  @Operation(summary = "Add a food to the market list")
   @PostMapping("/items")
   @ResponseStatus(HttpStatus.CREATED)
   ItemResponse add(
@@ -77,6 +82,7 @@ public class MarketController {
             MarketSource.MANUAL));
   }
 
+  @Operation(summary = "Change the grams of a market list item")
   @PatchMapping("/items/{itemId}")
   MarketListResponse changeGrams(
       @AuthenticationPrincipal Jwt jwt,
@@ -87,24 +93,28 @@ public class MarketController {
         jwt, householdId, new SetGrams(new MarketItemId(itemId), Grams.of(request.grams())));
   }
 
+  @Operation(summary = "Check an item as bought")
   @PostMapping("/items/{itemId}/check")
   MarketListResponse check(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId, @PathVariable UUID itemId) {
     return apply(jwt, householdId, new Check(new MarketItemId(itemId)));
   }
 
+  @Operation(summary = "Uncheck an item")
   @DeleteMapping("/items/{itemId}/check")
   MarketListResponse uncheck(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId, @PathVariable UUID itemId) {
     return apply(jwt, householdId, new Uncheck(new MarketItemId(itemId)));
   }
 
+  @Operation(summary = "Remove an item from the market list")
   @DeleteMapping("/items/{itemId}")
   MarketListResponse remove(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId, @PathVariable UUID itemId) {
     return apply(jwt, householdId, new Remove(new MarketItemId(itemId)));
   }
 
+  @Operation(summary = "Remove all checked items")
   @DeleteMapping("/checked")
   MarketListResponse clearChecked(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {

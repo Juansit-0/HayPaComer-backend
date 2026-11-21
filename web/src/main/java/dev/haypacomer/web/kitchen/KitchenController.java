@@ -10,6 +10,8 @@ import dev.haypacomer.web.kitchen.KitchenDtos.NodeResponse;
 import dev.haypacomer.web.kitchen.KitchenDtos.SetUpFridgeRequest;
 import dev.haypacomer.web.kitchen.KitchenDtos.SnapshotResponse;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Kitchen", description = "Fridges and the live inventory")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class KitchenController {
@@ -40,6 +43,7 @@ public class KitchenController {
     this.unpackFood = unpackFood;
   }
 
+  @Operation(summary = "Set up a new fridge")
   @PostMapping("/fridges")
   @ResponseStatus(HttpStatus.CREATED)
   NodeResponse setUpFridge(
@@ -59,6 +63,7 @@ public class KitchenController {
             .orElse(fridge));
   }
 
+  @Operation(summary = "List the household fridges")
   @GetMapping("/fridges")
   List<NodeResponse> fridges(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     HouseholdId household = new HouseholdId(householdId);
@@ -68,6 +73,7 @@ public class KitchenController {
         .toList();
   }
 
+  @Operation(summary = "List the food in the fridges, optionally food to use first on top")
   @GetMapping("/inventory")
   List<InventoryItemResponse> inventory(
       @AuthenticationPrincipal Jwt jwt,
@@ -84,6 +90,7 @@ public class KitchenController {
         .toList();
   }
 
+  @Operation(summary = "Show the kitchen at a glance")
   @GetMapping("/kitchen")
   SnapshotResponse snapshot(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return SnapshotResponse.from(

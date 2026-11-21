@@ -24,6 +24,8 @@ import dev.haypacomer.domain.inventory.Ownership;
 import dev.haypacomer.domain.inventory.Visibility;
 import dev.haypacomer.domain.quantity.Grams;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -47,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Inventory", description = "Stock, use, move, and share food items")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/items")
 public class InventoryController {
@@ -69,6 +72,7 @@ public class InventoryController {
     this.pieces = pieces;
   }
 
+  @Operation(summary = "Mark a food item as opened and update its expiry")
   @PostMapping("/{itemId}/open")
   OpenedResponse open(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId, @PathVariable UUID itemId) {
@@ -82,6 +86,7 @@ public class InventoryController {
         item.openedOn().orElse(null));
   }
 
+  @Operation(summary = "Put food into the fridge")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   OutcomeResponse stock(
@@ -111,6 +116,7 @@ public class InventoryController {
     return OutcomeResponse.from(stocked);
   }
 
+  @Operation(summary = "Use some grams of a food item")
   @PostMapping("/{itemId}/consume")
   OutcomeResponse consume(
       @AuthenticationPrincipal Jwt jwt,
@@ -129,6 +135,7 @@ public class InventoryController {
                 MovementSource.MANUAL)));
   }
 
+  @Operation(summary = "Throw away a food item")
   @PostMapping("/{itemId}/discard")
   OutcomeResponse discard(
       @AuthenticationPrincipal Jwt jwt,
@@ -144,6 +151,7 @@ public class InventoryController {
                 new FoodItemId(itemId))));
   }
 
+  @Operation(summary = "Move a food item to another shelf")
   @PostMapping("/{itemId}/move")
   OutcomeResponse move(
       @AuthenticationPrincipal Jwt jwt,
@@ -172,6 +180,7 @@ public class InventoryController {
     return UUID.nameUUIDFromBytes(scope.getBytes(StandardCharsets.UTF_8));
   }
 
+  @Operation(summary = "Change who can see and use a food item")
   @PutMapping("/{itemId}/visibility")
   OwnershipResponse visibility(
       @AuthenticationPrincipal Jwt jwt,
@@ -186,6 +195,7 @@ public class InventoryController {
             new SetVisibility(request.visibility())));
   }
 
+  @Operation(summary = "Let a member use your food item")
   @PostMapping("/{itemId}/grants")
   OwnershipResponse grant(
       @AuthenticationPrincipal Jwt jwt,
@@ -200,6 +210,7 @@ public class InventoryController {
             new Grant(new UserId(request.userId()))));
   }
 
+  @Operation(summary = "Take back a member's permission to use your food item")
   @DeleteMapping("/{itemId}/grants/{userId}")
   OwnershipResponse revoke(
       @AuthenticationPrincipal Jwt jwt,

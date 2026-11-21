@@ -8,6 +8,8 @@ import dev.haypacomer.application.settings.ViewHouseholdSettings;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Settings", description = "Household rule values such as alert thresholds")
 @RestController
 public class SettingsController {
 
@@ -41,6 +44,7 @@ public class SettingsController {
     this.definitions = definitions;
   }
 
+  @Operation(summary = "List every setting with its default value")
   @GetMapping("/api/v1/settings/defaults")
   List<DefinitionResponse> defaults() {
     return definitions.list().stream()
@@ -58,6 +62,7 @@ public class SettingsController {
         .toList();
   }
 
+  @Operation(summary = "Show the household settings")
   @GetMapping("/api/v1/households/{householdId}/settings")
   List<SettingResponse> view(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return viewSettings.view(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -66,6 +71,7 @@ public class SettingsController {
         .toList();
   }
 
+  @Operation(summary = "Change a household setting (owner only)")
   @PutMapping("/api/v1/households/{householdId}/settings")
   SettingResponse change(
       @AuthenticationPrincipal Jwt jwt,

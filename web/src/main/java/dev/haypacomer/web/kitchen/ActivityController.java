@@ -4,6 +4,8 @@ import dev.haypacomer.application.audit.AuditEntry;
 import dev.haypacomer.application.audit.ListActivity;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Activity", description = "Household activity log")
 @RestController
 public class ActivityController {
 
@@ -24,6 +27,7 @@ public class ActivityController {
     this.listActivity = listActivity;
   }
 
+  @Operation(summary = "List the recent inventory activity of the household")
   @GetMapping("/api/v1/households/{householdId}/activity")
   List<ActivityResponse> activity(
       @AuthenticationPrincipal Jwt jwt,

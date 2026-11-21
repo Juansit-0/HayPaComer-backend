@@ -10,6 +10,8 @@ import dev.haypacomer.domain.fridge.ZoneKind;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "Expiry", description = "Expiry dates by estimate or from a label photo")
 @RestController
 public class ExpiryController {
 
@@ -38,6 +41,7 @@ public class ExpiryController {
     this.localizer = localizer;
   }
 
+  @Operation(summary = "Propose an expiry date from a photo of the label")
   @PostMapping(
       path = "/api/v1/households/{householdId}/items/expiry-from-photo",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -69,6 +73,7 @@ public class ExpiryController {
         false);
   }
 
+  @Operation(summary = "Estimate the expiry date of a food")
   @GetMapping("/api/v1/households/{householdId}/expiry-estimate")
   EstimateResponse estimate(
       @AuthenticationPrincipal Jwt jwt,

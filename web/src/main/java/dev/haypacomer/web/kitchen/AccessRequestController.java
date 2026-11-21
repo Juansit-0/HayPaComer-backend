@@ -7,6 +7,8 @@ import dev.haypacomer.application.inventory.ListFoodRequests;
 import dev.haypacomer.domain.fridge.FoodItemId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Access requests", description = "Ask to use another member's private food")
 @RestController
 public class AccessRequestController {
 
@@ -32,11 +35,13 @@ public class AccessRequestController {
     this.answerRequest = answerRequest;
   }
 
+  @Operation(summary = "List the food access requests of the household")
   @GetMapping("/api/v1/households/{householdId}/access-requests")
   List<FoodRequestView> list(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listRequests.list(CurrentUser.of(jwt), new HouseholdId(householdId));
   }
 
+  @Operation(summary = "Ask the owner for permission to use a food item")
   @PostMapping("/api/v1/households/{householdId}/items/{itemId}/access-requests")
   @ResponseStatus(HttpStatus.CREATED)
   FoodRequestView ask(
@@ -45,6 +50,7 @@ public class AccessRequestController {
         CurrentUser.of(jwt), new HouseholdId(householdId), new FoodItemId(itemId));
   }
 
+  @Operation(summary = "Approve a food access request")
   @PostMapping("/api/v1/households/{householdId}/access-requests/{requestId}/approve")
   FoodRequestView approve(
       @AuthenticationPrincipal Jwt jwt,
@@ -53,6 +59,7 @@ public class AccessRequestController {
     return answerRequest.answer(CurrentUser.of(jwt), new HouseholdId(householdId), requestId, true);
   }
 
+  @Operation(summary = "Deny a food access request")
   @PostMapping("/api/v1/households/{householdId}/access-requests/{requestId}/deny")
   FoodRequestView deny(
       @AuthenticationPrincipal Jwt jwt,

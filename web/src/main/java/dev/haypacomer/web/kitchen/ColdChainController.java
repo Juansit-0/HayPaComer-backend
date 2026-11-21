@@ -8,6 +8,8 @@ import dev.haypacomer.domain.coldchain.ColdIncident;
 import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Cold chain", description = "Fridge cold chain status and incident review")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class ColdChainController {
@@ -32,6 +35,7 @@ public class ColdChainController {
     this.reviewColdChain = reviewColdChain;
   }
 
+  @Operation(summary = "Show the cold chain status of every fridge")
   @GetMapping("/cold-chain")
   List<ColdChainResponse> list(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listColdChains.list(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -39,6 +43,7 @@ public class ColdChainController {
         .toList();
   }
 
+  @Operation(summary = "Review a cold chain incident after the fridge recovered")
   @PostMapping("/fridges/{fridgeId}/cold-chain/review")
   IncidentResponse review(
       @AuthenticationPrincipal Jwt jwt,

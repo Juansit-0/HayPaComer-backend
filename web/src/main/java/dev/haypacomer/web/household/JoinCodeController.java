@@ -11,6 +11,8 @@ import dev.haypacomer.domain.household.Role;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.web.household.HouseholdDtos.HouseholdResponse;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Join codes", description = "Short codes to join a household")
 @RestController
 public class JoinCodeController {
 
@@ -49,12 +52,14 @@ public class JoinCodeController {
     this.unpackFood = unpackFood;
   }
 
+  @Operation(summary = "Show the household's current join code")
   @GetMapping("/api/v1/households/{householdId}/join-code")
   JoinCodeResponse current(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return JoinCodeResponse.from(
         viewCode.current(CurrentUser.of(jwt), new HouseholdId(householdId)));
   }
 
+  @Operation(summary = "Create a new join code for the household")
   @PostMapping("/api/v1/households/{householdId}/join-code")
   @ResponseStatus(HttpStatus.CREATED)
   JoinCodeResponse create(
@@ -66,12 +71,14 @@ public class JoinCodeController {
         createCode.create(CurrentUser.of(jwt), new HouseholdId(householdId), role));
   }
 
+  @Operation(summary = "Revoke the household join code")
   @DeleteMapping("/api/v1/households/{householdId}/join-code")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void revoke(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     revokeCode.revoke(CurrentUser.of(jwt), new HouseholdId(householdId));
   }
 
+  @Operation(summary = "Join a household with a join code")
   @PostMapping("/api/v1/households/join")
   HouseholdResponse join(
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody JoinRequest request) {

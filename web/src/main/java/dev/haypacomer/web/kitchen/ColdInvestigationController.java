@@ -10,6 +10,8 @@ import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Cold investigation", description = "Explain warm episodes and their effect on food")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class ColdInvestigationController {
@@ -36,6 +39,7 @@ public class ColdInvestigationController {
     this.localizer = localizer;
   }
 
+  @Operation(summary = "Investigate warm episodes: likely cause and verdict for each food")
   @GetMapping("/cold-investigation")
   List<InvestigationResponse> investigate(
       @AuthenticationPrincipal Jwt jwt,

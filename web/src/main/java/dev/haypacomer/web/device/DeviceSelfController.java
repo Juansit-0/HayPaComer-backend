@@ -10,6 +10,8 @@ import dev.haypacomer.domain.device.Device;
 import dev.haypacomer.domain.device.DeviceKind;
 import dev.haypacomer.domain.sensor.Finding;
 import dev.haypacomer.domain.sensor.FindingKind;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Device lane", description = "Endpoints called by the devices with their X-Device-Key")
 @RestController
 @RequestMapping("/api/v1/device")
 public class DeviceSelfController {
@@ -34,6 +37,7 @@ public class DeviceSelfController {
     this.ingestSensorEvents = ingestSensorEvents;
   }
 
+  @Operation(summary = "Upload a batch of sensor readings from a device")
   @PostMapping(value = "/events", consumes = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<IngestionResponse> events(
       @AuthenticationPrincipal Device device, @RequestBody String payload) {
@@ -45,11 +49,13 @@ public class DeviceSelfController {
     return ResponseEntity.status(status).body(IngestionResponse.from(report));
   }
 
+  @Operation(summary = "Fetch the pending alert commands for the device")
   @GetMapping("/commands")
   List<AlertPattern> commands(@AuthenticationPrincipal Device device) {
     return hardware.forDevice(device).alerts().drain(device.id());
   }
 
+  @Operation(summary = "Show which device the key belongs to")
   @GetMapping("/whoami")
   Identity whoami(@AuthenticationPrincipal Device device) {
     return new Identity(

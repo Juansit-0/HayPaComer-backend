@@ -9,6 +9,8 @@ import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.member.MemberId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Suggestions", description = "What to cook now with the food at home")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class SuggestionController {
@@ -37,6 +40,7 @@ public class SuggestionController {
     this.assembler = assembler;
   }
 
+  @Operation(summary = "Suggest dishes to cook now with the food at home")
   @PostMapping("/suggestions")
   SuggestionsResponse suggestions(
       @AuthenticationPrincipal Jwt jwt,
@@ -45,6 +49,7 @@ public class SuggestionController {
     return suggest(jwt, householdId, request, false);
   }
 
+  @Operation(summary = "Suggest dishes that use up food about to expire")
   @PostMapping("/rescue")
   SuggestionsResponse rescue(
       @AuthenticationPrincipal Jwt jwt,

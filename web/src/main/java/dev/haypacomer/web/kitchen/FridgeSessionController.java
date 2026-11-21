@@ -7,6 +7,8 @@ import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Fridge session", description = "Who is using the fridge right now")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/fridges/{fridgeId}/session")
 public class FridgeSessionController {
@@ -28,6 +31,7 @@ public class FridgeSessionController {
     this.useFridgeSession = useFridgeSession;
   }
 
+  @Operation(summary = "Show who is using the fridge")
   @GetMapping
   SessionResponse view(
       @AuthenticationPrincipal Jwt jwt,
@@ -36,6 +40,7 @@ public class FridgeSessionController {
     return act(jwt, householdId, fridgeId, FridgeSessionAction.VIEW);
   }
 
+  @Operation(summary = "Claim the fridge while you use it")
   @PostMapping
   SessionResponse claim(
       @AuthenticationPrincipal Jwt jwt,
@@ -44,6 +49,7 @@ public class FridgeSessionController {
     return act(jwt, householdId, fridgeId, FridgeSessionAction.CLAIM);
   }
 
+  @Operation(summary = "Release the fridge")
   @DeleteMapping
   SessionResponse release(
       @AuthenticationPrincipal Jwt jwt,

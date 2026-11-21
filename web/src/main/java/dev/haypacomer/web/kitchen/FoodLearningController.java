@@ -7,6 +7,8 @@ import dev.haypacomer.domain.food.FoodCategory;
 import dev.haypacomer.domain.food.FoodMetadata;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Food learning", description = "Add new foods to the household catalog")
 @RestController
 public class FoodLearningController {
 
@@ -31,6 +34,7 @@ public class FoodLearningController {
     this.estimateFoodDensity = estimateFoodDensity;
   }
 
+  @Operation(summary = "Estimate the density of a food")
   @GetMapping("/api/v1/households/{householdId}/foods/density")
   DensityEstimate density(
       @AuthenticationPrincipal Jwt jwt,
@@ -39,6 +43,7 @@ public class FoodLearningController {
     return estimateFoodDensity.estimate(CurrentUser.of(jwt), new HouseholdId(householdId), food);
   }
 
+  @Operation(summary = "Add a new food to the catalog by name")
   @PostMapping("/api/v1/households/{householdId}/foods")
   LearnedFood learn(
       @AuthenticationPrincipal Jwt jwt,

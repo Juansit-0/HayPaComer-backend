@@ -7,6 +7,8 @@ import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.member.Diet;
 import dev.haypacomer.domain.member.FoodProfile;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Food profiles", description = "Diets, allergies, and avoided foods of each member")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class ProfileController {
@@ -34,6 +37,7 @@ public class ProfileController {
     this.listFoodProfiles = listFoodProfiles;
   }
 
+  @Operation(summary = "List the food profiles of the household members")
   @GetMapping("/profiles")
   List<ProfileResponse> list(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listFoodProfiles.list(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -41,6 +45,7 @@ public class ProfileController {
         .toList();
   }
 
+  @Operation(summary = "Update your diet, allergies, and avoided foods")
   @PutMapping("/profile")
   ProfileResponse update(
       @AuthenticationPrincipal Jwt jwt,

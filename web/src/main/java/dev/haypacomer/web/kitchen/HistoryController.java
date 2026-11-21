@@ -8,6 +8,8 @@ import dev.haypacomer.application.inventory.TakeSnapshot;
 import dev.haypacomer.application.inventory.UndoLastChange;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "History", description = "Undo changes and restore inventory snapshots")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class HistoryController {
@@ -43,12 +46,14 @@ public class HistoryController {
     this.restoreSnapshot = restoreSnapshot;
   }
 
+  @Operation(summary = "Undo the last inventory change")
   @PostMapping("/inventory/undo")
   SnapshotResponse undo(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return SnapshotResponse.from(
         undoLastChange.undo(CurrentUser.of(jwt), new HouseholdId(householdId)));
   }
 
+  @Operation(summary = "Take a snapshot of the inventory")
   @PostMapping("/snapshots")
   @ResponseStatus(HttpStatus.CREATED)
   SnapshotResponse take(
@@ -62,6 +67,7 @@ public class HistoryController {
             request == null ? null : request.reason()));
   }
 
+  @Operation(summary = "List the inventory snapshots")
   @GetMapping("/snapshots")
   List<SnapshotResponse> list(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listSnapshots.list(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -69,6 +75,7 @@ public class HistoryController {
         .toList();
   }
 
+  @Operation(summary = "Restore the inventory from a snapshot (owner only)")
   @PostMapping("/snapshots/{snapshotId}/restore")
   SnapshotResponse restore(
       @AuthenticationPrincipal Jwt jwt,

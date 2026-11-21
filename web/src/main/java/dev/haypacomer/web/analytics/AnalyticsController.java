@@ -22,6 +22,8 @@ import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -49,6 +51,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(
+    name = "Analytics",
+    description = "Consumption, rescue, and waste metrics, reports, and food prices")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class AnalyticsController {
@@ -86,6 +91,7 @@ public class AnalyticsController {
     this.clock = clock;
   }
 
+  @Operation(summary = "Show consumed, rescued, and discarded food and money for a period")
   @GetMapping("/analytics")
   MetricsResponse metrics(
       @AuthenticationPrincipal Jwt jwt,
@@ -101,6 +107,7 @@ public class AnalyticsController {
         localizer.message("Former member"));
   }
 
+  @Operation(summary = "Download the household report as CSV or Markdown")
   @GetMapping("/analytics/report")
   ResponseEntity<String> report(
       @AuthenticationPrincipal Jwt jwt,
@@ -151,6 +158,7 @@ public class AnalyticsController {
     return new LocalDate[] {start, end};
   }
 
+  @Operation(summary = "Show the weekly digest with waste patterns and tips")
   @GetMapping("/analytics/weekly-digest")
   DigestResponse weeklyDigest(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     WeeklyDigest digest =
@@ -171,11 +179,13 @@ public class AnalyticsController {
 
   record DigestResponse(LocalDate from, LocalDate to, String text, List<TipResponse> tips) {}
 
+  @Operation(summary = "List the food prices used for money figures")
   @GetMapping("/prices")
   Map<String, BigDecimal> prices(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listFoodPrices.list(CurrentUser.of(jwt), new HouseholdId(householdId));
   }
 
+  @Operation(summary = "Set the price of a food")
   @PutMapping("/prices")
   PriceResponse setPrice(
       @AuthenticationPrincipal Jwt jwt,

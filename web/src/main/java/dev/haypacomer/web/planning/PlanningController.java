@@ -24,6 +24,8 @@ import dev.haypacomer.web.cooking.RecipeAssembler;
 import dev.haypacomer.web.cooking.RequirementRequest;
 import dev.haypacomer.web.cooking.StepRequest;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -50,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Planning", description = "Recipes, weekly meal plans, and what to buy for them")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class PlanningController {
@@ -85,6 +88,7 @@ public class PlanningController {
     this.assembler = assembler;
   }
 
+  @Operation(summary = "Save a household recipe")
   @PostMapping("/recipes")
   @ResponseStatus(HttpStatus.CREATED)
   RecipeResponse saveRecipe(
@@ -103,6 +107,7 @@ public class PlanningController {
                 request.steps())));
   }
 
+  @Operation(summary = "List the household recipes")
   @GetMapping("/recipes")
   List<RecipeResponse> recipes(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listRecipes.list(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -110,6 +115,7 @@ public class PlanningController {
         .toList();
   }
 
+  @Operation(summary = "Copy a recipe")
   @PostMapping("/recipes/{recipeId}/clone")
   @ResponseStatus(HttpStatus.CREATED)
   RecipeResponse cloneRecipe(
@@ -122,6 +128,7 @@ public class PlanningController {
     return RecipeResponse.from(copy.recipe(), copy.clonedFrom().value());
   }
 
+  @Operation(summary = "Copy a weekly plan to another week")
   @PostMapping("/weekly-plans/{planId}/clone")
   @ResponseStatus(HttpStatus.CREATED)
   PlanResponse clonePlan(
@@ -137,6 +144,7 @@ public class PlanningController {
             request.weekStart()));
   }
 
+  @Operation(summary = "Add what the weekly plan still needs to the market list")
   @PostMapping("/market-list/from-plan")
   List<DeltaResponse> planDelta(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return addPlanDelta.add(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -151,6 +159,7 @@ public class PlanningController {
         .toList();
   }
 
+  @Operation(summary = "Generate a weekly plan that uses at-risk food first")
   @PostMapping("/weekly-plans")
   @ResponseStatus(HttpStatus.CREATED)
   PlanResponse generate(
@@ -169,12 +178,14 @@ public class PlanningController {
             diners));
   }
 
+  @Operation(summary = "Show the current weekly plan")
   @GetMapping("/weekly-plans/current")
   PlanResponse current(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return PlanResponse.from(
         viewCurrentPlan.view(CurrentUser.of(jwt), new HouseholdId(householdId)));
   }
 
+  @Operation(summary = "Change a meal in the weekly plan")
   @PatchMapping("/plan-entries/{entryId}")
   EntryResponse change(
       @AuthenticationPrincipal Jwt jwt,

@@ -10,6 +10,8 @@ import dev.haypacomer.application.notification.UpdateNotificationPreferences;
 import dev.haypacomer.application.notification.ViewNotificationPreferences;
 import dev.haypacomer.web.i18n.Localizer;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Notifications", description = "Inbox and alert channel preferences")
 @RestController
 public class NotificationController {
 
@@ -54,6 +57,7 @@ public class NotificationController {
   private final Localizer localizer;
   private final boolean telegramReady;
 
+  @Operation(summary = "List your notifications")
   @GetMapping("/api/v1/notifications")
   List<NotificationResponse> notifications(@AuthenticationPrincipal Jwt jwt) {
     return listNotifications.list(CurrentUser.of(jwt)).stream()
@@ -71,17 +75,20 @@ public class NotificationController {
         .toList();
   }
 
+  @Operation(summary = "Mark a notification as read")
   @PatchMapping("/api/v1/notifications/{notificationId}/read")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void read(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID notificationId) {
     markNotificationRead.mark(CurrentUser.of(jwt), notificationId);
   }
 
+  @Operation(summary = "Show your notification preferences")
   @GetMapping("/api/v1/me/notification-preferences")
   PreferencesResponse preferences(@AuthenticationPrincipal Jwt jwt) {
     return PreferencesResponse.from(viewPreferences.view(CurrentUser.of(jwt)), telegramReady);
   }
 
+  @Operation(summary = "Update your notification channels and preferences")
   @PutMapping("/api/v1/me/notification-preferences")
   PreferencesResponse updatePreferences(
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody PreferencesRequest request) {

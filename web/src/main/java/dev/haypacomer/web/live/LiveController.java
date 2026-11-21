@@ -6,6 +6,8 @@ import dev.haypacomer.application.live.ViewFridgeTwin;
 import dev.haypacomer.domain.fridge.FridgeId;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@Tag(name = "Live", description = "Live updates and the fridge digital twin")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}")
 public class LiveController {
@@ -33,6 +36,7 @@ public class LiveController {
     this.hub = hub;
   }
 
+  @Operation(summary = "Stream live household updates (server-sent events)")
   @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   SseEmitter stream(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     HouseholdId household = new HouseholdId(householdId);
@@ -40,6 +44,7 @@ public class LiveController {
     return hub.open(household);
   }
 
+  @Operation(summary = "Show the latest door, temperature, and weight of a fridge")
   @GetMapping("/fridges/{fridgeId}/twin")
   TwinResponse twin(
       @AuthenticationPrincipal Jwt jwt,

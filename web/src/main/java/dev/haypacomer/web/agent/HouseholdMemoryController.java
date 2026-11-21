@@ -8,6 +8,8 @@ import dev.haypacomer.application.agent.ViewHouseholdMemory;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Household memory", description = "Notes the AI agent remembers about the household")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/agent/memory")
 public class HouseholdMemoryController {
@@ -41,6 +44,7 @@ public class HouseholdMemoryController {
     this.clear = clear;
   }
 
+  @Operation(summary = "List what the agent remembers about the household")
   @GetMapping
   List<NoteResponse> list(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return view.view(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -48,6 +52,7 @@ public class HouseholdMemoryController {
         .toList();
   }
 
+  @Operation(summary = "Add or forget notes in the household memory")
   @PatchMapping
   List<NoteResponse> edit(
       @AuthenticationPrincipal Jwt jwt,
@@ -67,6 +72,7 @@ public class HouseholdMemoryController {
     return list(jwt, householdId);
   }
 
+  @Operation(summary = "Erase the whole household memory (owner only)")
   @DeleteMapping
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void clear(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {

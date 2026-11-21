@@ -5,6 +5,8 @@ import dev.haypacomer.application.i18n.ListLocales;
 import dev.haypacomer.application.i18n.LocaleOption;
 import dev.haypacomer.application.i18n.ViewTranslations;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Duration;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 
+@Tag(name = "Languages", description = "Available languages and interface texts")
 @RestController
 public class I18nController {
 
@@ -41,11 +44,13 @@ public class I18nController {
     this.localizer = localizer;
   }
 
+  @Operation(summary = "List the available languages")
   @GetMapping("/api/v1/i18n")
   LocalesResponse locales() {
     return new LocalesResponse(localizer.locale(), localizer.saved(), listLocales.list());
   }
 
+  @Operation(summary = "Get the interface texts for a language")
   @GetMapping("/api/v1/i18n/{locale}")
   ResponseEntity<Map<String, String>> translations(
       @PathVariable String locale, WebRequest request) {
@@ -60,6 +65,7 @@ public class I18nController {
         .body(texts);
   }
 
+  @Operation(summary = "Change your preferred language")
   @PutMapping("/api/v1/me/locale")
   LocaleResponse change(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody LocaleRequest body) {
     return new LocaleResponse(changeUserLocale.change(CurrentUser.of(jwt), body.locale()));

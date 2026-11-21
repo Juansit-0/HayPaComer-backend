@@ -4,6 +4,8 @@ import dev.haypacomer.application.port.ServiceHealth;
 import dev.haypacomer.application.resilience.DegradedComponent;
 import dev.haypacomer.application.resilience.ServiceStatus;
 import dev.haypacomer.application.resilience.ViewServiceStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Status", description = "Health of the database and AI providers")
 @RestController
 @RequestMapping("/api/v1/status")
 public class StatusController {
@@ -35,6 +38,7 @@ public class StatusController {
     this.clock = clock;
   }
 
+  @Operation(summary = "Show whether the database and AI providers are available")
   @GetMapping
   StatusResponse status() {
     checkChefMemory();

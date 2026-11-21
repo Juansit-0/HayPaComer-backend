@@ -7,6 +7,8 @@ import dev.haypacomer.application.ai.RecipeDraft;
 import dev.haypacomer.application.ai.RecipePhoto;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "Recipe photos", description = "Read a recipe from a photo")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/recipes")
 public class RecipePhotoController {
@@ -31,6 +34,8 @@ public class RecipePhotoController {
     this.readRecipePhoto = readRecipePhoto;
   }
 
+  @Operation(
+      summary = "Read a recipe draft from a photo, checked against the catalog (never saved)")
   @PostMapping(path = "/from-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   DraftResponse read(
       @AuthenticationPrincipal Jwt jwt,

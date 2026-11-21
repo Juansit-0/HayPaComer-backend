@@ -1,11 +1,14 @@
 package dev.haypacomer.web.auth;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Demo", description = "Shared test accounts for the demo")
 @RestController
 public class DemoAccountController {
 
@@ -31,6 +34,7 @@ public class DemoAccountController {
    * The shared test accounts. The first one is also given as email and password, as before; a
    * second one, with its own label, appears in the list when it is configured.
    */
+  @Operation(summary = "Get the shared demo accounts when they are configured")
   @GetMapping("/api/v1/auth/demo")
   ResponseEntity<DemoAccount> demo() {
     if (email.isBlank() || password.isBlank()) {

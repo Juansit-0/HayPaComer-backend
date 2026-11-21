@@ -18,6 +18,8 @@ import dev.haypacomer.domain.scale.WeighingProgress;
 import dev.haypacomer.domain.scale.WeighingTarget;
 import dev.haypacomer.domain.sensor.ScaleMode;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Scale", description = "Kitchen scale modes, item assignment, tare, and calibration")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/devices/{deviceId}/scale")
 public class ScaleController {
@@ -69,6 +72,7 @@ public class ScaleController {
     this.readWeighingProgress = readWeighingProgress;
   }
 
+  @Operation(summary = "Set the scale mode and weighing target")
   @PutMapping("/mode")
   ModeResponse mode(
       @AuthenticationPrincipal Jwt jwt,
@@ -88,6 +92,7 @@ public class ScaleController {
             target));
   }
 
+  @Operation(summary = "Show the weighing progress against the target")
   @GetMapping("/progress")
   WeighingProgress progress(
       @AuthenticationPrincipal Jwt jwt,
@@ -97,6 +102,7 @@ public class ScaleController {
         CurrentUser.of(jwt), new HouseholdId(householdId), new DeviceId(deviceId));
   }
 
+  @Operation(summary = "Assign the food item resting on the scale")
   @PutMapping("/item")
   AssignmentResponse assign(
       @AuthenticationPrincipal Jwt jwt,
@@ -112,6 +118,7 @@ public class ScaleController {
     return new AssignmentResponse(assignment.item().value(), assignment.assignedAt());
   }
 
+  @Operation(summary = "Remove the food item assigned to the scale")
   @DeleteMapping("/item")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void unassign(
@@ -122,6 +129,7 @@ public class ScaleController {
         CurrentUser.of(jwt), new HouseholdId(householdId), new DeviceId(deviceId));
   }
 
+  @Operation(summary = "Tare the scale")
   @PostMapping("/tare")
   CalibrationResponse tare(
       @AuthenticationPrincipal Jwt jwt,
@@ -131,6 +139,7 @@ public class ScaleController {
         tareScale.tare(CurrentUser.of(jwt), new HouseholdId(householdId), new DeviceId(deviceId)));
   }
 
+  @Operation(summary = "Calibrate the scale with a known weight")
   @PostMapping("/calibrate")
   CalibrationResponse calibrate(
       @AuthenticationPrincipal Jwt jwt,
@@ -145,6 +154,7 @@ public class ScaleController {
             Grams.of(request.knownGrams())));
   }
 
+  @Operation(summary = "Show the latest scale reading")
   @GetMapping("/reading")
   ReadingResponse reading(
       @AuthenticationPrincipal Jwt jwt,

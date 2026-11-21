@@ -12,6 +12,8 @@ import dev.haypacomer.domain.household.Role;
 import dev.haypacomer.domain.identity.UserId;
 import dev.haypacomer.web.household.HouseholdDtos.HouseholdResponse;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Invitations", description = "Invite people to a household by email")
 @RestController
 public class InvitationController {
 
@@ -52,6 +55,7 @@ public class InvitationController {
     this.unpackFood = unpackFood;
   }
 
+  @Operation(summary = "Invite someone to the household by email")
   @PostMapping("/api/v1/households/{householdId}/invitations")
   @ResponseStatus(HttpStatus.CREATED)
   InvitationResponse invite(
@@ -64,6 +68,7 @@ public class InvitationController {
     return InvitationResponse.from(sent.invitation(), sent.link());
   }
 
+  @Operation(summary = "List the household's pending invitations")
   @GetMapping("/api/v1/households/{householdId}/invitations")
   List<InvitationResponse> list(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     return listInvitations.list(CurrentUser.of(jwt), new HouseholdId(householdId)).stream()
@@ -71,6 +76,7 @@ public class InvitationController {
         .toList();
   }
 
+  @Operation(summary = "Cancel an invitation")
   @DeleteMapping("/api/v1/households/{householdId}/invitations/{invitationId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void cancel(
@@ -80,6 +86,7 @@ public class InvitationController {
     cancelInvitation.cancel(CurrentUser.of(jwt), new HouseholdId(householdId), invitationId);
   }
 
+  @Operation(summary = "Accept an invitation with its token")
   @PostMapping("/api/v1/invitations/accept")
   HouseholdResponse accept(
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody AcceptRequest request) {

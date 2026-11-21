@@ -19,6 +19,8 @@ import dev.haypacomer.domain.session.CookingSessionId;
 import dev.haypacomer.domain.session.SessionPhase;
 import dev.haypacomer.domain.session.StepCompletion;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -45,6 +47,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(
+    name = "Cooking sessions",
+    description = "Guided cooking step by step with the scale and timers")
 @RestController
 @RequestMapping("/api/v1/households/{householdId}/cooking-sessions")
 public class CookingSessionController {
@@ -74,6 +79,7 @@ public class CookingSessionController {
     this.assembler = assembler;
   }
 
+  @Operation(summary = "Start a guided cooking session for a recipe")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   SessionResponse start(
@@ -94,6 +100,7 @@ public class CookingSessionController {
             Optional.ofNullable(request.scaleId()).map(DeviceId::new)));
   }
 
+  @Operation(summary = "Show the household's active cooking session, if any")
   @GetMapping("/active")
   ResponseEntity<SessionResponse> active(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
@@ -104,6 +111,7 @@ public class CookingSessionController {
         .orElseGet(() -> ResponseEntity.noContent().build());
   }
 
+  @Operation(summary = "Show one cooking session")
   @GetMapping("/{sessionId}")
   SessionResponse view(
       @AuthenticationPrincipal Jwt jwt,
@@ -114,6 +122,7 @@ public class CookingSessionController {
             CurrentUser.of(jwt), new HouseholdId(householdId), new CookingSessionId(sessionId)));
   }
 
+  @Operation(summary = "Complete the current step and move to the next one")
   @PostMapping("/{sessionId}/next")
   SessionResponse next(
       @AuthenticationPrincipal Jwt jwt,
@@ -122,6 +131,7 @@ public class CookingSessionController {
     return act(jwt, householdId, sessionId, SessionAction.NEXT);
   }
 
+  @Operation(summary = "Pause the cooking session")
   @PostMapping("/{sessionId}/pause")
   SessionResponse pause(
       @AuthenticationPrincipal Jwt jwt,
@@ -130,6 +140,7 @@ public class CookingSessionController {
     return act(jwt, householdId, sessionId, SessionAction.PAUSE);
   }
 
+  @Operation(summary = "Resume a paused cooking session")
   @PostMapping("/{sessionId}/resume")
   SessionResponse resume(
       @AuthenticationPrincipal Jwt jwt,
@@ -138,6 +149,7 @@ public class CookingSessionController {
     return act(jwt, householdId, sessionId, SessionAction.RESUME);
   }
 
+  @Operation(summary = "Abandon the cooking session")
   @PostMapping("/{sessionId}/abandon")
   SessionResponse abandon(
       @AuthenticationPrincipal Jwt jwt,
@@ -146,6 +158,7 @@ public class CookingSessionController {
     return act(jwt, householdId, sessionId, SessionAction.ABANDON);
   }
 
+  @Operation(summary = "Weigh the ingredient of the current step, by hand or with the scale")
   @PostMapping("/{sessionId}/steps/{position}/weigh")
   WeighingResponse weigh(
       @AuthenticationPrincipal Jwt jwt,
@@ -171,6 +184,7 @@ public class CookingSessionController {
         SessionResponse.from(result.session()));
   }
 
+  @Operation(summary = "Show the timer of the current step")
   @GetMapping("/{sessionId}/timer")
   ResponseEntity<TimerResponse> timer(
       @AuthenticationPrincipal Jwt jwt,

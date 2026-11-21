@@ -26,7 +26,7 @@ public class OpenApiConfiguration {
                 .description(
                     "Smart fridge API: households, live inventory in grams, cold chain, guided"
                         + " cooking, planning, and notifications. Errors follow RFC 7807."))
-        .servers(List.of(new Server().url("https://api.haypacomer.dev")))
+        .servers(List.of(new Server().url("/").description("This deployment")))
         .components(
             new Components()
                 .addSecuritySchemes(

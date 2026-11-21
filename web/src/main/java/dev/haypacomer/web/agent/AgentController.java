@@ -15,6 +15,8 @@ import dev.haypacomer.application.agent.TraceStep;
 import dev.haypacomer.application.agent.ViewAgentRun;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -35,6 +37,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(
+    name = "Agent",
+    description = "AI agent runs, their traces, and the confirmations a human must approve")
 @RestController
 @RequestMapping("/api/v1")
 public class AgentController {
@@ -58,6 +63,8 @@ public class AgentController {
     this.rejectConfirmation = rejectConfirmation;
   }
 
+  @Operation(
+      summary = "Ask the household AI agent a question; each specialist answers in its own run")
   @PostMapping("/households/{householdId}/agent/runs")
   @ResponseStatus(HttpStatus.CREATED)
   RunResponse start(
@@ -76,6 +83,7 @@ public class AgentController {
         answer.pending().map(ConfirmationResponse::from).orElse(null));
   }
 
+  @Operation(summary = "Show the step-by-step trace of an agent run")
   @GetMapping("/agent/runs/{runId}/trace")
   TraceResponse trace(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID runId) {
     RunTrace trace = viewAgentRun.view(CurrentUser.of(jwt), new AgentRunId(runId));
@@ -83,6 +91,7 @@ public class AgentController {
         RunSummary.from(trace.run()), trace.steps().stream().map(StepResponse::from).toList());
   }
 
+  @Operation(summary = "List the agent actions waiting for your confirmation")
   @GetMapping("/agent/confirmations")
   List<ConfirmationResponse> confirmations(@AuthenticationPrincipal Jwt jwt) {
     return listPendingConfirmations.list(CurrentUser.of(jwt)).stream()
@@ -90,12 +99,14 @@ public class AgentController {
         .toList();
   }
 
+  @Operation(summary = "Approve a pending agent action so it runs once")
   @PostMapping("/agent/confirmations/{confirmationId}/approve")
   ApprovalResponse approve(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID confirmationId) {
     return new ApprovalResponse(
         approveConfirmation.approve(CurrentUser.of(jwt), confirmationId).content());
   }
 
+  @Operation(summary = "Reject a pending agent action")
   @PostMapping("/agent/confirmations/{confirmationId}/reject")
   ConfirmationResponse reject(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID confirmationId) {
     return ConfirmationResponse.from(

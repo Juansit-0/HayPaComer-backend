@@ -13,6 +13,8 @@ import dev.haypacomer.application.agent.PendingConfirmation;
 import dev.haypacomer.application.agent.RunStatus;
 import dev.haypacomer.domain.household.HouseholdId;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Chef chat", description = "Conversational chef grounded in the household stock")
 @RestController
 @RequestMapping("/api/v1")
 public class ChefChatController {
@@ -43,6 +46,7 @@ public class ChefChatController {
     this.readConversation = readConversation;
   }
 
+  @Operation(summary = "Send a message to the chef and get a grounded answer")
   @PostMapping("/households/{householdId}/agent/chat")
   ChatResponse chat(
       @AuthenticationPrincipal Jwt jwt,
@@ -63,6 +67,7 @@ public class ChefChatController {
         reply.answer().pending().map(Pending::from).orElse(null));
   }
 
+  @Operation(summary = "List your conversations with the chef")
   @GetMapping("/households/{householdId}/agent/conversations")
   List<ConversationResponse> conversations(
       @AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
@@ -72,6 +77,7 @@ public class ChefChatController {
         .toList();
   }
 
+  @Operation(summary = "Read the messages of one chef conversation")
   @GetMapping("/households/{householdId}/agent/conversations/{conversationId}")
   List<MessageResponse> messages(
       @AuthenticationPrincipal Jwt jwt,

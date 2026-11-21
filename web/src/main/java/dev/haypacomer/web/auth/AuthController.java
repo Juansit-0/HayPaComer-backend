@@ -19,6 +19,8 @@ import dev.haypacomer.web.auth.AuthDtos.ResetPasswordRequest;
 import dev.haypacomer.web.auth.AuthDtos.TokenRequest;
 import dev.haypacomer.web.auth.AuthDtos.TokenResponse;
 import dev.haypacomer.web.auth.AuthDtos.UserResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +29,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(
+    name = "Authentication",
+    description = "Sign up, sign in, sessions, email verification, and password reset")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -59,6 +64,7 @@ public class AuthController {
     this.resetPassword = resetPassword;
   }
 
+  @Operation(summary = "Create a new account")
   @PostMapping("/register")
   @ResponseStatus(HttpStatus.CREATED)
   UserResponse register(@Valid @RequestBody RegisterRequest request) {
@@ -73,6 +79,7 @@ public class AuthController {
     return UserResponse.from(user);
   }
 
+  @Operation(summary = "Sign in and receive access and refresh tokens")
   @PostMapping("/login")
   TokenResponse login(@Valid @RequestBody LoginRequest request) {
     return TokenResponse.from(
@@ -80,28 +87,33 @@ public class AuthController {
             new LoginCommand(request.email(), request.password(), request.passwordProof())));
   }
 
+  @Operation(summary = "Exchange a refresh token for new tokens")
   @PostMapping("/refresh")
   TokenResponse refresh(@Valid @RequestBody RefreshRequest request) {
     return TokenResponse.from(refreshSession.refresh(request.refreshToken()));
   }
 
+  @Operation(summary = "Confirm an email address with the emailed token")
   @PostMapping("/verify-email")
   UserResponse verifyEmail(@Valid @RequestBody TokenRequest request) {
     return UserResponse.from(verifyEmail.verify(request.token()));
   }
 
+  @Operation(summary = "Send a password reset link to an email")
   @PostMapping("/forgot-password")
   @ResponseStatus(HttpStatus.ACCEPTED)
   void forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
     requestPasswordReset.request(request.email());
   }
 
+  @Operation(summary = "Set a new password with a reset token and close all sessions")
   @PostMapping("/reset-password")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
     resetPassword.reset(request.token(), request.password());
   }
 
+  @Operation(summary = "Sign out and revoke the refresh token")
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void logout(@Valid @RequestBody RefreshRequest request) {

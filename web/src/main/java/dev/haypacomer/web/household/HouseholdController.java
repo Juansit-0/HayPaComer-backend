@@ -22,6 +22,8 @@ import dev.haypacomer.web.household.HouseholdDtos.MemberResponse;
 import dev.haypacomer.web.household.HouseholdDtos.TransferOwnershipRequest;
 import dev.haypacomer.web.household.HouseholdDtos.UpdateHouseholdRequest;
 import dev.haypacomer.web.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Households", description = "Households, their members, roles, and ownership")
 @RestController
 @RequestMapping("/api/v1/households")
 public class HouseholdController {
@@ -80,6 +83,7 @@ public class HouseholdController {
     this.memberNames = memberNames;
   }
 
+  @Operation(summary = "Create a household with you as owner")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   HouseholdResponse create(
@@ -92,6 +96,7 @@ public class HouseholdController {
         actor);
   }
 
+  @Operation(summary = "List the households you belong to")
   @GetMapping
   List<HouseholdResponse> list(@AuthenticationPrincipal Jwt jwt) {
     UserId actor = CurrentUser.of(jwt);
@@ -100,6 +105,7 @@ public class HouseholdController {
         .toList();
   }
 
+  @Operation(summary = "Show one household")
   @GetMapping("/{householdId}")
   HouseholdResponse get(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
     UserId actor = CurrentUser.of(jwt);
@@ -108,6 +114,7 @@ public class HouseholdController {
         getHousehold.get(actor, household), actor, memberNames.names(actor, household));
   }
 
+  @Operation(summary = "Rename or update a household")
   @PatchMapping("/{householdId}")
   HouseholdResponse update(
       @AuthenticationPrincipal Jwt jwt,
@@ -122,6 +129,7 @@ public class HouseholdController {
         actor);
   }
 
+  @Operation(summary = "Close a household; each member keeps their own food")
   @DeleteMapping("/{householdId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID householdId) {
@@ -130,6 +138,7 @@ public class HouseholdController {
     deleteHousehold.delete(CurrentUser.of(jwt), new HouseholdId(householdId));
   }
 
+  @Operation(summary = "Change a member's role")
   @PatchMapping("/{householdId}/members/{userId}")
   MemberResponse changeRole(
       @AuthenticationPrincipal Jwt jwt,
@@ -141,6 +150,7 @@ public class HouseholdController {
             CurrentUser.of(jwt), new HouseholdId(householdId), new UserId(userId), request.role()));
   }
 
+  @Operation(summary = "Remove a member from the household")
   @DeleteMapping("/{householdId}/members/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void removeMember(
@@ -150,6 +160,7 @@ public class HouseholdController {
     removeMember.remove(CurrentUser.of(jwt), new HouseholdId(householdId), new UserId(userId));
   }
 
+  @Operation(summary = "Transfer household ownership to another member")
   @PutMapping("/{householdId}/owner")
   HouseholdResponse transferOwnership(
       @AuthenticationPrincipal Jwt jwt,
